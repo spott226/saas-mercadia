@@ -5,7 +5,7 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
 const options = {
 method,
 headers: {
-Authorization: "Bearer " + localStorage.getItem("token")
+Authorization: "Bearer " + sessionStorage.getItem("token")
 }
 };
 

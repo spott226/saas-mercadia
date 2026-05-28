@@ -26,8 +26,11 @@ const data = await res.json();
 
 if(data.token){
 
-localStorage.setItem("token",data.token);
-localStorage.setItem("store_id",data.store_id);
+localStorage.removeItem("token");
+localStorage.removeItem("store_id");
+
+sessionStorage.setItem("token",data.token);
+sessionStorage.setItem("store_id",data.store_id);
 
 window.location.href = "dashboard.html";
 
@@ -55,6 +58,8 @@ function logout(){
 
 localStorage.removeItem("token");
 localStorage.removeItem("store_id");
+sessionStorage.removeItem("token");
+sessionStorage.removeItem("store_id");
 
 window.location.href = "login.html";
 
@@ -67,7 +72,7 @@ PROTEGER PÁGINAS
 
 function protect(){
 
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token");
 
 if(!token){
 
@@ -84,7 +89,7 @@ EVITAR VOLVER AL LOGIN
 
 function checkLogin(){
 
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token");
 
 if(token){
 

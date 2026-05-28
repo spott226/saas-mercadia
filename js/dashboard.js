@@ -4,10 +4,10 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
 const token =
-  localStorage.getItem("token");
+  sessionStorage.getItem("token");
 
 const store =
-  localStorage.getItem("store_id");
+  sessionStorage.getItem("store_id");
 
 if (!store || !token) {
 
@@ -30,6 +30,30 @@ let totalRevenue = 0;
 let totalOrders = 0;
 
 let averageTicket = 0;
+
+
+function isPaidOrder(order){
+
+  return String(
+    order?.status || ""
+  ).toUpperCase() === "PAID";
+
+}
+
+
+function formatMoney(value){
+
+  return new Intl.NumberFormat(
+    "es-MX",
+    {
+      style:"currency",
+      currency:"MXN"
+    }
+  ).format(
+    Number(value || 0)
+  );
+
+}
 
 
 /* =========================
@@ -104,6 +128,11 @@ async function loadDashboardStats(){
 
     orders =
       ordersData.orders || [];
+
+    const paidOrders =
+      orders.filter(
+        isPaidOrder
+      );
 
 
     /* =========================
@@ -199,7 +228,7 @@ async function loadDashboardStats(){
 
     let monthTotal = 0;
 
-    orders.forEach(order => {
+    paidOrders.forEach(order => {
 
       const orderDate =
         new Date(order.created_at);
@@ -234,7 +263,7 @@ async function loadDashboardStats(){
     if(salesElement){
 
       salesElement.innerText =
-        `$${monthTotal.toLocaleString()}`;
+        formatMoney(monthTotal);
 
     }
 
@@ -244,7 +273,7 @@ async function loadDashboardStats(){
     ========================= */
 
     totalRevenue =
-      orders.reduce(
+      paidOrders.reduce(
 
         (acc,order)=>
 
@@ -263,7 +292,7 @@ async function loadDashboardStats(){
     if(revenueElement){
 
       revenueElement.innerText =
-        `$${totalRevenue.toLocaleString()}`;
+        formatMoney(totalRevenue);
 
     }
 
@@ -274,11 +303,11 @@ async function loadDashboardStats(){
 
     averageTicket =
 
-      totalOrders > 0
+      paidOrders.length > 0
 
       ?
 
-      totalRevenue / totalOrders
+      totalRevenue / paidOrders.length
 
       :
 
@@ -292,7 +321,7 @@ async function loadDashboardStats(){
     if(avgElement){
 
       avgElement.innerText =
-        `$${averageTicket.toFixed(2)}`;
+        formatMoney(averageTicket);
 
     }
 
@@ -366,9 +395,10 @@ function renderRecentOrders(orders){
 
   }
 
-  orders.forEach(order=>{
+  const rowsHTML =
+    orders.map(order=>{
 
-    table.innerHTML += `
+    return `
     
       <tr>
 
@@ -421,7 +451,10 @@ function renderRecentOrders(orders){
 
     `;
 
-  });
+  }).join("");
+
+  table.innerHTML =
+    rowsHTML;
 
 }
 
@@ -473,7 +506,8 @@ function renderBestSellers(products){
 
     products.slice(0,5);
 
-  productsToShow.forEach(product=>{
+  const productsHTML =
+    productsToShow.map(product=>{
 
     const image =
       product.image
@@ -491,7 +525,7 @@ function renderBestSellers(products){
       `
       : "";
 
-    container.innerHTML += `
+    return `
 
       <div class="best-product">
 
@@ -514,7 +548,10 @@ function renderBestSellers(products){
 
     `;
 
-  });
+  }).join("");
+
+  container.innerHTML =
+    productsHTML;
 
 }
 

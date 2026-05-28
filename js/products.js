@@ -4,10 +4,10 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app";
 
 const token =
-  localStorage.getItem("token");
+  sessionStorage.getItem("token");
 
 const store_id =
-  localStorage.getItem("store_id");
+  sessionStorage.getItem("store_id");
 
 if (!token || !store_id) {
 
@@ -31,6 +31,8 @@ let currentSearch = "";
 let currentCategory = "";
 
 let totalPages = 1;
+
+let searchTimer = null;
 
 
 /* =========================
@@ -254,9 +256,8 @@ function renderVariants(){
 
   list.innerHTML = "";
 
-  variants.forEach((v,i)=>{
-
-    list.innerHTML += `
+  const itemsHTML =
+    variants.map((v,i)=>`
     <div class="variant-item">
 
       <div>
@@ -295,9 +296,10 @@ function renderVariants(){
       </button>
 
     </div>
-    `;
+    `).join("");
 
-  });
+  list.innerHTML =
+    itemsHTML;
 
 }
 
@@ -351,6 +353,8 @@ async function loadProducts(){
 
     table.innerHTML = "";
 
+    let rowsHTML = "";
+
 
     /* =========================
     PRODUCTS
@@ -378,7 +382,7 @@ async function loadProducts(){
         ? `<span class="stock-low">Bajo</span>`
         : `<span class="stock-ok">OK</span>`;
 
-      table.innerHTML += `
+      rowsHTML += `
       <tr>
 
         <td>${p.name || ""}</td>
@@ -431,6 +435,9 @@ async function loadProducts(){
       `;
 
     });
+
+    table.innerHTML =
+      rowsHTML;
 
 
     /* =========================
@@ -487,15 +494,16 @@ async function loadProducts(){
       </option>
       `;
 
-      categories.forEach(c=>{
-
-        categorySelect.innerHTML += `
+      const categoryOptions =
+        categories.map(c=>`
         <option value="${c.category}">
           ${c.category}
         </option>
-        `;
+        `).join("");
 
-      });
+      categorySelect.innerHTML =
+        categorySelect.innerHTML +
+        categoryOptions;
 
       categorySelect.dataset.loaded =
         "true";
@@ -566,14 +574,24 @@ SEARCH
 
 window.searchProducts = () => {
 
-  currentSearch =
-    document.getElementById(
-      "search-product"
-    ).value;
+  clearTimeout(searchTimer);
 
-  currentPage = 1;
+  searchTimer =
+    setTimeout(
+      () => {
 
-  loadProducts();
+        currentSearch =
+          document.getElementById(
+            "search-product"
+          ).value;
+
+        currentPage = 1;
+
+        loadProducts();
+
+      },
+      250
+    );
 
 };
 

@@ -2,7 +2,7 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
 const token =
-  localStorage.getItem("token");
+  sessionStorage.getItem("token");
 
 if(!token){
 
@@ -17,6 +17,8 @@ GLOBAL DATA
 ========================= */
 
 let allOrders = [];
+
+let filterTimer = null;
 
 
 /* =========================
@@ -182,7 +184,8 @@ function renderOrders(orders){
 
   }
 
-  orders.forEach(order=>{
+  const rowsHTML =
+    orders.map(order=>{
 
     const productsHTML =
       (order.items || [])
@@ -235,7 +238,7 @@ function renderOrders(orders){
         ).toLocaleString()
       : "-";
 
-    table.innerHTML += `
+    return `
     <tr>
 
       <td>
@@ -342,7 +345,10 @@ function renderOrders(orders){
     </tr>
     `;
 
-  });
+  }).join("");
+
+  table.innerHTML =
+    rowsHTML;
 
 }
 
@@ -455,7 +461,17 @@ function setupFilters(){
 
   searchInput.addEventListener(
     "keyup",
-    applyFilters
+    () => {
+
+      clearTimeout(filterTimer);
+
+      filterTimer =
+        setTimeout(
+          applyFilters,
+          200
+        );
+
+    }
   );
 
   statusFilter.addEventListener(

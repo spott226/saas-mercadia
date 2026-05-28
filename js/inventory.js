@@ -2,7 +2,7 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
 const token =
-  localStorage.getItem("token");
+  sessionStorage.getItem("token");
 
 if(!token){
 
@@ -27,6 +27,10 @@ PAGINATION INVENTORY
 let inventoryPage = 1;
 
 let inventoryLimit = 10;
+
+let currentInventoryTotal = 0;
+
+let filterTimer = null;
 
 
 /* =========================
@@ -72,7 +76,7 @@ async function loadInventory(){
       data.inventory || [];
 
     renderInventoryKPIs(
-      data.kpis || {}
+      inventoryData
     );
 
     renderInventoryTable(
@@ -135,14 +139,92 @@ async function loadMovements(){
 KPIS
 ========================= */
 
-function renderInventoryKPIs(kpis){
+function toNumber(value){
+
+  return Number(value || 0);
+
+}
+
+
+function formatMoney(value){
+
+  return new Intl.NumberFormat(
+    "es-MX",
+    {
+      style:"currency",
+      currency:"MXN"
+    }
+  ).format(
+    toNumber(value)
+  );
+
+}
+
+
+function getInventoryValue(item){
+
+  const stock =
+    toNumber(item.stock);
+
+  const cost =
+    toNumber(item.cost);
+
+  if(cost > 0){
+
+    return stock * cost;
+
+  }
+
+  return toNumber(
+    item.inventory_value
+  );
+
+}
+
+
+function getInventoryKPIs(data){
+
+  return {
+
+    totalInventoryValue:
+      data.reduce(
+        (acc,item)=>
+          acc + getInventoryValue(item),
+        0
+      ),
+
+    totalVariants:
+      data.length,
+
+    lowStock:
+      data.filter(
+        item =>
+          toNumber(item.stock) <= 5
+      ).length,
+
+    totalStock:
+      data.reduce(
+        (acc,item)=>
+          acc + toNumber(item.stock),
+        0
+      )
+
+  };
+
+}
+
+
+function renderInventoryKPIs(data){
+
+  const kpis =
+    getInventoryKPIs(data || []);
 
   document.getElementById(
     "inventory-value"
   ).innerText =
-    `$${Number(
-      kpis.totalInventoryValue || 0
-    ).toLocaleString()}`;
+    formatMoney(
+      kpis.totalInventoryValue
+    );
 
   document.getElementById(
     "total-variants"
@@ -185,6 +267,8 @@ function renderInventoryTable(data){
     </tr>
     `;
 
+    renderInventoryPagination(0);
+
     return;
 
   }
@@ -209,19 +293,29 @@ function renderInventoryTable(data){
   TABLE DATA
   ========================= */
 
-  paginatedData.forEach(item=>{
+  const rowsHTML =
+    paginatedData.map(item=>{
+
+    const stock =
+      toNumber(item.stock);
+
+    const cost =
+      toNumber(item.cost);
+
+    const inventoryValue =
+      getInventoryValue(item);
 
     const stockClass =
-      Number(item.stock) <= 5
+      stock <= 5
       ? "stock-low"
       : "stock-ok";
 
     const stockLabel =
-      Number(item.stock) <= 5
+      stock <= 5
       ? "BAJO"
       : "OK";
 
-    table.innerHTML += `
+    return `
     <tr>
 
       <td>
@@ -263,7 +357,7 @@ function renderInventoryTable(data){
       </td>
 
       <td>
-        ${item.stock || 0}
+        ${stock}
       </td>
 
       <td
@@ -272,9 +366,7 @@ function renderInventoryTable(data){
           white-space:nowrap;
         "
       >
-        $${Number(
-          item.cost || 0
-        ).toFixed(2)}
+        ${formatMoney(cost)}
       </td>
 
       <td
@@ -284,9 +376,7 @@ function renderInventoryTable(data){
           white-space:nowrap;
         "
       >
-        $${Number(
-          item.inventory_value || 0
-        ).toLocaleString()}
+        ${formatMoney(inventoryValue)}
       </td>
 
       <td>
@@ -302,7 +392,10 @@ function renderInventoryTable(data){
     </tr>
     `;
 
-  });
+  }).join("");
+
+  table.innerHTML =
+    rowsHTML;
 
   renderInventoryPagination(
     data.length
@@ -317,9 +410,15 @@ PAGINATION UI
 
 function renderInventoryPagination(totalItems){
 
+  currentInventoryTotal =
+    totalItems;
+
   const totalPages =
-    Math.ceil(
+    Math.max(
+      1,
+      Math.ceil(
       totalItems / inventoryLimit
+      )
     );
 
   let pagination =
@@ -404,9 +503,12 @@ NEXT PAGE
 window.nextInventoryPage = () => {
 
   const totalPages =
-    Math.ceil(
-      inventoryData.length
-      / inventoryLimit
+    Math.max(
+      1,
+      Math.ceil(
+        currentInventoryTotal
+        / inventoryLimit
+      )
     );
 
   if(
@@ -415,7 +517,7 @@ window.nextInventoryPage = () => {
 
     inventoryPage++;
 
-    applyFilters();
+    applyFilters(false);
 
   }
 
@@ -432,7 +534,7 @@ window.prevInventoryPage = () => {
 
     inventoryPage--;
 
-    applyFilters();
+    applyFilters(false);
 
   }
 
@@ -466,7 +568,8 @@ function renderMovementsTable(data){
 
   }
 
-  data.forEach(movement=>{
+  const rowsHTML =
+    data.map(movement=>{
 
     let movementClass =
       "movement-adjustment";
@@ -497,7 +600,7 @@ function renderMovementsTable(data){
         ).toLocaleString()
       : "-";
 
-    table.innerHTML += `
+    return `
     <tr>
 
       <td>
@@ -557,7 +660,10 @@ function renderMovementsTable(data){
     </tr>
     `;
 
-  });
+  }).join("");
+
+  table.innerHTML =
+    rowsHTML;
 
 }
 
@@ -580,7 +686,17 @@ function setupFilters(){
 
   searchInput.addEventListener(
     "keyup",
-    applyFilters
+    () => {
+
+      clearTimeout(filterTimer);
+
+      filterTimer =
+        setTimeout(
+          () => applyFilters(),
+          200
+        );
+
+    }
   );
 
   movementFilter.addEventListener(
@@ -595,7 +711,7 @@ function setupFilters(){
 APPLY FILTERS
 ========================= */
 
-function applyFilters(){
+function applyFilters(resetPage = true){
 
   const search =
     document
@@ -638,6 +754,16 @@ function applyFilters(){
       );
 
   }
+
+  if(resetPage){
+
+    inventoryPage = 1;
+
+  }
+
+  renderInventoryKPIs(
+    filteredInventory
+  );
 
   renderInventoryTable(
     filteredInventory

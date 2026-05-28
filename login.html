@@ -120,11 +120,11 @@ Mercadia
 <h2>Panel de administración</h2>
 
 <div class="input-group">
-<input id="email" placeholder="Correo">
+<input id="email" placeholder="Correo" autocomplete="off">
 </div>
 
 <div class="input-group">
-<input id="password" type="password" placeholder="Contraseña">
+<input id="password" type="password" placeholder="Contraseña" autocomplete="off">
 </div>
 
 <button onclick="login()">Entrar</button>
@@ -145,7 +145,10 @@ Mercadia Admin
 EVITAR VOLVER AL LOGIN
 ========================= */
 
-const token = localStorage.getItem("token");
+localStorage.removeItem("token");
+localStorage.removeItem("store_id");
+
+const token = sessionStorage.getItem("token");
 
 if(token){
 window.location.href="dashboard.html";
@@ -175,8 +178,8 @@ const data = await res.json();
 
 if(data.token){
 
-localStorage.setItem("token",data.token);
-localStorage.setItem("store_id",data.store_id);
+sessionStorage.setItem("token",data.token);
+sessionStorage.setItem("store_id",data.store_id);
 
 window.location.href="dashboard.html";
 
@@ -194,6 +197,32 @@ document.getElementById("error").innerText="Error conectando con el servidor";
 }
 
 }
+
+document
+.getElementById("password")
+.addEventListener("keydown",event=>{
+
+if(event.key === "Enter"){
+
+event.preventDefault();
+login();
+
+}
+
+});
+
+document
+.getElementById("email")
+.addEventListener("keydown",event=>{
+
+if(event.key === "Enter"){
+
+event.preventDefault();
+document.getElementById("password").focus();
+
+}
+
+});
 
 </script>
 

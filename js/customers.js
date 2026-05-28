@@ -2,7 +2,7 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
 const token =
-  localStorage.getItem("token");
+  sessionStorage.getItem("token");
 
 if(!token){
 
@@ -16,6 +16,86 @@ GLOBAL DATA
 ========================= */
 
 let customersData = [];
+
+let searchTimer = null;
+
+
+function isPaidOrder(order){
+
+  return String(
+    order?.status || ""
+  ).toUpperCase() === "PAID";
+
+}
+
+
+function formatMoney(value){
+
+  return new Intl.NumberFormat(
+    "es-MX",
+    {
+      style:"currency",
+      currency:"MXN"
+    }
+  ).format(
+    Number(value || 0)
+  );
+
+}
+
+
+function getPaidOrders(customer){
+
+  return (customer.orders || [])
+    .filter(
+      isPaidOrder
+    );
+
+}
+
+
+function normalizeCustomer(customer){
+
+  const paidOrders =
+    getPaidOrders(customer);
+
+  const totalSpent =
+    paidOrders.reduce(
+      (acc,order)=>
+        acc + Number(order.total || 0),
+      0
+    );
+
+  return {
+
+    ...customer,
+
+    orders:
+      paidOrders,
+
+    total_orders:
+      paidOrders.length,
+
+    total_spent:
+      totalSpent
+
+  };
+
+}
+
+
+function getConfirmedCustomers(customers){
+
+  return customers
+    .map(
+      normalizeCustomer
+    )
+    .filter(
+      customer =>
+        Number(customer.total_orders || 0) > 0
+    );
+
+}
 
 
 /* =========================
@@ -56,10 +136,12 @@ async function loadCustomers(){
       await res.json();
 
     customersData =
-      data.customers || [];
+      getConfirmedCustomers(
+        data.customers || []
+      );
 
     renderKPIs(
-      data.kpis || {}
+      customersData
     );
 
     renderCustomers(
@@ -82,7 +164,35 @@ async function loadCustomers(){
 RENDER KPIS
 ========================= */
 
-function renderKPIs(kpis){
+function getCustomerKPIs(customers){
+
+  return {
+
+    totalCustomers:
+      customers.length,
+
+    totalRevenue:
+      customers.reduce(
+        (acc,customer)=>
+          acc + Number(customer.total_spent || 0),
+        0
+      ),
+
+    frequentCustomers:
+      customers.filter(
+        customer =>
+          Number(customer.total_orders || 0) >= 2
+      ).length
+
+  };
+
+}
+
+
+function renderKPIs(customers){
+
+  const kpis =
+    getCustomerKPIs(customers || []);
 
   document.getElementById(
     "total-customers"
@@ -92,9 +202,9 @@ function renderKPIs(kpis){
   document.getElementById(
     "total-revenue"
   ).innerText =
-    `$${Number(
-      kpis.totalRevenue || 0
-    ).toFixed(2)}`;
+    formatMoney(
+      kpis.totalRevenue
+    );
 
   document.getElementById(
     "frequent-customers"
@@ -131,7 +241,8 @@ function renderCustomers(customers){
 
   }
 
-  customers.forEach(customer=>{
+  const rowsHTML =
+    customers.map(customer=>{
 
     const frequent =
       Number(
@@ -168,9 +279,7 @@ function renderCustomers(customers){
           <br>
 
           Total:
-          $${Number(
-            order.total || 0
-          ).toFixed(2)}
+          ${formatMoney(order.total)}
 
         </div>
       `)
@@ -183,7 +292,7 @@ function renderCustomers(customers){
         ).toLocaleDateString()
       : "-";
 
-    table.innerHTML += `
+    return `
     <tr>
 
       <td>
@@ -203,9 +312,9 @@ function renderCustomers(customers){
       </td>
 
       <td>
-        $${Number(
-          customer.total_spent || 0
-        ).toFixed(2)}
+        ${formatMoney(
+          customer.total_spent
+        )}
       </td>
 
       <td>
@@ -232,7 +341,10 @@ function renderCustomers(customers){
     </tr>
     `;
 
-  });
+  }).join("");
+
+  table.innerHTML =
+    rowsHTML;
 
 }
 
@@ -250,7 +362,17 @@ function setupSearch(){
 
   input.addEventListener(
     "keyup",
-    applySearch
+    () => {
+
+      clearTimeout(searchTimer);
+
+      searchTimer =
+        setTimeout(
+          applySearch,
+          200
+        );
+
+    }
   );
 
 }
@@ -276,6 +398,10 @@ function applySearch(){
       customersData
     );
 
+    renderKPIs(
+      customersData
+    );
+
     return;
 
   }
@@ -296,5 +422,7 @@ function applySearch(){
     );
 
   renderCustomers(filtered);
+
+  renderKPIs(filtered);
 
 }

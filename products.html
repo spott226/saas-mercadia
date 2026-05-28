@@ -522,51 +522,100 @@ Cerrar sesión
 
 <div class="content">
 
+<div class="page-heading">
 <h2 class="page-title">
 Gestión de productos
 </h2>
+<button class="info-dot" type="button" aria-label="Información de productos" data-info="Aquí das de alta productos, agregas variantes por color y talla, subes imágenes y controlas precio, categoría, destacado e inventario inicial.">
+i
+</button>
+</div>
 
 
 <!-- FORM -->
 
 <div class="form-card">
 
+<div class="section-heading">
+<div>
+<h3>
+Agregar producto
+</h3>
+<p>
+Llena la información principal y luego agrega variantes con stock para que el producto quede listo para vender.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información para agregar producto" data-info="El botón Agregar guarda el producto con sus variantes. Si editas un producto, este mismo botón cambia a Guardar cambios.">
+i
+</button>
+</div>
+
 <form
 id="product-form"
 onsubmit="event.preventDefault(); createProduct();"
 >
 
-<div class="form-row">
+<div class="form-grid product-main-grid">
+
+<div class="field-group">
+<label for="name">
+Nombre
+</label>
 
 <input
 id="name"
-placeholder="Nombre producto"
+placeholder="Ej. Playera oversize negra"
 required
 >
+</div>
 
-<input
-id="description"
-placeholder="Descripción"
->
+<div class="field-group">
+<label for="price">
+Precio base
+</label>
 
 <input
 id="price"
 type="number"
-placeholder="Precio"
+placeholder="0.00"
 required
 >
+</div>
+
+<div class="field-group">
+<label for="category">
+Categoría
+</label>
+
+<input
+id="category"
+placeholder="Ej. Playera deportiva"
+>
+</div>
+
+<div class="field-group">
+<label for="image">
+Imagen principal
+</label>
 
 <input
 type="file"
 id="image"
 >
+</div>
+
+<div class="field-group field-wide">
+<label for="description">
+Descripción
+</label>
 
 <input
-id="category"
-placeholder="Categoría"
+id="description"
+placeholder="Describe materiales, corte o detalles importantes"
 >
+</div>
 
-<label>
+<label class="check-card">
 <input
 type="checkbox"
 id="featured"
@@ -574,13 +623,15 @@ id="featured"
 Destacado
 </label>
 
+</div>
+
+<div class="form-actions">
 <button
 id="save-btn"
 type="submit"
 >
 Agregar
 </button>
-
 </div>
 
 </form>
@@ -588,53 +639,106 @@ Agregar
 
 <!-- VARIANTES ERP -->
 
-<div style="margin-top:25px;">
+<div class="subsection-card">
 
-<h3 style="margin-bottom:15px;">
-Variantes ERP (1 imagen por color)
+<div class="section-heading compact">
+<div>
+<h3>
+Variantes e inventario
 </h3>
+<p>
+Agrega cada color con sus tallas, SKU, costo, precio y stock inicial.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de variantes" data-info="Cada variante representa combinaciones de color y talla. El stock inicial alimenta inventario; usa una imagen por color para que el catálogo se vea claro.">
+i
+</button>
+</div>
 
-<div class="form-row">
+<div class="form-grid variants-grid">
+
+<div class="field-group">
+<label for="variant-color">
+Color
+</label>
 
 <input
 id="variant-color"
 placeholder="Color (ej: rojo)"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-size">
+Tallas
+</label>
 
 <input
 id="variant-size"
 placeholder="Tallas (ej: S,M,L)"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-price">
+Precio variante
+</label>
 
 <input
 id="variant-price"
 type="number"
 placeholder="Precio variante"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-stock">
+Stock inicial
+</label>
 
 <input
 id="variant-stock"
 type="number"
 placeholder="Stock inicial"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-sku">
+SKU
+</label>
 
 <input
 id="variant-sku"
 placeholder="SKU"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-cost">
+Costo
+</label>
 
 <input
 id="variant-cost"
 type="number"
 placeholder="Costo"
 >
+</div>
+
+<div class="field-group">
+<label for="variant-image">
+Imagen por color
+</label>
 
 <input
 type="file"
 id="variant-image"
 >
+</div>
 
 <button
+class="secondary-action"
 type="button"
 onclick="addVariant()"
 >
@@ -653,6 +757,20 @@ Agregar variante
 <!-- FILTERS ERP -->
 
 <div class="filters-card">
+
+<div class="section-heading compact">
+<div>
+<h3>
+Buscar y filtrar
+</h3>
+<p>
+Encuentra productos por nombre, categoría o cambia cuántos productos ves por página.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de filtros" data-info="La búsqueda espera un momento mientras escribes para evitar recargar la tabla en cada tecla.">
+i
+</button>
+</div>
 
 <div class="filters-grid">
 
@@ -713,6 +831,13 @@ Página 1
 <!-- TABLE -->
 
 <div class="table-card">
+
+<div class="table-title">
+Productos publicados
+<button class="info-dot" type="button" aria-label="Información de tabla de productos" data-info="Aquí ves stock total por producto, estado de inventario, si está destacado y acciones para editar o eliminar.">
+i
+</button>
+</div>
 
 <table>
 

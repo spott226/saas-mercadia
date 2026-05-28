@@ -440,6 +440,10 @@ Cerrar sesión
 Clientes ERP
 </h1>
 
+<button class="info-dot page-info-dot" type="button" aria-label="Información de clientes" data-info="Lista clientes confirmados: solo aparecen cuando tienen al menos un pedido pagado.">
+i
+</button>
+
 
 <!-- KPIS -->
 
@@ -499,6 +503,15 @@ id="frequent-customers"
 
 <div class="filters">
 
+<div class="section-heading inline-info">
+<h3>
+Buscar clientes
+</h3>
+<button class="info-dot" type="button" aria-label="Información de búsqueda de clientes" data-info="Busca clientes confirmados por nombre o teléfono. Los pendientes no aparecen hasta que paguen.">
+i
+</button>
+</div>
+
 <input
 type="text"
 id="search-customer"
@@ -514,6 +527,9 @@ placeholder="Buscar cliente..."
 
 <div class="table-title">
 Clientes registrados
+<button class="info-dot" type="button" aria-label="Información de clientes registrados" data-info="Muestra historial e ingresos solo con pedidos pagados.">
+i
+</button>
 </div>
 
 <table>

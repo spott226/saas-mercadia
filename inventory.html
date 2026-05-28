@@ -464,6 +464,10 @@ Cerrar sesión
 Inventario ERP
 </h1>
 
+<button class="info-dot page-info-dot" type="button" aria-label="Información de inventario" data-info="Controla stock por variante, valor de inventario calculado con costo por stock y movimientos de entrada o salida.">
+i
+</button>
+
 
 <!-- KPIS -->
 
@@ -539,6 +543,15 @@ id="total-stock"
 
 <div class="filters">
 
+<div class="section-heading inline-info">
+<h3>
+Buscar inventario
+</h3>
+<button class="info-dot" type="button" aria-label="Información de filtros de inventario" data-info="Busca por producto o SKU y filtra movimientos para revisar cambios de stock sin recorrer toda la tabla.">
+i
+</button>
+</div>
+
 <input
 type="text"
 id="search-inventory"
@@ -574,6 +587,9 @@ ADJUSTMENT
 
 <div class="table-title">
 Inventario actual
+<button class="info-dot" type="button" aria-label="Información de inventario actual" data-info="Muestra cada variante con su stock, costo y valor calculado como stock por costo.">
+i
+</button>
 </div>
 
 <table>
@@ -645,6 +661,9 @@ Cargando inventario...
 
 <div class="table-title">
 Movimientos inventario
+<button class="info-dot" type="button" aria-label="Información de movimientos" data-info="Historial de ventas, cancelaciones y ajustes que cambiaron el stock.">
+i
+</button>
 </div>
 
 <table>
