@@ -35,3 +35,7 @@ throw new Error("API ERROR");
 return await res.json();
 
 }
+
+export async function getProducts(storeId) {
+return apiRequest(`/products/${storeId}`);
+}
