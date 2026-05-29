@@ -32,7 +32,8 @@ const templatesByType = {
       label:"Fashion editorial 1",
       description:"Portada editorial, categorias visibles y catalogo con sensacion de marca premium.",
       sections:[
-        { type:"editorial_banner", eyebrow:"Nueva temporada", title:"Piezas listas para elevar el look diario", text:"Una experiencia visual para tiendas de moda con enfoque elegante." },
+        { type:"split_showcase", eyebrow:"Nueva temporada", title:"Piezas listas para elevar el look diario", text:"Una experiencia visual para tiendas de moda con enfoque elegante." },
+        { type:"editorial_banner", eyebrow:"Seleccion curada", title:"Nueva seleccion", text:"Piezas elegidas para elevar tu estilo diario." },
         { type:"category_tiles", title:"Explora colecciones" },
         { type:"product_grid", title:"Seleccion destacada" }
       ]
@@ -167,8 +168,29 @@ const templateKey =
 const templatePreview =
   document.getElementById("template-preview");
 
+const sectionTitle =
+  document.getElementById("section-title");
+
+const sectionKicker =
+  document.getElementById("section-kicker");
+
+const sectionText =
+  document.getElementById("section-text");
+
+const sectionImageUrl =
+  document.getElementById("section-image-url");
+
+const sectionImageInput =
+  document.getElementById("section-image-input");
+
 const promotionForm =
   document.getElementById("promotion-form");
+
+const editableSectionTypes = [
+  "split_showcase",
+  "image_banner",
+  "editorial_banner"
+];
 
 
 function showMessage(text,type = "success"){
@@ -362,6 +384,14 @@ function renderStore(store){
     store.template_key
   );
 
+  setSectionEditorFromSections(
+    getCurrentHomepageSections().length
+      ? getCurrentHomepageSections()
+      : getSelectedTemplate()?.sections
+  );
+
+  updateTemplatePreview();
+
 }
 
 
@@ -385,6 +415,102 @@ function getSelectedTemplate(){
 }
 
 
+function cloneSections(sections){
+
+  return JSON.parse(
+    JSON.stringify(sections || [])
+  );
+
+}
+
+
+function getEditableSection(sections){
+
+  return (sections || []).find(
+    section => editableSectionTypes.includes(section.type)
+  );
+
+}
+
+
+function getCurrentHomepageSections(){
+
+  return Array.isArray(currentStore?.homepage_sections)
+    ? currentStore.homepage_sections
+    : [];
+
+}
+
+
+function buildHomepageSections(){
+
+  const selectedTemplate =
+    getSelectedTemplate();
+
+  const sections =
+    cloneSections(selectedTemplate?.sections || []);
+
+  let editableSection =
+    getEditableSection(sections);
+
+  if(!editableSection){
+
+    editableSection = {
+      type:"split_showcase"
+    };
+
+    sections.unshift(editableSection);
+
+  }
+
+  if(sectionTitle.value.trim()){
+    editableSection.title = sectionTitle.value.trim();
+  }
+
+  if(sectionKicker.value.trim()){
+    editableSection.eyebrow = sectionKicker.value.trim();
+    editableSection.kicker = sectionKicker.value.trim();
+  }
+
+  if(sectionText.value.trim()){
+    editableSection.text = sectionText.value.trim();
+  }
+
+  if(sectionImageUrl.value.trim()){
+    editableSection.image_url = sectionImageUrl.value.trim();
+  }
+
+  return sections;
+
+}
+
+
+function setSectionEditorFromSections(sections){
+
+  const editableSection =
+    getEditableSection(sections) || {};
+
+  sectionTitle.value =
+    editableSection.title || "";
+
+  sectionKicker.value =
+    editableSection.eyebrow ||
+    editableSection.kicker ||
+    "";
+
+  sectionText.value =
+    editableSection.text ||
+    editableSection.description ||
+    "";
+
+  sectionImageUrl.value =
+    editableSection.image_url ||
+    editableSection.image ||
+    "";
+
+}
+
+
 function updateTemplatePreview(){
 
   if(!templatePreview) return;
@@ -400,7 +526,10 @@ function updateTemplatePreview(){
   }
 
   const sections =
-    selectedTemplate.sections || [];
+    buildHomepageSections();
+
+  const editableSection =
+    getEditableSection(sections);
 
   templatePreview.innerHTML = `
     <div class="template-preview-header">
@@ -408,6 +537,13 @@ function updateTemplatePreview(){
       <span>${escapeHTML(businessType.value)}</span>
     </div>
     <p>${escapeHTML(selectedTemplate.description || "")}</p>
+    ${
+      editableSection?.image_url
+        ? `<div class="template-preview-image">
+            <img src="${escapeHTML(resolveAssetUrl(editableSection.image_url))}" alt="">
+          </div>`
+        : ""
+    }
     <div class="template-section-list">
       ${
         sections
@@ -469,9 +605,6 @@ async function saveExperience(event){
 
   event.preventDefault();
 
-  const selectedTemplate =
-    getSelectedTemplate();
-
   await adminRequest(
     "/admin/store",
     {
@@ -482,7 +615,7 @@ async function saveExperience(event){
       body:JSON.stringify({
         business_type:businessType.value,
         template_key:templateKey.value,
-        homepage_sections:selectedTemplate?.sections || []
+        homepage_sections:buildHomepageSections()
       })
     }
   );
@@ -521,6 +654,39 @@ async function uploadStoreImage(kind,file){
   );
 
   await loadStore();
+
+}
+
+
+async function uploadSectionImage(file){
+
+  if(!file) return;
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "image",
+    file
+  );
+
+  const data =
+    await adminRequest(
+      "/admin/uploads",
+      {
+        method:"POST",
+        body:formData
+      }
+    );
+
+  sectionImageUrl.value =
+    data.image_url || data.url || "";
+
+  updateTemplatePreview();
+
+  showMessage(
+    "Imagen de sección lista. Guarda la experiencia para publicarla."
+  );
 
 }
 
@@ -928,13 +1094,38 @@ window.deletePromotion = (id) => runSafely(
 
 businessType.addEventListener(
   "change",
-  () => renderTemplateOptions()
+  () => {
+    renderTemplateOptions();
+    setSectionEditorFromSections(
+      getSelectedTemplate()?.sections
+    );
+    updateTemplatePreview();
+  }
 );
 
 templateKey.addEventListener(
   "change",
-  updateTemplatePreview
+  () => {
+    setSectionEditorFromSections(
+      getSelectedTemplate()?.sections
+    );
+    updateTemplatePreview();
+  }
 );
+
+[
+  sectionTitle,
+  sectionKicker,
+  sectionText,
+  sectionImageUrl
+].forEach(input => {
+
+  input.addEventListener(
+    "input",
+    updateTemplatePreview
+  );
+
+});
 
 document
   .getElementById("experience-form")
@@ -968,6 +1159,15 @@ document
       )
     )
   );
+
+sectionImageInput.addEventListener(
+  "change",
+  event => runSafely(
+    () => uploadSectionImage(
+      event.target.files[0]
+    )
+  )
+);
 
 promotionForm.addEventListener(
   "submit",
