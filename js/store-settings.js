@@ -20,23 +20,134 @@ const templatesByType = {
   ecommerce:[
     {
       value:"ecommerce_default",
-      label:"Ecommerce default"
+      label:"Ecommerce default",
+      description:"Catalogo limpio con hero, categorias y productos destacados.",
+      sections:[
+        { type:"category_tiles", title:"Comprar por categoria" },
+        { type:"product_grid", title:"Productos destacados" }
+      ]
+    },
+    {
+      value:"fashion_editorial_1",
+      label:"Fashion editorial 1",
+      description:"Portada editorial, categorias visibles y catalogo con sensacion de marca premium.",
+      sections:[
+        { type:"editorial_banner", eyebrow:"Nueva temporada", title:"Piezas listas para elevar el look diario", text:"Una experiencia visual para tiendas de moda con enfoque elegante." },
+        { type:"category_tiles", title:"Explora colecciones" },
+        { type:"product_grid", title:"Seleccion destacada" }
+      ]
+    },
+    {
+      value:"fashion_editorial_2",
+      label:"Fashion editorial 2",
+      description:"Mas enfoque en colecciones: imagen fuerte, texto corto y productos al cierre.",
+      sections:[
+        { type:"image_banner", eyebrow:"Coleccion", title:"Moda con presencia", cta:"Ver productos" },
+        { type:"category_tiles", title:"Categorias principales" },
+        { type:"promo_strip", title:"Entrega y disponibilidad se confirman por WhatsApp", text:"Compra directa con la tienda." },
+        { type:"product_grid", title:"Lo mas nuevo" }
+      ]
+    },
+    {
+      value:"streetwear_drop_1",
+      label:"Streetwear drop",
+      description:"Formato de lanzamientos: directo, visual y con productos como drop principal.",
+      sections:[
+        { type:"promo_strip", title:"Drop activo", text:"Piezas limitadas disponibles por tiempo corto." },
+        { type:"product_grid", title:"Ultimo drop" },
+        { type:"category_tiles", title:"Comprar por estilo" }
+      ]
+    },
+    {
+      value:"gym_active_1",
+      label:"Gym active",
+      description:"Pensado para activewear: dinamico, claro y facil de comprar desde mobile.",
+      sections:[
+        { type:"image_banner", eyebrow:"Performance", title:"Ropa lista para moverse contigo", cta:"Ver coleccion" },
+        { type:"product_grid", title:"Favoritos para entrenar" },
+        { type:"category_tiles", title:"Compra por categoria" }
+      ]
+    },
+    {
+      value:"luxury_minimal_1",
+      label:"Luxury minimal",
+      description:"Minimalista y sobria, con aire europeo para boutiques premium.",
+      sections:[
+        { type:"editorial_banner", eyebrow:"Atelier", title:"Seleccion curada con detalle", text:"Menos ruido, mas producto." },
+        { type:"product_grid", title:"Piezas esenciales" },
+        { type:"category_tiles", title:"Lineas de producto" }
+      ]
+    },
+    {
+      value:"boutique_grid_1",
+      label:"Boutique grid",
+      description:"Mas grid, mas escaneo: ideal para tiendas con muchas categorias.",
+      sections:[
+        { type:"category_tiles", title:"Categorias" },
+        { type:"product_grid", title:"Catalogo completo" },
+        { type:"image_banner", eyebrow:"Boutique", title:"Nuevas piezas disponibles", cta:"Comprar ahora" }
+      ]
+    },
+    {
+      value:"lookbook_1",
+      label:"Lookbook",
+      description:"Primero inspiracion, luego productos. Bueno para ropa, outfits y colecciones.",
+      sections:[
+        { type:"image_banner", eyebrow:"Lookbook", title:"Ideas para combinar esta temporada", cta:"Ver looks" },
+        { type:"editorial_banner", eyebrow:"Estilo", title:"Crea tu propia combinacion", text:"Piezas faciles de mezclar y comprar." },
+        { type:"product_grid", title:"Comprar el look" }
+      ]
+    },
+    {
+      value:"promo_stack_1",
+      label:"Promo stack",
+      description:"Ideal para tiendas que empujan ofertas, novedades y comunicados.",
+      sections:[
+        { type:"promo_strip", title:"Promocion activa", text:"Revisa disponibilidad antes de que se agote." },
+        { type:"image_banner", eyebrow:"Oferta", title:"Nuevas oportunidades para comprar", cta:"Ver ofertas" },
+        { type:"product_grid", title:"Productos en tendencia" }
+      ]
+    },
+    {
+      value:"mobile_first_1",
+      label:"Mobile first",
+      description:"Experiencia ligera y directa para clientes que compran desde celular.",
+      sections:[
+        { type:"product_grid", title:"Compra rapido" },
+        { type:"category_tiles", title:"Encuentra rapido" },
+        { type:"promo_strip", title:"Pedido por WhatsApp", text:"Agrega al carrito y coordina directo con la tienda." }
+      ]
     }
   ],
   restaurant:[
     {
       value:"restaurant_1",
-      label:"Restaurante 1"
+      label:"Restaurante 1",
+      description:"Menu visual para restaurante con productos como platillos.",
+      sections:[
+        { type:"category_tiles", title:"Categorias del menu" },
+        { type:"product_grid", title:"Especialidades" }
+      ]
     },
     {
       value:"restaurant_2",
-      label:"Restaurante 2"
+      label:"Restaurante 2",
+      description:"Restaurante con foco en recomendaciones y orden rapido.",
+      sections:[
+        { type:"promo_strip", title:"Ordena directo", text:"Disponibilidad y entrega se confirman con la tienda." },
+        { type:"product_grid", title:"Recomendaciones" }
+      ]
     }
   ],
   appointments:[
     {
       value:"appointments_1",
-      label:"Citas 1"
+      label:"Citas 1",
+      description:"Servicios y citas con enfoque claro en agendar.",
+      sections:[
+        { type:"category_tiles", title:"Servicios" },
+        { type:"product_grid", title:"Servicios destacados" }
+      ]
     }
   ]
 };
@@ -52,6 +163,9 @@ const businessType =
 
 const templateKey =
   document.getElementById("template-key");
+
+const templatePreview =
+  document.getElementById("template-preview");
 
 const promotionForm =
   document.getElementById("promotion-form");
@@ -251,14 +365,67 @@ function renderStore(store){
 }
 
 
-function renderTemplateOptions(selectedValue){
+function getTemplateOptions(){
 
-  const type =
-    businessType.value;
+  return templatesByType[businessType.value] ||
+    templatesByType.ecommerce;
+
+}
+
+
+function getSelectedTemplate(){
 
   const options =
-    templatesByType[type] ||
-    templatesByType.ecommerce;
+    getTemplateOptions();
+
+  return options.find(
+    option => option.value === templateKey.value
+  ) || options[0];
+
+}
+
+
+function updateTemplatePreview(){
+
+  if(!templatePreview) return;
+
+  const selectedTemplate =
+    getSelectedTemplate();
+
+  if(!selectedTemplate){
+
+    templatePreview.innerHTML = "";
+    return;
+
+  }
+
+  const sections =
+    selectedTemplate.sections || [];
+
+  templatePreview.innerHTML = `
+    <div class="template-preview-header">
+      <strong>${escapeHTML(selectedTemplate.label)}</strong>
+      <span>${escapeHTML(businessType.value)}</span>
+    </div>
+    <p>${escapeHTML(selectedTemplate.description || "")}</p>
+    <div class="template-section-list">
+      ${
+        sections
+          .map(section => `
+            <span>${escapeHTML(section.title || section.type)}</span>
+          `)
+          .join("")
+      }
+    </div>
+  `;
+
+}
+
+
+function renderTemplateOptions(selectedValue){
+
+  const options =
+    getTemplateOptions();
 
   templateKey.innerHTML =
     options
@@ -278,6 +445,8 @@ function renderTemplateOptions(selectedValue){
 
   templateKey.value =
     nextValue;
+
+  updateTemplatePreview();
 
 }
 
@@ -300,6 +469,9 @@ async function saveExperience(event){
 
   event.preventDefault();
 
+  const selectedTemplate =
+    getSelectedTemplate();
+
   await adminRequest(
     "/admin/store",
     {
@@ -309,7 +481,8 @@ async function saveExperience(event){
       },
       body:JSON.stringify({
         business_type:businessType.value,
-        template_key:templateKey.value
+        template_key:templateKey.value,
+        homepage_sections:selectedTemplate?.sections || []
       })
     }
   );
@@ -756,6 +929,11 @@ window.deletePromotion = (id) => runSafely(
 businessType.addEventListener(
   "change",
   () => renderTemplateOptions()
+);
+
+templateKey.addEventListener(
+  "change",
+  updateTemplatePreview
 );
 
 document
