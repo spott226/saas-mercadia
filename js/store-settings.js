@@ -138,6 +138,36 @@ const templatesByType = {
         { type:"promo_strip", title:"Ordena directo", text:"Disponibilidad y entrega se confirman con la tienda." },
         { type:"product_grid", title:"Recomendaciones" }
       ]
+    },
+    {
+      value:"restaurant_3",
+      label:"Restaurante visual",
+      description:"Portada con imagen grande para comida, menu por categorias y favoritos.",
+      sections:[
+        { type:"split_showcase", eyebrow:"Mesa lista", title:"Sabores para pedir hoy", text:"Una portada visual para restaurantes con menu directo y facil de explorar." },
+        { type:"category_tiles", title:"Explora el menu" },
+        { type:"product_grid", title:"Favoritos de la casa" }
+      ]
+    },
+    {
+      value:"restaurant_4",
+      label:"Restaurante promo",
+      description:"Ideal para comida rapida, cafes y negocios que empujan especiales del dia.",
+      sections:[
+        { type:"image_banner", eyebrow:"Especial del dia", title:"Antojos que se ven y se piden rapido", text:"Ideal para comida rapida, cafes y restaurantes con promos activas." },
+        { type:"promo_strip", title:"Pedido por WhatsApp", text:"Confirma horario, disponibilidad y entrega directo con la tienda." },
+        { type:"product_grid", title:"Mas pedidos" }
+      ]
+    },
+    {
+      value:"restaurant_5",
+      label:"Restaurante boutique",
+      description:"Mas sobrio y elegante para carta corta, cocina de autor, postres o cafe.",
+      sections:[
+        { type:"editorial_banner", eyebrow:"Carta curada", title:"Menu corto, claro y elegante", text:"Pensado para restaurantes boutique, postres, cafes o cocina de autor." },
+        { type:"category_tiles", title:"Secciones de la carta" },
+        { type:"product_grid", title:"Seleccion del chef" }
+      ]
     }
   ],
   appointments:[
@@ -148,6 +178,36 @@ const templatesByType = {
       sections:[
         { type:"category_tiles", title:"Servicios" },
         { type:"product_grid", title:"Servicios destacados" }
+      ]
+    },
+    {
+      value:"appointments_2",
+      label:"Citas visual",
+      description:"Portada con imagen principal para servicios, consultorios, belleza y wellness.",
+      sections:[
+        { type:"split_showcase", eyebrow:"Agenda abierta", title:"Servicios listos para reservar", text:"Una experiencia clara para consultorios, belleza, wellness y servicios profesionales." },
+        { type:"category_tiles", title:"Areas de servicio" },
+        { type:"product_grid", title:"Reservar servicio" }
+      ]
+    },
+    {
+      value:"appointments_3",
+      label:"Citas directa",
+      description:"Pensada para que el cliente elija servicio y coordine horario por WhatsApp.",
+      sections:[
+        { type:"image_banner", eyebrow:"Citas", title:"Elige servicio y coordina horario", text:"Ideal para negocios donde la confianza y el primer contacto importan." },
+        { type:"promo_strip", title:"Confirmacion por WhatsApp", text:"El horario final se coordina directamente con el negocio." },
+        { type:"product_grid", title:"Servicios populares" }
+      ]
+    },
+    {
+      value:"appointments_4",
+      label:"Citas profesional",
+      description:"Mas limpio y serio para dentistas, clinicas, spas, barbers y asesores.",
+      sections:[
+        { type:"editorial_banner", eyebrow:"Atencion personalizada", title:"Una agenda limpia para vender servicios", text:"Pensada para dentistas, clinicas, spas, barbers y asesores." },
+        { type:"category_tiles", title:"Categorias de servicio" },
+        { type:"product_grid", title:"Agenda tu cita" }
       ]
     }
   ]
