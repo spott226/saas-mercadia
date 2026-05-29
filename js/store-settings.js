@@ -1,6 +1,12 @@
 const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
+const BACKEND_ORIGIN =
+  "https://mercadia-back-production.up.railway.app";
+
+const BACKEND_UPLOADS_URL =
+  `${BACKEND_ORIGIN}/uploads/`;
+
 const token =
   sessionStorage.getItem("token");
 
@@ -107,6 +113,45 @@ function toDateInput(value){
 }
 
 
+function resolveAssetUrl(asset){
+
+  if(!asset) return "";
+
+  const value =
+    String(asset).trim();
+
+  if(
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  ){
+
+    return value;
+
+  }
+
+  if(value.startsWith("/uploads/")){
+
+    return `${BACKEND_ORIGIN}${value}`;
+
+  }
+
+  if(value.startsWith("uploads/")){
+
+    return `${BACKEND_ORIGIN}/${value}`;
+
+  }
+
+  if(value.startsWith("/")){
+
+    return value;
+
+  }
+
+  return `${BACKEND_UPLOADS_URL}${value}`;
+
+}
+
+
 async function adminRequest(endpoint,options = {}){
 
   const headers = {
@@ -118,6 +163,7 @@ async function adminRequest(endpoint,options = {}){
     await fetch(
       `${API_URL}${endpoint}`,
       {
+        cache:"no-store",
         ...options,
         headers
       }
@@ -151,7 +197,8 @@ function setImagePreview(img,empty,url){
 
   if(url){
 
-    img.src = url;
+    img.src =
+      resolveAssetUrl(url);
     img.style.display = "block";
     empty.style.display = "none";
 
@@ -342,13 +389,18 @@ function renderPromotions(){
 
   container.innerHTML =
     promotions
-      .map(promo=>`
+      .map(promo=>{
+
+        const visibility =
+          getPromotionVisibility(promo);
+
+        return `
         <div class="promotion-item">
           <div class="promotion-info">
             <div class="promotion-title-row">
               <strong>${escapeHTML(promo.title || "Promoción")}</strong>
-              <span class="status ${promo.is_active ? "status-paid" : "status-cancelled"}">
-                ${promo.is_active ? "Activa" : "Inactiva"}
+              <span class="status ${visibility.className}">
+                ${visibility.label}
               </span>
             </div>
             <p>${escapeHTML(promo.description || "Sin descripción")}</p>
@@ -370,8 +422,59 @@ function renderPromotions(){
             </button>
           </div>
         </div>
-      `)
+      `;
+      })
       .join("");
+
+}
+
+
+function getPromotionVisibility(promo){
+
+  if(!promo.is_active){
+
+    return {
+      label:"Inactiva",
+      className:"status-cancelled"
+    };
+
+  }
+
+  const now =
+    new Date();
+
+  const startsAt =
+    promo.starts_at
+    ? new Date(promo.starts_at)
+    : null;
+
+  const endsAt =
+    promo.ends_at
+    ? new Date(promo.ends_at)
+    : null;
+
+  if(startsAt && startsAt > now){
+
+    return {
+      label:"Programada",
+      className:"status-pending"
+    };
+
+  }
+
+  if(endsAt && endsAt < now){
+
+    return {
+      label:"Vencida",
+      className:"status-cancelled"
+    };
+
+  }
+
+  return {
+    label:"Visible",
+    className:"status-paid"
+  };
 
 }
 
