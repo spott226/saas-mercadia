@@ -19,12 +19,21 @@ let customersData = [];
 
 let searchTimer = null;
 
+const SALES_PIPELINE_STATUSES = [
+  "PAID",
+  "PREPARING",
+  "SHIPPED",
+  "DELIVERED"
+];
+
 
 function isPaidOrder(order){
 
-  return String(
+  return SALES_PIPELINE_STATUSES.includes(
+    String(
     order?.status || ""
-  ).toUpperCase() === "PAID";
+  ).toUpperCase()
+  );
 
 }
 
@@ -86,14 +95,9 @@ function normalizeCustomer(customer){
 
 function getConfirmedCustomers(customers){
 
-  return customers
-    .map(
-      normalizeCustomer
-    )
-    .filter(
-      customer =>
-        Number(customer.total_orders || 0) > 0
-    );
+  return customers.map(
+    normalizeCustomer
+  );
 
 }
 
@@ -256,9 +260,15 @@ function renderCustomers(customers){
           Frecuente
         </span>
       `
+      : Number(customer.total_orders || 0) === 1
+      ? `
+        <span class="badge badge-normal">
+          Activo
+        </span>
+      `
       : `
         <span class="badge badge-normal">
-          Nuevo
+          Registrado
         </span>
       `;
 

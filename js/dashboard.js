@@ -31,12 +31,21 @@ let totalOrders = 0;
 
 let averageTicket = 0;
 
+const SALES_PIPELINE_STATUSES = [
+  "PAID",
+  "PREPARING",
+  "SHIPPED",
+  "DELIVERED"
+];
+
 
 function isPaidOrder(order){
 
-  return String(
+  return SALES_PIPELINE_STATUSES.includes(
+    String(
     order?.status || ""
-  ).toUpperCase() === "PAID";
+  ).toUpperCase()
+  );
 
 }
 

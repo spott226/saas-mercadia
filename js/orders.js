@@ -20,6 +20,61 @@ let allOrders = [];
 
 let filterTimer = null;
 
+const SALES_PIPELINE_STATUSES = [
+  "PAID",
+  "PREPARING",
+  "SHIPPED",
+  "DELIVERED"
+];
+
+function isConfirmedOrder(order){
+
+  return SALES_PIPELINE_STATUSES.includes(
+    String(order?.status || "")
+      .toUpperCase()
+  );
+
+}
+
+function getStatusClass(status){
+
+  const normalizedStatus =
+    String(status || "")
+      .toUpperCase();
+
+  if(normalizedStatus === "CANCELLED"){
+    return "status-cancelled";
+  }
+
+  if(
+    normalizedStatus === "PAID" ||
+    normalizedStatus === "DELIVERED"
+  ){
+    return "status-paid";
+  }
+
+  return "status-pending";
+
+}
+
+function getStatusLabel(status){
+
+  const labels = {
+    PENDING: "Pendiente",
+    PAID: "Pagado",
+    PREPARING: "Preparando",
+    SHIPPED: "Enviado",
+    DELIVERED: "Entregado",
+    CANCELLED: "Cancelado"
+  };
+
+  return labels[
+    String(status || "")
+      .toUpperCase()
+  ] || status || "-";
+
+}
+
 
 /* =========================
 INIT
@@ -117,13 +172,13 @@ function renderKPIs(orders){
 
   const paid =
     orders.filter(
-      o => o.status === "PAID"
+      isConfirmedOrder
     ).length;
 
   const totalSales =
     orders
       .filter(
-        o => o.status === "PAID"
+        isConfirmedOrder
       )
       .reduce(
         (acc,o)=>
@@ -216,20 +271,7 @@ function renderOrders(orders){
       .join("");
 
     const statusClass =
-
-      order.status === "PAID"
-
-      ? "status-paid"
-
-      :
-
-      order.status === "CANCELLED"
-
-      ? "status-cancelled"
-
-      :
-
-      "status-pending";
+      getStatusClass(order.status);
 
     const createdAt =
       order.created_at
@@ -279,7 +321,7 @@ function renderOrders(orders){
 
         <span class="status ${statusClass}">
 
-          ${order.status || "-"}
+          ${getStatusLabel(order.status)}
 
         </span>
 
@@ -317,6 +359,39 @@ function renderOrders(orders){
               }
             >
               Pagado
+            </option>
+
+            <option
+              value="PREPARING"
+              ${
+                order.status === "PREPARING"
+                ? "selected"
+                : ""
+              }
+            >
+              Preparando
+            </option>
+
+            <option
+              value="SHIPPED"
+              ${
+                order.status === "SHIPPED"
+                ? "selected"
+                : ""
+              }
+            >
+              Enviado
+            </option>
+
+            <option
+              value="DELIVERED"
+              ${
+                order.status === "DELIVERED"
+                ? "selected"
+                : ""
+              }
+            >
+              Entregado
             </option>
 
             <option

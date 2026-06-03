@@ -468,7 +468,7 @@ Cerrar sesión
 Gestión de pedidos ERP
 </h1>
 
-<button class="info-dot page-info-dot" type="button" aria-label="Información de pedidos" data-info="Aquí revisas pedidos, filtras por cliente o estado y cambias el estado. Solo los pedidos pagados cuentan como venta.">
+<button class="info-dot page-info-dot" type="button" aria-label="Información de pedidos" data-info="Aquí revisas pedidos, filtras por cliente o estado y cambias el estado. Los pedidos confirmados y sus etapas logísticas cuentan como venta.">
 i
 </button>
 
@@ -512,7 +512,7 @@ id="pending-orders"
 <div class="kpi-card">
 
 <div class="kpi-title">
-Pagados
+Confirmados
 </div>
 
 <div
@@ -574,6 +574,18 @@ Pendiente
 
 <option value="PAID">
 Pagado
+</option>
+
+<option value="PREPARING">
+Preparando
+</option>
+
+<option value="SHIPPED">
+Enviado
+</option>
+
+<option value="DELIVERED">
+Entregado
 </option>
 
 <option value="CANCELLED">
