@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mercadia Admin - Tienda</title>
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/admin-polish.css">
+
+</head>
+
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">
+☰
+</button>
+
+<div class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar">
+
+<div class="logo">
+Mercadia
+</div>
+
+<div class="menu">
+
+<a href="dashboard.html">
+Dashboard
+</a>
+
+<a href="products.html">
+Productos
+</a>
+
+<a href="orders.html">
+Pedidos
+</a>
+
+<a href="inventory.html">
+Inventario
+</a>
+
+<a href="customers.html">
+Clientes
+</a>
+
+<a href="store.html" class="active" aria-current="page">
+Tienda
+</a>
+
+</div>
+
+<button class="logout" onclick="logout()">
+Cerrar sesión
+</button>
+
+</div>
+
+<div class="content">
+
+<div class="page-heading">
+<h1 class="page-title">
+Configuración de tienda
+</h1>
+<button class="info-dot" type="button" aria-label="Información de tienda" data-info="Administra identidad visual, tipo de experiencia, plantilla y promociones de la tienda.">
+i
+</button>
+</div>
+
+<div id="store-message" class="admin-message" role="status"></div>
+
+<div class="settings-grid">
+
+<section class="section-card store-summary-card">
+
+<div class="section-heading">
+<div>
+<h3>Vista general</h3>
+<p>Revisa la identidad actual y actualiza los recursos visuales principales.</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de vista general" data-info="El logo se usa como marca principal. El hero se usa como imagen destacada de la experiencia pública.">
+i
+</button>
+</div>
+
+<div class="store-identity-grid">
+
+<div>
+<div class="meta-label">Nombre</div>
+<div id="store-name" class="meta-value">Cargando...</div>
+</div>
+
+<div>
+<div class="meta-label">Slug</div>
+<div id="store-slug" class="meta-value">-</div>
+</div>
+
+<div>
+<div class="meta-label">Tipo actual</div>
+<div id="store-business-type" class="meta-value">-</div>
+</div>
+
+<div>
+<div class="meta-label">Plantilla actual</div>
+<div id="store-template-key" class="meta-value">-</div>
+</div>
+
+</div>
+
+<div class="media-grid">
+
+<div class="media-panel">
+<div class="media-panel-header">
+<span>Logo</span>
+<label class="file-action">
+Cambiar
+<input id="logo-input" type="file" accept="image/*">
+</label>
+</div>
+<div class="media-preview logo-preview">
+<img id="logo-preview" alt="Logo actual">
+<span id="logo-empty">Sin logo</span>
+</div>
+</div>
+
+<div class="media-panel">
+<div class="media-panel-header">
+<span>Hero</span>
+<label class="file-action">
+Cambiar
+<input id="hero-input" type="file" accept="image/*">
+</label>
+</div>
+<div class="media-preview hero-preview">
+<img id="hero-preview" alt="Hero actual">
+<span id="hero-empty">Sin hero</span>
+</div>
+</div>
+
+</div>
+
+</section>
+
+<section class="section-card">
+
+<div class="section-heading">
+<div>
+<h3>Tipo de experiencia</h3>
+<p>Define cómo se presenta la tienda al cliente.</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de experiencia" data-info="El tipo de negocio controla qué plantillas puede usar la tienda. No cambia productos, pedidos ni inventario.">
+i
+</button>
+</div>
+
+<form id="experience-form">
+
+<div class="form-grid settings-form-grid">
+
+<div class="field-group">
+<label for="business-type">Tipo de negocio</label>
+<select id="business-type" required>
+<option value="ecommerce">Ecommerce</option>
+<option value="restaurant">Restaurante</option>
+<option value="appointments">Citas</option>
+</select>
+</div>
+
+<div class="field-group">
+<label for="template-key">Plantilla</label>
+<select id="template-key" required></select>
+</div>
+
+</div>
+
+<div id="template-preview" class="template-preview"></div>
+
+<div id="section-editor" class="template-editor">
+<div class="template-editor-title">
+Personalizar sección principal
+</div>
+
+<div class="form-grid template-editor-grid">
+
+<div class="field-group">
+<label for="section-title">Título</label>
+<input id="section-title" placeholder="Nuevas oportunidades para comprar">
+</div>
+
+<div class="field-group">
+<label for="section-kicker">Etiqueta</label>
+<input id="section-kicker" placeholder="Nueva temporada">
+</div>
+
+<div class="field-group field-wide">
+<label for="section-text">Texto</label>
+<input id="section-text" placeholder="Una selección pensada para destacar tu tienda.">
+</div>
+
+<div class="field-group field-wide">
+<label for="section-image-url">Imagen de sección</label>
+<input id="section-image-url" placeholder="https://... o /uploads/imagen.jpg">
+</div>
+
+<div class="field-group field-wide">
+<label>Subir imagen</label>
+<label class="file-action section-upload-action">
+Elegir imagen
+<input id="section-image-input" type="file" accept="image/*">
+</label>
+</div>
+
+</div>
+</div>
+
+<div class="form-actions">
+<button type="submit" id="save-experience-btn">
+Guardar experiencia
+</button>
+</div>
+
+</form>
+
+</section>
+
+</div>
+
+<section class="section-card promotions-section">
+
+<div class="section-heading">
+<div>
+<h3>Promoción emergente</h3>
+<p>Crea, edita y activa promociones visibles para clientes.</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de promociones" data-info="Puedes tener promociones con imagen, fechas, botón y estado activo. El popup se previsualiza antes de guardar.">
+i
+</button>
+</div>
+
+<div class="promotion-layout">
+
+<form id="promotion-form" class="promotion-form">
+
+<input id="promotion-id" type="hidden">
+
+<div class="form-grid promotion-form-grid">
+
+<div class="field-group">
+<label for="promo-title">Título</label>
+<input id="promo-title" placeholder="Nuevo usuario" required>
+</div>
+
+<div class="field-group">
+<label for="promo-discount">Texto de descuento</label>
+<input id="promo-discount" placeholder="10% OFF">
+</div>
+
+<div class="field-group field-wide">
+<label for="promo-description">Descripción</label>
+<input id="promo-description" placeholder="Regístrate y obtén un 10% de descuento">
+</div>
+
+<div class="field-group">
+<label for="promo-button-text">Texto del botón</label>
+<input id="promo-button-text" placeholder="Registrarme">
+</div>
+
+<div class="field-group">
+<label for="promo-button-url">URL del botón</label>
+<input id="promo-button-url" placeholder="/registro">
+</div>
+
+<div class="field-group">
+<label for="promo-starts">Fecha inicio</label>
+<input id="promo-starts" type="date">
+</div>
+
+<div class="field-group">
+<label for="promo-ends">Fecha fin</label>
+<input id="promo-ends" type="date">
+</div>
+
+<div class="field-group">
+<label for="promo-image">Imagen opcional</label>
+<input id="promo-image" type="file" accept="image/*">
+</div>
+
+<label class="check-card">
+<input id="promo-active" type="checkbox" checked>
+Activa
+</label>
+
+</div>
+
+<div class="form-actions split-actions">
+<button type="button" class="secondary-action" id="reset-promotion-btn">
+Limpiar
+</button>
+<button type="submit" id="save-promotion-btn">
+Crear promoción
+</button>
+</div>
+
+</form>
+
+<aside class="popup-preview-card">
+<div class="meta-label">Preview</div>
+<div class="promo-preview">
+<img id="preview-image" alt="Preview promoción">
+<div id="preview-discount" class="promo-preview-discount">10% OFF</div>
+<h4 id="preview-title">Nuevo usuario</h4>
+<p id="preview-description">Regístrate y obtén un 10% de descuento</p>
+<button id="preview-button" type="button">Registrarme</button>
+</div>
+</aside>
+
+</div>
+
+<div class="table-card promotions-table-card">
+
+<div class="table-title">
+Promociones existentes
+<button class="info-dot" type="button" aria-label="Información de lista de promociones" data-info="Edita, activa/desactiva o elimina promociones sin tocar base de datos manualmente.">
+i
+</button>
+</div>
+
+<div id="promotions-list" class="promotions-list">
+<div class="empty">Cargando promociones...</div>
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<script src="config.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+
+function toggleMenu(){
+
+const sidebar = document.querySelector(".sidebar");
+const overlay = document.querySelector(".sidebar-overlay");
+
+sidebar.classList.toggle("open");
+overlay.classList.toggle("active");
+
+}
+
+</script>
+
+<script type="module" src="js/store-settings.js"></script>
+
+</body>
+</html>

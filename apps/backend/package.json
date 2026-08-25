@@ -1,0 +1,37 @@
+{
+  "name": "Mercadia-Backend",
+  "version": "1.0.0",
+  "description": "Backend SaaS multi-tenant para tiendas online simples",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "postgresql",
+    "railway",
+    "multi-tenant",
+    "saas"
+  ],
+  "author": "Mercadia",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.10.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "pg": "^8.20.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

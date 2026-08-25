@@ -1,0 +1,15 @@
+{
+  "name": "mercadia-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo de Mercadia para Railway y Supabase",
+  "scripts": {
+    "start:backend": "npm --prefix apps/backend start",
+    "start:admin": "npm --prefix apps/admin start",
+    "start:storefront": "npm --prefix apps/storefront start",
+    "verify": "node scripts/verify-monorepo.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

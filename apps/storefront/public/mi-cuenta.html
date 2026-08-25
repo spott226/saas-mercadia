@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/mercadia-app.png">
+
+<title>Mi cuenta</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet" href="/css/styles.css">
+
+</head>
+
+<body>
+
+<header class="shadow sticky top-0 z-50">
+
+<div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+
+<a href="/index.html" class="brand-link flex items-center gap-3">
+
+<img
+id="store-logo"
+src="/icons/mercadia-app.png"
+class="h-10 w-auto"
+alt="Logo tienda"
+>
+
+<h1 id="store-name" class="text-xl font-bold">
+Tienda
+</h1>
+
+</a>
+
+<nav class="hidden md:flex gap-8 text-sm font-medium">
+
+<a href="/index.html" class="hover:opacity-70">Inicio</a>
+<a href="/products.html" class="hover:opacity-70">Productos</a>
+<a href="/categorias.html" class="hover:opacity-70">Categorias</a>
+<a href="/mi-cuenta.html" class="hover:opacity-70">Mi cuenta</a>
+
+</nav>
+
+<button id="menu-btn" class="md:hidden text-sm font-semibold uppercase" aria-label="Abrir menu">
+Menu
+</button>
+
+</div>
+
+<div id="mobile-menu" class="hidden md:hidden border-t">
+
+<a href="/index.html" class="block p-4 border-b">Inicio</a>
+<a href="/products.html" class="block p-4 border-b">Productos</a>
+<a href="/categorias.html" class="block p-4 border-b">Categorias</a>
+<a href="/mi-cuenta.html" class="block p-4">Mi cuenta</a>
+
+</div>
+
+</header>
+
+<main class="account-shell">
+
+  <section class="account-summary">
+    <p class="account-kicker">Portal cliente</p>
+    <h2 id="account-store-title">Tu tienda</h2>
+    <p class="account-copy">
+      Entra para revisar tus pedidos y guardar tus datos de compra sin mover el flujo actual de la tienda.
+    </p>
+    <div id="account-message" class="account-message" data-state="neutral"></div>
+  </section>
+
+  <section class="account-card">
+    <div id="account-auth-section">
+      <div class="account-tabs">
+        <button type="button" class="account-tab account-tab-active" data-account-tab="login">
+          Ingresar
+        </button>
+        <button type="button" class="account-tab" data-account-tab="register">
+          Crear cuenta
+        </button>
+      </div>
+
+      <div data-account-panel="login">
+        <form id="account-login-form" class="account-form">
+          <label>
+            <span>Correo</span>
+            <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" placeholder="Minimo 6 caracteres" required>
+          </label>
+          <button type="submit" class="btn-primary">
+            Entrar
+          </button>
+          <button id="account-forgot-btn" type="button" class="account-link-button">
+            Olvide mi contrasena
+          </button>
+        </form>
+      </div>
+
+      <div data-account-panel="register" class="hidden">
+        <form id="account-register-form" class="account-form">
+          <label>
+            <span>Nombre</span>
+            <input type="text" name="name" placeholder="Tu nombre" required>
+          </label>
+          <label>
+            <span>Telefono</span>
+            <input type="tel" name="phone" placeholder="Tu telefono" required>
+          </label>
+          <label>
+            <span>Correo</span>
+            <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" placeholder="Minimo 6 caracteres" required>
+          </label>
+          <button type="submit" class="btn-primary">
+            Crear cuenta
+          </button>
+        </form>
+      </div>
+
+      <div id="account-forgot-panel" class="hidden">
+        <form id="account-forgot-form" class="account-form">
+          <label>
+            <span>Correo</span>
+            <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" required>
+          </label>
+          <button type="submit" class="btn-primary">
+            Enviar enlace de recuperacion
+          </button>
+          <button id="account-back-login-btn" type="button" class="account-link-button">
+            Volver a iniciar sesion
+          </button>
+        </form>
+      </div>
+
+      <div id="account-reset-panel" class="hidden">
+        <form id="account-reset-form" class="account-form">
+          <label>
+            <span>Nueva contrasena</span>
+            <input type="password" name="password" minlength="6" autocomplete="new-password" required>
+          </label>
+          <button type="submit" class="btn-primary">
+            Guardar nueva contrasena
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="account-dashboard" class="hidden">
+      <div class="account-dashboard-head">
+        <div>
+          <p class="account-kicker">Cliente</p>
+          <h3 id="account-customer-name">Cliente</h3>
+          <p id="account-customer-phone" class="account-copy"></p>
+        </div>
+        <button id="account-logout-btn" type="button" class="btn-secondary">
+          Cerrar sesion
+        </button>
+      </div>
+
+      <div class="account-stats">
+        <article>
+          <span>Pedidos</span>
+          <strong id="account-total-orders">0</strong>
+        </article>
+        <article>
+          <span>Total comprado</span>
+          <strong id="account-total-spent">$0.00</strong>
+        </article>
+        <article>
+          <span>Ultimo acceso</span>
+          <strong id="account-last-login">-</strong>
+        </article>
+      </div>
+
+      <div class="account-orders">
+        <div class="account-orders-head">
+          <p class="account-kicker">Historial</p>
+          <h3>Tus pedidos</h3>
+        </div>
+        <div id="account-orders-list" class="account-orders-list"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/config.js"></script>
+<script type="module" src="/js/pwa.js"></script>
+<script type="module" src="/js/customer-account.js"></script>
+
+</body>
+</html>

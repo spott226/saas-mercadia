@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mercadia Admin - Productos</title>
+
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+
+/* RESET */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+}
+
+body{
+display:flex;
+background:#f1f5f9;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+
+/* BOTON HAMBURGUESA */
+
+.menu-toggle{
+display:none;
+position:fixed;
+top:15px;
+left:15px;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+border:none;
+width:48px;
+height:48px;
+border-radius:14px;
+font-size:22px;
+cursor:pointer;
+z-index:2000;
+box-shadow:0 8px 25px rgba(15,23,42,.25);
+backdrop-filter:blur(10px);
+transition:.25s ease;
+}
+
+.menu-toggle:hover{
+transform:scale(1.05);
+background:linear-gradient(135deg,#1e293b,#334155);
+}
+
+.menu-toggle:active{
+transform:scale(.96);
+}
+
+
+/* OVERLAY */
+
+.sidebar-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.45);
+backdrop-filter:blur(3px);
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:1400;
+}
+
+.sidebar-overlay.active{
+opacity:1;
+pointer-events:auto;
+}
+
+
+/* SIDEBAR */
+
+.sidebar{
+width:230px;
+background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+color:white;
+display:flex;
+flex-direction:column;
+padding:20px;
+flex-shrink:0;
+transition:.3s ease;
+box-shadow:8px 0 30px rgba(0,0,0,.08);
+}
+
+.logo{
+font-size:22px;
+font-weight:700;
+margin-bottom:35px;
+letter-spacing:.5px;
+}
+
+.menu a{
+display:flex;
+align-items:center;
+gap:10px;
+padding:13px 14px;
+color:#cbd5f5;
+text-decoration:none;
+border-radius:12px;
+margin-bottom:8px;
+transition:.25s ease;
+font-size:15px;
+font-weight:500;
+}
+
+.menu a:hover{
+background:rgba(255,255,255,.08);
+color:white;
+transform:translateX(3px);
+}
+
+.logout{
+margin-top:auto;
+background:linear-gradient(135deg,#ef4444,#dc2626);
+border:none;
+color:white;
+padding:12px;
+border-radius:12px;
+cursor:pointer;
+font-weight:600;
+transition:.25s ease;
+}
+
+.logout:hover{
+transform:translateY(-1px);
+box-shadow:0 10px 20px rgba(239,68,68,.25);
+}
+
+
+/* CONTENT */
+
+.content{
+flex:1;
+padding:30px;
+min-width:0;
+}
+
+.page-title{
+font-size:28px;
+font-weight:700;
+margin-bottom:25px;
+color:#0f172a;
+}
+
+
+/* FORM */
+
+.form-card{
+background:white;
+padding:22px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.06);
+margin-bottom:25px;
+border:1px solid rgba(226,232,240,.7);
+}
+
+.form-row{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+align-items:center;
+}
+
+.form-row input,
+.form-row select{
+padding:12px;
+border:1px solid #d1d5db;
+border-radius:12px;
+min-width:180px;
+outline:none;
+transition:.2s;
+}
+
+.form-row input:focus,
+.form-row select:focus{
+border-color:#0f172a;
+box-shadow:0 0 0 4px rgba(15,23,42,.08);
+}
+
+.form-row button{
+padding:12px 16px;
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:600;
+transition:.25s ease;
+}
+
+.form-row button:hover{
+transform:translateY(-1px);
+box-shadow:0 10px 20px rgba(37,99,235,.25);
+}
+
+
+/* FILTERS */
+
+.filters-card{
+background:white;
+padding:22px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.06);
+margin-bottom:20px;
+border:1px solid rgba(226,232,240,.7);
+}
+
+.filters-grid{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+align-items:center;
+}
+
+.filters-grid input,
+.filters-grid select{
+padding:12px;
+border:1px solid #d1d5db;
+border-radius:12px;
+min-width:180px;
+background:white;
+outline:none;
+transition:.2s;
+}
+
+.filters-grid input:focus,
+.filters-grid select:focus{
+border-color:#0f172a;
+box-shadow:0 0 0 4px rgba(15,23,42,.08);
+}
+
+.info-row{
+margin-top:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:10px;
+color:#475569;
+font-size:14px;
+}
+
+
+/* VARIANTES */
+
+.variant-item{
+background:#f8fafc;
+padding:16px;
+border-radius:14px;
+margin-top:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border:1px solid #e2e8f0;
+transition:.2s;
+}
+
+.variant-item:hover{
+background:#f1f5f9;
+}
+
+
+/* TABLE */
+
+.table-card{
+background:white;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.06);
+overflow-x:auto;
+border:1px solid rgba(226,232,240,.7);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#f8fafc;
+font-weight:700;
+color:#334155;
+}
+
+th,td{
+padding:14px;
+border-bottom:1px solid #e5e7eb;
+text-align:left;
+}
+
+tbody tr{
+transition:.2s;
+}
+
+tbody tr:hover{
+background:#f8fafc;
+}
+
+td img{
+width:70px;
+height:70px;
+object-fit:cover;
+border-radius:12px;
+}
+
+.action-btn{
+padding:8px 12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:13px;
+margin-right:6px;
+font-weight:600;
+transition:.2s;
+}
+
+.edit-btn{
+background:#2563eb;
+color:white;
+}
+
+.edit-btn:hover{
+background:#1d4ed8;
+}
+
+.delete-btn{
+background:#ef4444;
+color:white;
+}
+
+.delete-btn:hover{
+background:#dc2626;
+}
+
+.stock-low{
+color:#dc2626;
+font-weight:bold;
+}
+
+.stock-ok{
+color:#16a34a;
+font-weight:bold;
+}
+
+
+/* PAGINATION */
+
+.pagination{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+padding:20px;
+flex-wrap:wrap;
+}
+
+.pagination button{
+padding:10px 15px;
+border:none;
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+transition:.2s;
+}
+
+.pagination button:hover{
+transform:translateY(-1px);
+box-shadow:0 10px 20px rgba(37,99,235,.25);
+}
+
+.pagination button:disabled{
+opacity:0.5;
+cursor:not-allowed;
+box-shadow:none;
+}
+
+#page-info{
+font-weight:600;
+color:#334155;
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.sidebar{
+width:190px;
+padding:16px;
+}
+
+.content{
+padding:20px;
+}
+
+}
+
+@media(max-width:700px){
+
+body{
+display:block;
+}
+
+.menu-toggle{
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.sidebar{
+position:fixed;
+left:-260px;
+top:0;
+width:240px;
+height:100vh;
+z-index:1500;
+padding-top:70px;
+border-top-right-radius:24px;
+border-bottom-right-radius:24px;
+}
+
+.sidebar.open{
+left:0;
+}
+
+.content{
+padding:75px 15px 15px 15px;
+}
+
+.form-row,
+.filters-grid{
+flex-direction:column;
+align-items:stretch;
+}
+
+.form-row input,
+.form-row button,
+.form-row select,
+.filters-grid input,
+.filters-grid select{
+width:100%;
+}
+
+.page-title{
+font-size:24px;
+}
+
+.info-row{
+flex-direction:column;
+align-items:flex-start;
+}
+
+}
+
+</style>
+
+<link rel="stylesheet" href="css/admin-polish.css">
+
+</head>
+
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">
+☰
+</button>
+
+<div class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div class="logo">
+Mercadia
+</div>
+
+<div class="menu">
+
+<a href="dashboard.html">
+Dashboard
+</a>
+
+<a href="products.html" class="active" aria-current="page">
+Productos
+</a>
+
+<a href="orders.html">
+Pedidos
+</a>
+
+<a href="inventory.html">
+Inventario
+</a>
+
+<a href="customers.html">
+Clientes
+</a>
+
+<a href="store.html">
+Tienda
+</a>
+
+</div>
+
+<button class="logout" onclick="logout()">
+Cerrar sesión
+</button>
+
+</div>
+
+
+<!-- CONTENT -->
+
+<div class="content">
+
+<div class="page-heading">
+<h2 class="page-title">
+Gestión de productos
+</h2>
+<button class="info-dot" type="button" aria-label="Información de productos" data-info="Aquí das de alta productos, agregas variantes por color y talla, subes imágenes y controlas precio, categoría, destacado e inventario inicial.">
+i
+</button>
+</div>
+
+
+<!-- FORM -->
+
+<div class="form-card">
+
+<div class="section-heading">
+<div>
+<h3>
+Agregar producto
+</h3>
+<p>
+Llena la información principal y luego agrega variantes con stock para que el producto quede listo para vender.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información para agregar producto" data-info="El botón Agregar guarda el producto con sus variantes. Si editas un producto, este mismo botón cambia a Guardar cambios.">
+i
+</button>
+</div>
+
+<form
+id="product-form"
+onsubmit="event.preventDefault(); createProduct();"
+>
+
+<div class="form-grid product-main-grid">
+
+<div class="field-group">
+<label for="name">
+Nombre
+</label>
+
+<input
+id="name"
+placeholder="Ej. Playera oversize negra"
+required
+>
+</div>
+
+<div class="field-group">
+<label for="price">
+Precio base
+</label>
+
+<input
+id="price"
+type="number"
+placeholder="0.00"
+required
+>
+</div>
+
+<div class="field-group">
+<label for="category">
+Categoría
+</label>
+
+<input
+id="category"
+placeholder="Ej. Playera deportiva"
+>
+</div>
+
+<div class="field-group">
+<label for="image">
+Imagen principal
+</label>
+
+<input
+type="file"
+id="image"
+>
+</div>
+
+<div class="field-group field-wide">
+<label for="description">
+Descripción
+</label>
+
+<input
+id="description"
+placeholder="Describe materiales, corte o detalles importantes"
+>
+</div>
+
+<label class="check-card">
+<input
+type="checkbox"
+id="featured"
+>
+Destacado
+</label>
+
+</div>
+
+<div class="form-actions">
+<button
+id="save-btn"
+type="submit"
+>
+Agregar
+</button>
+</div>
+
+</form>
+
+
+<!-- VARIANTES ERP -->
+
+<div class="subsection-card">
+
+<div class="section-heading compact">
+<div>
+<h3>
+Variantes e inventario
+</h3>
+<p>
+Agrega cada color con sus tallas, SKU, costo, precio y stock inicial.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de variantes" data-info="Cada variante representa combinaciones de color y talla. El stock inicial alimenta inventario; usa una imagen por color para que el catálogo se vea claro.">
+i
+</button>
+</div>
+
+<div class="form-grid variants-grid">
+
+<div class="field-group">
+<label for="variant-color">
+Color
+</label>
+
+<input
+id="variant-color"
+placeholder="Color (ej: rojo)"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-size">
+Tallas
+</label>
+
+<input
+id="variant-size"
+placeholder="Tallas (ej: S,M,L)"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-price">
+Precio variante
+</label>
+
+<input
+id="variant-price"
+type="number"
+placeholder="Precio variante"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-stock">
+Stock inicial
+</label>
+
+<input
+id="variant-stock"
+type="number"
+placeholder="Stock inicial"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-sku">
+SKU
+</label>
+
+<input
+id="variant-sku"
+placeholder="SKU"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-cost">
+Costo
+</label>
+
+<input
+id="variant-cost"
+type="number"
+placeholder="Costo"
+>
+</div>
+
+<div class="field-group">
+<label for="variant-image">
+Imagen por color
+</label>
+
+<input
+type="file"
+id="variant-image"
+>
+</div>
+
+<button
+class="secondary-action"
+type="button"
+onclick="addVariant()"
+>
+Agregar variante
+</button>
+
+</div>
+
+<div id="variants-list"></div>
+
+</div>
+
+</div>
+
+
+<!-- FILTERS ERP -->
+
+<div class="filters-card">
+
+<div class="section-heading compact">
+<div>
+<h3>
+Buscar y filtrar
+</h3>
+<p>
+Encuentra productos por nombre, categoría o cambia cuántos productos ves por página.
+</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de filtros" data-info="La búsqueda espera un momento mientras escribes para evitar recargar la tabla en cada tecla.">
+i
+</button>
+</div>
+
+<div class="filters-grid">
+
+<input
+type="text"
+id="search-product"
+placeholder="Buscar producto..."
+onkeyup="searchProducts()"
+>
+
+<select
+id="filter-category"
+onchange="filterByCategory()"
+>
+
+<option value="">
+Todas las categorías
+</option>
+
+</select>
+
+<select
+id="limit-products"
+onchange="changeLimit()"
+>
+
+<option value="10">
+10 productos
+</option>
+
+<option value="20">
+20 productos
+</option>
+
+<option value="50">
+50 productos
+</option>
+
+</select>
+
+</div>
+
+<div class="info-row">
+
+<div id="pagination-info">
+Mostrando productos
+</div>
+
+<div id="page-info">
+Página 1
+</div>
+
+</div>
+
+</div>
+
+
+<!-- TABLE -->
+
+<div class="table-card">
+
+<div class="table-title">
+Productos publicados
+<button class="info-dot" type="button" aria-label="Información de tabla de productos" data-info="Aquí ves stock total por producto, estado de inventario, si está destacado y acciones para editar o eliminar.">
+i
+</button>
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+Nombre
+</th>
+
+<th>
+Precio
+</th>
+
+<th>
+Stock
+</th>
+
+<th>
+Estado
+</th>
+
+<th>
+Imagen
+</th>
+
+<th>
+Destacado
+</th>
+
+<th>
+Acciones
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="products-table"></tbody>
+
+</table>
+
+</div>
+
+
+<!-- PAGINATION -->
+
+<div class="pagination">
+
+<button
+id="prev-page"
+onclick="prevPage()"
+>
+Anterior
+</button>
+
+<div id="page-status">
+Página actual
+</div>
+
+<button
+id="next-page"
+onclick="nextPage()"
+>
+Siguiente
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+function toggleMenu(){
+
+const sidebar = document.querySelector(".sidebar");
+const overlay = document.querySelector(".sidebar-overlay");
+
+sidebar.classList.toggle("open");
+overlay.classList.toggle("active");
+
+}
+
+</script>
+
+<script src="config.js"></script>
+<script src="js/auth.js"></script>
+
+<script type="module" src="js/products.js"></script>
+
+</body>
+</html>
