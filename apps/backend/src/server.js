@@ -37,6 +37,20 @@ const customerRoutes =
 const app = express();
 
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
+
+const repositoryRoot = path.resolve(
+  __dirname,
+  "../../.."
+);
+const adminDirectory = path.join(
+  repositoryRoot,
+  "apps/admin"
+);
+const storefrontDirectory = path.join(
+  repositoryRoot,
+  "apps/storefront/public"
+);
 
 const allowedOrigins =
   (process.env.CORS_ORIGINS || "")
@@ -139,21 +153,36 @@ app.use(
 
 
 /* =========================
-RUTA TEST
+APLICACIONES WEB
 ========================= */
 
-app.get("/", (req, res) => {
+function sendRuntimeConfig(req, res){
+  const origin = `${req.protocol}://${req.get("host")}`;
 
-  res.json({
+  res
+    .type("application/javascript")
+    .set("Cache-Control", "no-store")
+    .send(
+      `window.MERCADIA_CONFIG=${JSON.stringify({
+        API_URL: `${origin}/api`,
+        BACKEND_ORIGIN: origin
+      })};`
+    );
+}
 
-    success: true,
+app.get("/config.js", sendRuntimeConfig);
+app.get("/admin/config.js", sendRuntimeConfig);
 
-    message:
-      "Mercadia ERP Backend funcionando"
-
-  });
-
+app.get("/admin", (req, res) => {
+  res.redirect(302, "/admin/login.html");
 });
+
+app.use(
+  "/admin",
+  express.static(adminDirectory, {
+    index: "login.html"
+  })
+);
 
 app.get("/healthz", async (req, res) => {
   try{
@@ -167,6 +196,12 @@ app.get("/healthz", async (req, res) => {
     });
   }
 });
+
+app.use(
+  express.static(storefrontDirectory, {
+    index: "index.html"
+  })
+);
 
 
 /* =========================

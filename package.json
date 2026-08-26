@@ -4,6 +4,7 @@
   "private": true,
   "description": "Monorepo de Mercadia para Railway y Supabase",
   "scripts": {
+    "start": "node apps/backend/src/server.js",
     "start:backend": "npm --prefix apps/backend start",
     "start:admin": "npm --prefix apps/admin start",
     "start:storefront": "npm --prefix apps/storefront start",

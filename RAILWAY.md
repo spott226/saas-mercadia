@@ -1,35 +1,25 @@
-# Railway: un repositorio, tres servicios
+# Railway: un repositorio, un servicio
 
-Conecta este unico repositorio a un proyecto de Railway y crea tres servicios.
+Conecta este unico repositorio a un proyecto de Railway y crea un solo servicio.
 
-## Servicio 1: backend
+## Servicio Mercadia
 
-- Root Directory: `/apps/backend`
+- Root Directory: `/`
+- Railway Config File: `/railway.toml`
 - Start Command: `npm start`
 - Healthcheck: `/healthz`
-- Variables: se configuraran despues usando `apps/backend/.env.example`.
+- Tienda: `/`
+- Panel administrativo: `/admin`
+- API: `/api`
+- Variables: usa `apps/backend/.env.example` como referencia.
 
-## Servicio 2: admin
-
-- Root Directory: `/apps/admin`
-- Start Command: `npm start`
-- Healthcheck: `/healthz`
-- Variable posterior: `API_URL=https://DOMINIO-BACKEND/api`
-
-## Servicio 3: storefront
-
-- Root Directory: `/apps/storefront`
-- Start Command: `npm start`
-- Healthcheck: `/healthz`
-- Variable posterior: `API_URL=https://DOMINIO-BACKEND/api`
-
-Cada carpeta contiene su propio `railway.toml`. Railway debe desplegar las tres desde el mismo commit.
+El `Dockerfile` instala el backend y el mismo proceso sirve tambien el panel y la tienda.
 
 ## Orden recomendado
 
 1. Publicar este monorepo en GitHub.
-2. Crear el proyecto y los tres servicios de Railway sin borrar los despliegues actuales.
-3. Configurar variables del backend, admin y storefront.
+2. Crear un servicio de Railway.
+3. Configurar las variables del backend.
 4. Crear Supabase e importar PostgreSQL.
 5. Probar el flujo completo.
 6. Retirar los servicios viejos solamente despues de validar produccion.

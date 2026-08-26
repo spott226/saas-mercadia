@@ -5,6 +5,8 @@ const { execFileSync } = require("child_process");
 const root = path.resolve(__dirname, "..");
 
 const requiredFiles = [
+  "Dockerfile",
+  "railway.toml",
   "apps/admin/package.json",
   "apps/admin/server.js",
   "apps/admin/railway.toml",
