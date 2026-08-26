@@ -3,7 +3,12 @@ const db = require("../db/db");
 exports.getStoreBySlug = async (slug) => {
 
   const result = await db.query(
-    "SELECT * FROM stores WHERE slug = $1",
+    `SELECT s.*
+     FROM stores s
+     LEFT JOIN merchant_accounts ma ON ma.store_id = s.id
+     WHERE s.slug = $1
+       AND (ma.id IS NULL OR ma.status = 'active')
+     LIMIT 1`,
     [slug]
   );
 

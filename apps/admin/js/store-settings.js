@@ -428,6 +428,14 @@ function renderStore(store){
   document.getElementById("store-template-key").textContent =
     store.template_key || "-";
 
+  const previewLink =
+    document.getElementById("store-preview-link");
+
+  if(previewLink && store.slug){
+    previewLink.href =
+      `/tienda/${encodeURIComponent(store.slug)}`;
+  }
+
   setImagePreview(
     document.getElementById("logo-preview"),
     document.getElementById("logo-empty"),

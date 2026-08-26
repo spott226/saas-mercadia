@@ -52,6 +52,11 @@ return BACKEND_UPLOADS_URL + value;
 
 function getSlugFromDomain(){
 
+const pathMatch = window.location.pathname.match(/^\/tienda\/([^/]+)/i);
+if(pathMatch?.[1]){
+return decodeURIComponent(pathMatch[1]);
+}
+
 const params = new URLSearchParams(window.location.search);
 const slugParam = params.get("slug") || params.get("store");
 
@@ -85,12 +90,7 @@ return slug;
 
 function keepLocalSlugInLinks(slug){
 
-const host = window.location.hostname;
-const isLocal =
-host === "localhost" ||
-host === "127.0.0.1";
-
-if(!isLocal || !slug) return;
+if(!slug) return;
 
 document
 .querySelectorAll(
@@ -98,8 +98,15 @@ document
 )
 .forEach(link => {
 
+const originalPath = link.getAttribute("href");
+
+if(originalPath === "/" || originalPath === "/index.html"){
+link.href = `/tienda/${encodeURIComponent(slug)}`;
+return;
+}
+
 const url = new URL(
-  link.getAttribute("href"),
+  originalPath,
   window.location.origin
 );
 

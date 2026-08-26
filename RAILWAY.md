@@ -8,8 +8,10 @@ Conecta este unico repositorio a un proyecto de Railway y crea un solo servicio.
 - Railway Config File: `/railway.toml`
 - Start Command: `npm start`
 - Healthcheck: `/healthz`
-- Tienda: `/`
+- Inicio y registro: `/`
+- Tiendas: `/tienda/:slug`
 - Panel administrativo: `/admin`
+- Panel maestro: `/platform.html`
 - API: `/api`
 - Variables: usa `apps/backend/.env.example` como referencia.
 

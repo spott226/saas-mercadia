@@ -56,9 +56,13 @@ const server = http.createServer((req, res) => {
     );
   }
 
-  const pathname = requestUrl.pathname === "/"
-    ? "/index.html"
+  let pathname = requestUrl.pathname === "/"
+    ? "/landing.html"
     : requestUrl.pathname;
+
+  if(/^\/tienda\/[^/]+\/?$/.test(pathname)){
+    pathname = "/index.html";
+  }
   const relativePath = decodeURIComponent(pathname).replace(/^[/\\]+/, "");
   const filePath = path.resolve(PUBLIC_DIR, relativePath);
 

@@ -50,7 +50,7 @@ function authenticate(req, res, next) {
   next();
 }
 
-function requireAdmin(req, res, next){
+async function requireAdmin(req, res, next){
   const decoded =
     getTokenPayload(req, res);
 
@@ -67,6 +67,32 @@ function requireAdmin(req, res, next){
     });
   }
 
+  if(decoded.merchant_id){
+    try{
+      const result = await db.query(
+        `SELECT 1 FROM merchant_accounts
+         WHERE id = $1 AND store_id = $2 AND status = 'active'
+         LIMIT 1`,
+        [decoded.merchant_id, decoded.store_id]
+      );
+      if(!result.rows.length){
+        return res.status(403).json({ error: "merchant account is not active" });
+      }
+    }catch(error){
+      return next(error);
+    }
+  }
+
+  req.user = decoded;
+  next();
+}
+
+function requireSuperadmin(req, res, next){
+  const decoded = getTokenPayload(req, res);
+  if(!decoded) return;
+  if(decoded.role !== "superadmin"){
+    return res.status(403).json({ error: "superadmin access required" });
+  }
   req.user = decoded;
   next();
 }
@@ -141,3 +167,4 @@ async function requireCustomer(req, res, next){
 module.exports = authenticate;
 module.exports.requireAdmin = requireAdmin;
 module.exports.requireCustomer = requireCustomer;
+module.exports.requireSuperadmin = requireSuperadmin;

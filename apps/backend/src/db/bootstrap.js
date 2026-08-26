@@ -31,6 +31,74 @@ async function ensureCustomerAccountSchema(){
 
       await pool.query(
         `
+        ALTER TABLE users
+          ADD COLUMN IF NOT EXISTS role VARCHAR(30) NOT NULL DEFAULT 'admin'
+        `
+      );
+
+      await pool.query(
+        `
+        CREATE TABLE IF NOT EXISTS merchant_accounts (
+          id BIGSERIAL PRIMARY KEY,
+          supabase_user_id UUID UNIQUE,
+          email VARCHAR(320) NOT NULL UNIQUE,
+          full_name VARCHAR(120) NOT NULL,
+          phone VARCHAR(30),
+          business_name VARCHAR(120) NOT NULL,
+          desired_slug VARCHAR(80) NOT NULL,
+          status VARCHAR(30) NOT NULL DEFAULT 'pending_email'
+            CHECK (status IN ('pending_email','payment_pending','payment_reported','active','rejected','suspended')),
+          plan_amount NUMERIC(10,2) NOT NULL DEFAULT 3.99,
+          payment_reference VARCHAR(40) NOT NULL UNIQUE,
+          store_id INTEGER REFERENCES stores(id) ON DELETE SET NULL,
+          email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+          approved_at TIMESTAMPTZ,
+          approved_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        `
+      );
+
+      await pool.query(
+        `
+        CREATE TABLE IF NOT EXISTS merchant_payments (
+          id BIGSERIAL PRIMARY KEY,
+          merchant_account_id BIGINT NOT NULL REFERENCES merchant_accounts(id) ON DELETE CASCADE,
+          amount NUMERIC(10,2) NOT NULL,
+          reference VARCHAR(40) NOT NULL,
+          proof_url TEXT,
+          notes VARCHAR(500),
+          status VARCHAR(20) NOT NULL DEFAULT 'reported'
+            CHECK (status IN ('reported','approved','rejected')),
+          rejection_reason VARCHAR(500),
+          reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          reviewed_at TIMESTAMPTZ,
+          reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+        )
+        `
+      );
+
+      await pool.query(
+        `
+        CREATE INDEX IF NOT EXISTS merchant_payments_status_idx
+        ON merchant_payments (status, reported_at DESC)
+        `
+      );
+
+      await pool.query(
+        `
+        UPDATE users
+        SET role = 'superadmin'
+        WHERE id = (SELECT MIN(id) FROM users)
+          AND NOT EXISTS (
+            SELECT 1 FROM users WHERE role = 'superadmin'
+          )
+        `
+      );
+
+      await pool.query(
+        `
         ALTER TABLE customer_accounts
           ADD COLUMN IF NOT EXISTS email VARCHAR(320),
           ADD COLUMN IF NOT EXISTS supabase_user_id UUID

@@ -1,11 +1,14 @@
-const CACHE_NAME = "mercadia-shell-v2";
+const CACHE_NAME = "mercadia-shell-v3";
 const APP_SHELL = [
   "/",
+  "/landing.html",
+  "/platform.html",
   "/index.html",
   "/products.html",
   "/categorias.html",
   "/mi-cuenta.html",
   "/css/styles.css",
+  "/css/platform.css",
   "/config.js",
   "/icons/mercadia-app.png"
 ];

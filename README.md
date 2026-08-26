@@ -8,7 +8,16 @@ Aplicacion unificada de Mercadia. Un solo repositorio alimenta un solo servicio 
 | --- | --- | --- |
 | `apps/backend` | `/api` | API, pedidos, Supabase Auth y notificaciones push |
 | `apps/admin` | `/admin` | Panel para administrar tiendas, productos, pedidos y pagina publica |
-| `apps/storefront` | `/` | Tienda publica instalable como aplicacion movil |
+| `apps/storefront` | `/` y `/tienda/:slug` | Inicio de Mercadia y tiendas publicas instalables |
+
+## Flujo SaaS
+
+- `/`: inicio, registro, acceso y reporte de transferencia.
+- `/platform.html`: panel maestro para revisar pagos y activar, suspender o reactivar cuentas.
+- `/admin`: panel privado del dueño de cada tienda.
+- `/tienda/:slug`: página pública aislada de cada negocio.
+
+Las cuentas nuevas usan Supabase Auth y deben confirmar su correo. Después reportan la transferencia de activación. Cuando se aprueba el pago, Mercadia crea la tienda y habilita el panel. Los pedidos reservan existencias desde que quedan pendientes y descuentan stock al entrar al flujo de venta.
 
 ## Verificacion local
 

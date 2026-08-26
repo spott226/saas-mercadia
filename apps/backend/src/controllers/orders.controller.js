@@ -15,6 +15,15 @@ const ALLOWED_ORDER_STATUSES = [
   "CANCELLED"
 ];
 
+const STATUS_TRANSITIONS = {
+  PENDING: new Set(["PAID", "PREPARING", "CANCELLED"]),
+  PAID: new Set(["PREPARING", "SHIPPED", "CANCELLED"]),
+  PREPARING: new Set(["SHIPPED", "CANCELLED"]),
+  SHIPPED: new Set(["DELIVERED", "CANCELLED"]),
+  DELIVERED: new Set(),
+  CANCELLED: new Set()
+};
+
 function isSalesPipelineStatus(status){
 
   return SALES_PIPELINE_STATUSES.includes(
@@ -218,7 +227,7 @@ exports.createOrder = async (
         ]
       );
 
-    const customer =
+    let customer =
       customerResult.rows[0] || null;
 
     for (const item of normalizedItems) {
@@ -232,6 +241,7 @@ exports.createOrder = async (
           ON p.id = pv.product_id
           WHERE pv.id = $1
           AND p.store_id = $2
+          FOR UPDATE OF pv
           `,
           [
             item.variant_id,
@@ -248,6 +258,18 @@ exports.createOrder = async (
           "Variante no encontrada"
         );
 
+      }
+
+      const availableStock =
+        Number(variant.stock || 0) -
+        Number(variant.reserved_stock || 0);
+
+      if(availableStock < item.quantity){
+        const error = new Error(
+          `Stock insuficiente para ${variant.name}`
+        );
+        error.status = 409;
+        throw error;
       }
 
       const subtotal =
@@ -281,11 +303,18 @@ exports.createOrder = async (
         ]
       );
 
+      await client.query(
+        `UPDATE product_variants
+         SET reserved_stock = COALESCE(reserved_stock, 0) + $1
+         WHERE id = $2`,
+        [item.quantity, variant.id]
+      );
+
     }
 
     if (customer) {
 
-      await client.query(
+      const updatedCustomer = await client.query(
         `
         UPDATE customers
         SET
@@ -293,6 +322,7 @@ exports.createOrder = async (
           total_spent = total_spent + $1,
           address = COALESCE($2,address)
         WHERE id = $3
+        RETURNING *
         `,
         [
           total,
@@ -301,9 +331,11 @@ exports.createOrder = async (
         ]
       );
 
+      customer = updatedCustomer.rows[0];
+
     } else {
 
-      await client.query(
+      const insertedCustomer = await client.query(
         `
         INSERT INTO customers
         (
@@ -318,6 +350,7 @@ exports.createOrder = async (
         (
           $1,$2,$3,$4,$5,$6
         )
+        RETURNING *
         `,
         [
           store_id,
@@ -328,6 +361,8 @@ exports.createOrder = async (
           total
         ]
       );
+
+      customer = insertedCustomer.rows[0];
 
     }
 
@@ -347,7 +382,7 @@ exports.createOrder = async (
         ) = $4
       `,
       [
-        customer?.id || null,
+        customer.id,
         normalizedCustomerName,
         store_id,
         normalizedPhoneDigits
@@ -588,23 +623,12 @@ exports.updateOrderStatus = async (
 
     }
 
-    if(currentStatus === "CANCELLED"){
-
-      throw new Error(
-        "No se puede actualizar un pedido cancelado"
+    if(!STATUS_TRANSITIONS[currentStatus]?.has(nextStatus)){
+      const error = new Error(
+        `No se puede cambiar un pedido de ${currentStatus} a ${nextStatus}`
       );
-
-    }
-
-    if(
-      currentStatus === "DELIVERED" &&
-      nextStatus !== "DELIVERED"
-    ){
-
-      throw new Error(
-        "No se puede retroceder un pedido entregado"
-      );
-
+      error.status = 409;
+      throw error;
     }
 
     const itemsResult =
@@ -635,11 +659,13 @@ exports.updateOrderStatus = async (
         const variantResult =
           await client.query(
             `
-            SELECT *
-            FROM product_variants
-            WHERE id = $1
+            SELECT pv.*
+            FROM product_variants pv
+            JOIN products p ON p.id = pv.product_id
+            WHERE pv.id = $1 AND p.store_id = $2
+            FOR UPDATE OF pv
             `,
-            [item.variant_id]
+            [item.variant_id, req.user.store_id]
           );
 
         const variant =
@@ -653,13 +679,10 @@ exports.updateOrderStatus = async (
 
         }
 
-        if (
-          Number(variant.stock)
-          < Number(item.quantity)
-        ) {
+        if(Number(variant.reserved_stock || 0) < Number(item.quantity)){
 
           throw new Error(
-            `Stock insuficiente para variante ${variant.id}`
+            `La reserva de stock del pedido está incompleta para la variante ${variant.id}`
           );
 
         }
@@ -674,11 +697,13 @@ exports.updateOrderStatus = async (
         await client.query(
           `
           UPDATE product_variants
-          SET stock = $1
-          WHERE id = $2
+          SET stock = $1,
+              reserved_stock = GREATEST(COALESCE(reserved_stock,0) - $2, 0)
+          WHERE id = $3
           `,
           [
             newStock,
+            item.quantity,
             variant.id
           ]
         );
@@ -715,6 +740,36 @@ exports.updateOrderStatus = async (
 
     }
 
+    if(
+      currentStatus === "PENDING" &&
+      nextStatus === "CANCELLED"
+    ){
+      for(const item of items){
+        const variantResult = await client.query(
+          `SELECT pv.*
+           FROM product_variants pv
+           JOIN products p ON p.id = pv.product_id
+           WHERE pv.id = $1 AND p.store_id = $2
+           FOR UPDATE OF pv`,
+          [item.variant_id, req.user.store_id]
+        );
+        const variant = variantResult.rows[0];
+        if(!variant){
+          throw new Error("Variante no encontrada");
+        }
+        const releaseQuantity = Math.min(
+          Number(variant.reserved_stock || 0),
+          Number(item.quantity)
+        );
+        await client.query(
+          `UPDATE product_variants
+           SET reserved_stock = GREATEST(COALESCE(reserved_stock,0) - $1, 0)
+           WHERE id = $2`,
+          [releaseQuantity, variant.id]
+        );
+      }
+    }
+
     if (
       isSalesPipelineStatus(
         currentStatus
@@ -728,11 +783,13 @@ exports.updateOrderStatus = async (
         const variantResult =
           await client.query(
             `
-            SELECT *
-            FROM product_variants
-            WHERE id = $1
+            SELECT pv.*
+            FROM product_variants pv
+            JOIN products p ON p.id = pv.product_id
+            WHERE pv.id = $1 AND p.store_id = $2
+            FOR UPDATE OF pv
             `,
-            [item.variant_id]
+            [item.variant_id, req.user.store_id]
           );
 
         const variant =

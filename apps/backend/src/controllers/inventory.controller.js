@@ -40,6 +40,11 @@ exports.getInventory = async (
 
           pv.reserved_stock,
 
+          GREATEST(
+            pv.stock - COALESCE(pv.reserved_stock,0),
+            0
+          ) AS available_stock,
+
           pv.sku,
 
           pv.cost,
@@ -99,7 +104,7 @@ exports.getInventory = async (
       inventory.reduce(
         (acc,item)=>
           acc +
-          Number(item.stock || 0),
+          Number(item.available_stock || 0),
         0
       );
 

@@ -102,23 +102,27 @@ function getSlugFromDomain(){
 
 function keepLocalSlugInLinks(slug){
 
-  const host =
-    window.location.hostname;
-
-  if(
-    host !== "localhost" &&
-    host !== "127.0.0.1"
-  ){
-    return;
-  }
+  if(!slug) return;
 
   document
     .querySelectorAll(
       'a[href="/index.html"], a[href="/"], a[href="/products.html"], a[href="/categorias.html"], a[href="/mi-cuenta.html"]'
     )
     .forEach(link => {
+      const originalPath =
+        link.getAttribute("href");
+
+      if(
+        originalPath === "/" ||
+        originalPath === "/index.html"
+      ){
+        link.href =
+          `/tienda/${encodeURIComponent(slug)}`;
+        return;
+      }
+
       const url = new URL(
-        link.getAttribute("href"),
+        originalPath,
         window.location.origin
       );
 

@@ -29,7 +29,17 @@ const attachProductAssets = async (products) => {
         variant.product_id
       ) || [];
 
-    list.push(variant);
+    const availableStock = Math.max(
+      0,
+      Number(variant.stock || 0) -
+      Number(variant.reserved_stock || 0)
+    );
+
+    list.push({
+      ...variant,
+      stock: availableStock,
+      available_stock: availableStock
+    });
 
     variantsByProduct.set(
       variant.product_id,

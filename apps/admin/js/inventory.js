@@ -182,6 +182,16 @@ function getInventoryValue(item){
 
 }
 
+function getAvailableStock(item){
+
+  return toNumber(
+    item.available_stock !== undefined
+      ? item.available_stock
+      : item.stock
+  );
+
+}
+
 
 function getInventoryKPIs(data){
 
@@ -200,13 +210,13 @@ function getInventoryKPIs(data){
     lowStock:
       data.filter(
         item =>
-          toNumber(item.stock) <= 5
+          getAvailableStock(item) <= 5
       ).length,
 
     totalStock:
       data.reduce(
         (acc,item)=>
-          acc + toNumber(item.stock),
+          acc + getAvailableStock(item),
         0
       )
 
@@ -298,7 +308,10 @@ function renderInventoryTable(data){
     paginatedData.map(item=>{
 
     const stock =
-      toNumber(item.stock);
+      getAvailableStock(item);
+
+    const reservedStock =
+      toNumber(item.reserved_stock);
 
     const cost =
       toNumber(item.cost);
@@ -359,6 +372,9 @@ function renderInventoryTable(data){
 
       <td>
         ${stock}
+        ${reservedStock > 0
+          ? `<small style="display:block;color:#667085">${reservedStock} reservadas</small>`
+          : ""}
       </td>
 
       <td

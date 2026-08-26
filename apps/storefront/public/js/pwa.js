@@ -117,7 +117,11 @@ async function init(){
     });
   });
 
-  if("PushManager" in window && "Notification" in window){
+  if(
+    document.body.dataset.pwaContext !== "platform" &&
+    "PushManager" in window &&
+    "Notification" in window
+  ){
     const current = await registration.pushManager.getSubscription();
     const button = actionButton(
       "pwa-notifications",

@@ -25,6 +25,8 @@ const inventoryRoutes =
   require("./routes/inventory");
 const customerAuthRoutes =
   require("./routes/customerAuth");
+const platformRoutes =
+  require("./routes/platform");
 const {
   ensureCustomerAccountSchema
 } = require("./db/bootstrap");
@@ -151,6 +153,11 @@ app.use(
   customerAuthRoutes
 );
 
+app.use(
+  "/api/platform",
+  platformRoutes
+);
+
 
 /* =========================
 APLICACIONES WEB
@@ -172,6 +179,14 @@ function sendRuntimeConfig(req, res){
 
 app.get("/config.js", sendRuntimeConfig);
 app.get("/admin/config.js", sendRuntimeConfig);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(storefrontDirectory, "landing.html"));
+});
+
+app.get("/tienda/:slug", (req, res) => {
+  res.sendFile(path.join(storefrontDirectory, "index.html"));
+});
 
 app.get("/admin", (req, res) => {
   res.redirect(302, "/admin/login.html");
@@ -233,7 +248,11 @@ app.use((err, req, res, next) => {
     err
   );
 
-  res.status(500).json({
+  res.status(
+    Number.isInteger(err.status)
+      ? err.status
+      : 500
+  ).json({
 
     success: false,
 
