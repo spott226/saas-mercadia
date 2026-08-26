@@ -48,7 +48,7 @@ async function ensureCustomerAccountSchema(){
           desired_slug VARCHAR(80) NOT NULL,
           status VARCHAR(30) NOT NULL DEFAULT 'pending_email'
             CHECK (status IN ('pending_email','payment_pending','payment_reported','active','rejected','suspended')),
-          plan_amount NUMERIC(10,2) NOT NULL DEFAULT 3.99,
+          plan_amount NUMERIC(10,2) NOT NULL DEFAULT 399,
           payment_reference VARCHAR(40) NOT NULL UNIQUE,
           store_id INTEGER REFERENCES stores(id) ON DELETE SET NULL,
           email_verified BOOLEAN NOT NULL DEFAULT FALSE,
@@ -76,6 +76,23 @@ async function ensureCustomerAccountSchema(){
           reviewed_at TIMESTAMPTZ,
           reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL
         )
+        `
+      );
+
+      await pool.query(
+        `
+        ALTER TABLE merchant_accounts
+          ALTER COLUMN plan_amount SET DEFAULT 399
+        `
+      );
+
+      await pool.query(
+        `
+        UPDATE merchant_accounts
+        SET plan_amount = 399,
+            updated_at = NOW()
+        WHERE plan_amount = 3.99
+          AND status IN ('pending_email','payment_pending','payment_reported')
         `
       );
 

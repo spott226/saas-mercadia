@@ -5,7 +5,7 @@ const pool = require("../db/db");
 const supabaseAuth = require("../services/supabaseAuth");
 const { JWT_SECRET, JWT_EXPIRES_IN } = require("../config/auth");
 
-const PLAN_AMOUNT = 3.99;
+const PLAN_AMOUNT = 399;
 
 function clean(value, max = 255){
   return String(value || "").trim().slice(0, max);
