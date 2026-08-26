@@ -201,6 +201,15 @@ if(hash.get("access_token")){
   if(hash.get("type") === "recovery") resetDialog.showModal();
 }
 
+if(new URLSearchParams(location.search).get("verified") === "1"){
+  showTab("login");
+  authDialog.showModal();
+  setMessage(
+    "Correo verificado correctamente. Inicia sesión para continuar con el pago.",
+    true
+  );
+}
+
 document.getElementById("reset-form").addEventListener("submit", async event => {
   event.preventDefault();
   const resetMessage = document.getElementById("reset-message");

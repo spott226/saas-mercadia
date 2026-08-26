@@ -74,7 +74,7 @@ async function request(
   return data;
 }
 
-function signUp({
+async function signUp({
   email,
   password,
   name,
@@ -86,7 +86,7 @@ function signUp({
     ? `?redirect_to=${encodeURIComponent(redirectTo)}`
     : "";
 
-  return request(
+  const data = await request(
     `/signup${query}`,
     {
       body: {
@@ -100,6 +100,16 @@ function signUp({
       }
     }
   );
+
+  if(data?.user){
+    return data;
+  }
+
+  if(data?.id){
+    return { user: data };
+  }
+
+  return data;
 }
 
 function signIn(email, password){

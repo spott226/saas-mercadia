@@ -117,17 +117,57 @@ exports.register = async (req, res, next) => {
       return res.status(409).json({ success: false, error: "Ese correo ya está registrado." });
     }
 
-    const authData = await supabaseAuth.signUp({
-      email: userEmail,
-      password,
-      name: fullName,
-      phone,
-      storeId: null,
-      redirectTo: `${req.protocol}://${req.get("host")}/?verified=1`
-    });
+    let authData;
+    let existingAuthUser = false;
+
+    try{
+      authData = await supabaseAuth.signIn(
+        userEmail,
+        password
+      );
+      existingAuthUser = true;
+    }catch(signInError){
+      const signInMessage = String(
+        signInError?.message || ""
+      ).toLowerCase();
+
+      if(signInMessage.includes("email not confirmed")){
+        return res.status(409).json({
+          success: false,
+          error: "La cuenta ya existe. Confirma primero el correo y vuelve a intentarlo."
+        });
+      }
+
+      if(
+        !signInMessage.includes("invalid") &&
+        !signInMessage.includes("credentials")
+      ){
+        throw signInError;
+      }
+
+      authData = await supabaseAuth.signUp({
+        email: userEmail,
+        password,
+        name: fullName,
+        phone,
+        storeId: null,
+        redirectTo: `${req.protocol}://${req.get("host")}/?verified=1`
+      });
+    }
 
     if(!authData.user?.id){
       return res.status(502).json({ success: false, error: "No se pudo crear la cuenta de acceso." });
+    }
+
+    if(
+      !existingAuthUser &&
+      Array.isArray(authData.user.identities) &&
+      authData.user.identities.length === 0
+    ){
+      return res.status(409).json({
+        success: false,
+        error: "Ese correo ya existe. Inicia sesión con tu contraseña."
+      });
     }
 
     const result = await pool.query(
@@ -142,16 +182,19 @@ exports.register = async (req, res, next) => {
         phone || null,
         businessName,
         desiredSlug,
-        authData.access_token ? "payment_pending" : "pending_email",
+        existingAuthUser || authData.access_token
+          ? "payment_pending"
+          : "pending_email",
         PLAN_AMOUNT,
         paymentReference(),
-        Boolean(authData.access_token)
+        Boolean(existingAuthUser || authData.access_token)
       ]
     );
 
     res.status(201).json({
       success: true,
-      email_confirmation_required: !authData.access_token,
+      email_confirmation_required:
+        !existingAuthUser && !authData.access_token,
       merchant: merchantView(result.rows[0]),
       ...(authData.access_token ? sessionPayload(authData) : {})
     });
