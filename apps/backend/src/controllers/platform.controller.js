@@ -196,6 +196,7 @@ exports.register = async (req, res, next) => {
       email_confirmation_required:
         !existingAuthUser && !authData.access_token,
       merchant: merchantView(result.rows[0]),
+      bank: bankDetails(),
       ...(authData.access_token ? sessionPayload(authData) : {})
     });
   }catch(error){

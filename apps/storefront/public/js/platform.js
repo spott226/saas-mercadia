@@ -165,7 +165,7 @@ document.getElementById("register-form").addEventListener("submit", async event 
       event.currentTarget.reset();
     }else{
       authDialog.close();
-      renderAccount({ merchant: data.merchant, bank: {} });
+      renderAccount(data);
     }
   }catch(error){ setMessage(error.message); }
 });
