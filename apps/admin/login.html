@@ -120,7 +120,8 @@ Mercadia
 
 <div class="login-box">
 
-<h2>Panel de administración</h2>
+<h2>Acceso Mercadia</h2>
+<p class="login-copy">Usa el mismo acceso para administrar tu tienda o revisar usuarios y pagos.</p>
 
 <div class="input-group">
 <input id="email" placeholder="Correo" autocomplete="off">
@@ -152,9 +153,16 @@ EVITAR VOLVER AL LOGIN
 localStorage.removeItem("token");
 localStorage.removeItem("store_id");
 
+const platformToken = sessionStorage.getItem("mercadia_platform_token") || localStorage.getItem("mercadia_platform_token");
+
+if(platformToken){
+sessionStorage.setItem("mercadia_platform_token",platformToken);
+window.location.href="/platform.html";
+}
+
 const token = sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token");
 
-if(token){
+if(!platformToken && token){
 sessionStorage.setItem("token",token);
 const savedStore = localStorage.getItem("mercadia_admin_store_id");
 if(savedStore) sessionStorage.setItem("store_id",savedStore);
@@ -185,12 +193,25 @@ const data = await res.json();
 
 if(data.token){
 
+if(data.role === "superadmin"){
+sessionStorage.removeItem("token");
+sessionStorage.removeItem("store_id");
+localStorage.removeItem("mercadia_admin_token");
+localStorage.removeItem("mercadia_admin_store_id");
+sessionStorage.setItem("mercadia_platform_token",data.token);
+localStorage.setItem("mercadia_platform_token",data.token);
+window.location.href=data.redirect || "/platform.html";
+return;
+}
+
 sessionStorage.setItem("token",data.token);
 sessionStorage.setItem("store_id",data.store_id);
 localStorage.setItem("mercadia_admin_token",data.token);
 localStorage.setItem("mercadia_admin_store_id",data.store_id);
+sessionStorage.removeItem("mercadia_platform_token");
+localStorage.removeItem("mercadia_platform_token");
 
-window.location.href="dashboard.html";
+window.location.href=data.redirect || "dashboard.html";
 
 }else{
 

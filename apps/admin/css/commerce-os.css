@@ -452,7 +452,8 @@ body.os-login .logo{position:relative;margin:0 0 28px!important;font-size:25px!i
 body.os-login .logo::after{top:38px;left:55px}
 body.os-login .login-box{width:100%!important;padding:34px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:24px!important;box-shadow:0 35px 90px rgba(0,0,0,.35)!important}
 body.os-login .login-box h2{font-size:24px!important;font-weight:850!important;letter-spacing:-.03em!important}
-body.os-login .login-box h2::after{content:"Opera tu tienda, inventario y pedidos desde un solo lugar.";display:block;margin-top:9px;color:var(--os-muted);font-size:13px;font-weight:500;line-height:1.5;letter-spacing:0}
+body.os-login .login-box h2::after{content:"Un solo acceso para tu tienda o el panel maestro.";display:block;margin-top:9px;color:var(--os-muted);font-size:13px;font-weight:500;line-height:1.5;letter-spacing:0}
+body.os-login .login-copy{margin:-8px 0 20px;color:var(--os-muted);font-size:13px;line-height:1.55}
 body.os-login .login-box button{background:linear-gradient(135deg,var(--os-brand),var(--os-brand-2))!important;border-radius:13px!important;box-shadow:0 12px 25px rgba(79,70,229,.28)!important}
 body.os-login .footer{color:#718096!important}
 

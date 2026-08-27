@@ -48,6 +48,17 @@ const data = await res.json();
 
 if(data.token){
 
+if(data.role === "superadmin"){
+sessionStorage.removeItem("token");
+sessionStorage.removeItem("store_id");
+localStorage.removeItem(ADMIN_TOKEN_KEY);
+localStorage.removeItem(ADMIN_STORE_KEY);
+sessionStorage.setItem("mercadia_platform_token",data.token);
+localStorage.setItem("mercadia_platform_token",data.token);
+window.location.href = data.redirect || "/platform.html";
+return;
+}
+
 localStorage.removeItem("token");
 localStorage.removeItem("store_id");
 
@@ -55,8 +66,10 @@ sessionStorage.setItem("token",data.token);
 sessionStorage.setItem("store_id",data.store_id);
 localStorage.setItem(ADMIN_TOKEN_KEY,data.token);
 localStorage.setItem(ADMIN_STORE_KEY,data.store_id);
+sessionStorage.removeItem("mercadia_platform_token");
+localStorage.removeItem("mercadia_platform_token");
 
-window.location.href = "dashboard.html";
+window.location.href = data.redirect || "dashboard.html";
 
 }else{
 

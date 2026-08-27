@@ -1,17 +1,22 @@
 const API = window.MERCADIA_CONFIG?.API_URL || "/api";
 const KEY = "mercadia_platform_token";
-const loginView = document.getElementById("platform-login-view");
 const dashboard = document.getElementById("platform-dashboard");
 const logout = document.getElementById("platform-logout");
 
+function getToken(){
+  const token=sessionStorage.getItem(KEY)||localStorage.getItem(KEY);
+  if(token)sessionStorage.setItem(KEY,token);
+  return token;
+}
+
 function escapeHtml(value){ const div=document.createElement("div"); div.textContent=String(value??""); return div.innerHTML; }
 async function request(path, options={}){
-  const token=sessionStorage.getItem(KEY);
+  const token=getToken();
   options.headers={...(options.headers||{}),...(token?{Authorization:`Bearer ${token}`}:{})};
   const response=await fetch(`${API}${path}`,options); const data=await response.json().catch(()=>({}));
   if(!response.ok) throw new Error(data.error||"No se pudo completar la operación."); return data;
 }
-function showDashboard(){ loginView.classList.add("hidden"); dashboard.classList.remove("hidden"); logout.classList.remove("hidden"); }
+function showDashboard(){ dashboard.classList.remove("hidden"); logout.classList.remove("hidden"); }
 function statusLabel(status){return ({pending_email:"Correo pendiente",payment_pending:"Pago pendiente",payment_reported:"Pago reportado",active:"Activo",rejected:"Rechazado",suspended:"Suspendido"})[status]||status;}
 async function loadAccounts(){
   showDashboard();
@@ -31,7 +36,7 @@ async function loadAccounts(){
       </div></article>`).join(""):"<div class='status-card'><h2>No hay cuentas registradas</h2></div>";
     bindActions();
   }catch(error){
-    if(/token|access/i.test(error.message)){sessionStorage.removeItem(KEY);location.reload();return;}
+    if(/token|access/i.test(error.message)){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/admin/login.html");return;}
     list.innerHTML=`<p class="form-message">${escapeHtml(error.message)}</p>`;
   }
 }
@@ -48,10 +53,6 @@ function bindActions(){
     try{await request(`/platform/admin/accounts/${button.dataset.status}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:button.dataset.value})});await loadAccounts();}catch(error){alert(error.message);}
   }));
 }
-document.getElementById("platform-login-form").addEventListener("submit",async event=>{
-  event.preventDefault();const msg=document.getElementById("platform-message");msg.textContent="Entrando...";
-  try{const data=await request("/platform/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))});sessionStorage.setItem(KEY,data.token);await loadAccounts();}catch(error){msg.textContent=error.message;}
-});
 document.getElementById("refresh-accounts").addEventListener("click",loadAccounts);
-logout.addEventListener("click",()=>{sessionStorage.removeItem(KEY);location.reload();});
-if(sessionStorage.getItem(KEY))loadAccounts();
+logout.addEventListener("click",()=>{sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/admin/login.html");});
+if(getToken())loadAccounts();else location.replace("/admin/login.html");

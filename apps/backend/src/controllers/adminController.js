@@ -236,11 +236,16 @@ exports.login = async (req,res)=>{
         return res.status(401).json({error:"invalid credentials"});
       }
 
-      tokenPayload = {
-        user_id:user.id,
-        store_id:user.store_id,
-        role:"admin"
-      };
+      tokenPayload = user.role === "superadmin"
+        ? {
+            user_id:user.id,
+            role:"superadmin"
+          }
+        : {
+            user_id:user.id,
+            store_id:user.store_id,
+            role:"admin"
+          };
     }else{
       let authData;
 
@@ -284,7 +289,11 @@ exports.login = async (req,res)=>{
 
     res.json({
       token,
-      store_id:tokenPayload.store_id
+      store_id:tokenPayload.store_id || null,
+      role:tokenPayload.role,
+      redirect:tokenPayload.role === "superadmin"
+        ? "/platform.html"
+        : "/admin/dashboard.html"
     });
 
   }catch(err){
