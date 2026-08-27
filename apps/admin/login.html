@@ -4,7 +4,8 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#08111f"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/mercadia-app.png">
 
 <title>Mercadia Admin</title>
 
@@ -151,9 +152,12 @@ EVITAR VOLVER AL LOGIN
 localStorage.removeItem("token");
 localStorage.removeItem("store_id");
 
-const token = sessionStorage.getItem("token");
+const token = sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token");
 
 if(token){
+sessionStorage.setItem("token",token);
+const savedStore = localStorage.getItem("mercadia_admin_store_id");
+if(savedStore) sessionStorage.setItem("store_id",savedStore);
 window.location.href="dashboard.html";
 }
 
@@ -183,6 +187,8 @@ if(data.token){
 
 sessionStorage.setItem("token",data.token);
 sessionStorage.setItem("store_id",data.store_id);
+localStorage.setItem("mercadia_admin_token",data.token);
+localStorage.setItem("mercadia_admin_store_id",data.store_id);
 
 window.location.href="dashboard.html";
 

@@ -7,7 +7,7 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
 const options = {
 method,
 headers: {
-Authorization: "Bearer " + sessionStorage.getItem("token")
+Authorization: "Bearer " + (window.getAdminToken?.() || sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token"))
 }
 };
 

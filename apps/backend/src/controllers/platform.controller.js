@@ -255,6 +255,43 @@ exports.login = async (req, res, next) => {
   }
 };
 
+exports.refresh = async (req,res,next) => {
+  try{
+    const refreshToken = String(req.body.refresh_token || "");
+    if(!refreshToken){
+      return res.status(400).json({ success:false, error:"refresh token required" });
+    }
+
+    const authData = await supabaseAuth.refresh(refreshToken);
+    const account = await accountByAuthUser(authData.user);
+    if(!account){
+      return res.status(403).json({ success:false, error:"La cuenta no está registrada en Mercadia." });
+    }
+
+    const adminToken =
+      account.status === "active" && account.store_id
+        ? jwt.sign(
+            { merchant_id:account.id, store_id:account.store_id, role:"admin" },
+            JWT_SECRET,
+            { expiresIn:JWT_EXPIRES_IN }
+          )
+        : null;
+
+    res.json({
+      success:true,
+      ...sessionPayload(authData),
+      admin_token:adminToken,
+      merchant:merchantView(account),
+      bank:bankDetails()
+    });
+  }catch(error){
+    if(error?.status){
+      return res.status(401).json({ success:false, error:"La sesión expiró." });
+    }
+    next(error);
+  }
+};
+
 exports.forgotPassword = async (req, res, next) => {
   try{
     await supabaseAuth.recover(

@@ -11,7 +11,7 @@ const BACKEND_UPLOADS_URL =
   `${BACKEND_ORIGIN}/uploads/`;
 
 const token =
-  sessionStorage.getItem("token");
+  window.getAdminToken?.() || sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token");
 
 if(!token){
 
@@ -218,6 +218,9 @@ const templatesByType = {
 
 let currentStore = null;
 let promotions = [];
+let workingSections = [];
+let activeSectionIndex = 0;
+let workingSiteSettings = {};
 
 const message =
   document.getElementById("store-message");
@@ -239,6 +242,35 @@ const sectionKicker =
 
 const sectionText =
   document.getElementById("section-text");
+
+const sectionType =
+  document.getElementById("section-type");
+
+const sectionCta =
+  document.getElementById("section-cta");
+
+const sectionLayout =
+  document.getElementById("section-layout");
+
+const sectionBackground =
+  document.getElementById("section-background");
+
+const sectionTextColor =
+  document.getElementById("section-text-color");
+
+const sectionList =
+  document.getElementById("section-list");
+
+const sectionImages =
+  document.getElementById("section-images");
+
+const livePreview =
+  document.getElementById("live-store-preview");
+
+const siteTheme = document.getElementById("site-theme");
+const siteDisplayName = document.getElementById("site-display-name");
+const siteHeroTitle = document.getElementById("site-hero-title");
+const siteHeroText = document.getElementById("site-hero-text");
 
 const sectionImageUrl =
   document.getElementById("section-image-url");
@@ -434,6 +466,15 @@ function renderStore(store){
   if(previewLink && store.slug){
     previewLink.href =
       `/tienda/${encodeURIComponent(store.slug)}`;
+
+    if(livePreview){
+      const previewUrl =
+        `/tienda/${encodeURIComponent(store.slug)}?editor=1`;
+
+      if(livePreview.getAttribute("src") !== previewUrl){
+        livePreview.src = previewUrl;
+      }
+    }
   }
 
   setImagePreview(
@@ -495,15 +536,6 @@ function cloneSections(sections){
 }
 
 
-function getEditableSection(sections){
-
-  return (sections || []).find(
-    section => editableSectionTypes.includes(section.type)
-  );
-
-}
-
-
 function getCurrentHomepageSections(){
 
   return Array.isArray(currentStore?.homepage_sections)
@@ -513,119 +545,199 @@ function getCurrentHomepageSections(){
 }
 
 
+function sectionImageList(section){
+  const images = Array.isArray(section?.images)
+    ? section.images.filter(Boolean)
+    : [];
+  const primary = section?.image_url || section?.image;
+
+  if(primary && !images.includes(primary)){
+    images.unshift(primary);
+  }
+
+  return images.slice(0,8);
+}
+
+
+function syncActiveSectionFromInputs(){
+  const section = workingSections[activeSectionIndex];
+  if(!section) return;
+
+  section.type = sectionType.value;
+  section.title = sectionTitle.value.trim();
+  section.eyebrow = sectionKicker.value.trim();
+  section.kicker = sectionKicker.value.trim();
+  section.text = sectionText.value.trim();
+  section.cta = sectionCta.value.trim();
+  section.layout = sectionLayout.value;
+  section.styles = {
+    ...(section.styles || {}),
+    background_color:sectionBackground.value,
+    text_color:sectionTextColor.value
+  };
+
+  const directImage = sectionImageUrl.value.trim();
+  const images = sectionImageList(section);
+
+  if(directImage){
+    section.image_url = directImage;
+    section.images = [
+      directImage,
+      ...images.filter(image => image !== directImage)
+    ].slice(0,8);
+  }else{
+    delete section.image_url;
+    section.images = images;
+  }
+}
+
+
+function renderSectionList(){
+  if(!sectionList) return;
+
+  sectionList.innerHTML = workingSections.map((section,index) => `
+    <button type="button" class="section-tab ${index === activeSectionIndex ? "active" : ""}" data-section-index="${index}" role="tab" aria-selected="${index === activeSectionIndex}">
+      <span>${index + 1}</span>
+      ${escapeHTML(section.title || section.type || "Sección")}
+    </button>
+  `).join("");
+}
+
+
+function renderSectionImages(){
+  if(!sectionImages) return;
+
+  const section = workingSections[activeSectionIndex] || {};
+  const images = sectionImageList(section);
+
+  sectionImages.innerHTML = images.length
+    ? images.map((image,index) => `
+        <figure class="section-image-item">
+          <img src="${escapeHTML(resolveAssetUrl(image))}" alt="Imagen ${index + 1} de la sección">
+          <button type="button" data-remove-image="${index}" aria-label="Quitar imagen">×</button>
+          ${index === 0 ? "<figcaption>Principal</figcaption>" : ""}
+        </figure>
+      `).join("")
+    : `<div class="empty section-images-empty">Esta sección todavía no tiene imágenes propias.</div>`;
+}
+
+
+function loadActiveSection(){
+  const section = workingSections[activeSectionIndex] || {};
+  const images = sectionImageList(section);
+
+  sectionType.value = section.type || "image_banner";
+  sectionTitle.value = section.title || "";
+  sectionKicker.value = section.eyebrow || section.kicker || "";
+  sectionText.value = section.text || section.description || "";
+  sectionCta.value = section.cta || "";
+  sectionLayout.value = section.layout || "default";
+  sectionBackground.value = section.styles?.background_color || "#ffffff";
+  sectionTextColor.value = section.styles?.text_color || "#111827";
+  sectionImageUrl.value = section.image_url || section.image || images[0] || "";
+
+  renderSectionList();
+  renderSectionImages();
+}
+
+
 function buildHomepageSections(){
+  syncActiveSectionFromInputs();
+  workingSiteSettings = {
+    type:"site_settings",
+    theme:siteTheme.value,
+    display_name:siteDisplayName.value.trim(),
+    hero_title:siteHeroTitle.value.trim(),
+    hero_text:siteHeroText.value.trim()
+  };
 
-  const selectedTemplate =
-    getSelectedTemplate();
-
-  const sections =
-    cloneSections(selectedTemplate?.sections || []);
-
-  let editableSection =
-    getEditableSection(sections);
-
-  if(!editableSection){
-
-    editableSection = {
-      type:"split_showcase"
-    };
-
-    sections.unshift(editableSection);
-
-  }
-
-  if(sectionTitle.value.trim()){
-    editableSection.title = sectionTitle.value.trim();
-  }
-
-  if(sectionKicker.value.trim()){
-    editableSection.eyebrow = sectionKicker.value.trim();
-    editableSection.kicker = sectionKicker.value.trim();
-  }
-
-  if(sectionText.value.trim()){
-    editableSection.text = sectionText.value.trim();
-  }
-
-  if(sectionImageUrl.value.trim()){
-    editableSection.image_url = sectionImageUrl.value.trim();
-  }
-
-  return sections;
-
+  return [
+    cloneSections([workingSiteSettings])[0],
+    ...cloneSections(workingSections)
+  ];
 }
 
 
 function setSectionEditorFromSections(sections){
+  const clonedSections = cloneSections(sections || []);
+  workingSiteSettings = clonedSections.find(section => section.type === "site_settings") || {};
+  workingSections = clonedSections.filter(section => section.type !== "site_settings");
 
-  const editableSection =
-    getEditableSection(sections) || {};
+  siteTheme.value = workingSiteSettings.theme || currentStore?.theme || "modern";
+  siteDisplayName.value = workingSiteSettings.display_name || currentStore?.name || "";
+  siteHeroTitle.value = workingSiteSettings.hero_title || currentStore?.hero_title || currentStore?.name || "";
+  siteHeroText.value = workingSiteSettings.hero_text || currentStore?.hero_text || "";
 
-  sectionTitle.value =
-    editableSection.title || "";
+  if(!workingSections.length){
+    workingSections = [{ type:"image_banner", title:"Nueva sección", images:[] }];
+  }
 
-  sectionKicker.value =
-    editableSection.eyebrow ||
-    editableSection.kicker ||
-    "";
+  activeSectionIndex = Math.min(activeSectionIndex,workingSections.length - 1);
+  loadActiveSection();
+}
 
-  sectionText.value =
-    editableSection.text ||
-    editableSection.description ||
-    "";
 
-  sectionImageUrl.value =
-    editableSection.image_url ||
-    editableSection.image ||
-    "";
+function readSiteEditor(){
+  return {
+    theme:siteTheme.value,
+    display_name:siteDisplayName.value,
+    hero_title:siteHeroTitle.value,
+    hero_text:siteHeroText.value
+  };
+}
 
+
+function writeSiteEditor(settings){
+  siteTheme.value = settings.theme || "modern";
+  siteDisplayName.value = settings.display_name || "";
+  siteHeroTitle.value = settings.hero_title || "";
+  siteHeroText.value = settings.hero_text || "";
+}
+
+
+function postLivePreview(){
+  if(!livePreview?.contentWindow || !currentStore) return;
+
+  livePreview.contentWindow.postMessage({
+    type:"mercadia:preview-store",
+    store:{
+      ...currentStore,
+      name:siteDisplayName.value.trim() || currentStore.name,
+      theme:siteTheme.value,
+      hero_title:siteHeroTitle.value.trim(),
+      hero_text:siteHeroText.value.trim(),
+      business_type:businessType.value,
+      template_key:templateKey.value,
+      homepage_sections:buildHomepageSections()
+    }
+  },window.location.origin);
 }
 
 
 function updateTemplatePreview(){
-
   if(!templatePreview) return;
 
-  const selectedTemplate =
-    getSelectedTemplate();
+  syncActiveSectionFromInputs();
 
-  if(!selectedTemplate){
-
-    templatePreview.innerHTML = "";
-    return;
-
-  }
-
-  const sections =
-    buildHomepageSections();
-
-  const editableSection =
-    getEditableSection(sections);
+  const selectedTemplate = getSelectedTemplate();
+  const section = workingSections[activeSectionIndex] || {};
+  const images = sectionImageList(section);
 
   templatePreview.innerHTML = `
     <div class="template-preview-header">
-      <strong>${escapeHTML(selectedTemplate.label)}</strong>
-      <span>${escapeHTML(businessType.value)}</span>
+      <strong>${escapeHTML(selectedTemplate?.label || "Diseño personalizado")}</strong>
+      <span>${workingSections.length} secciones</span>
     </div>
-    <p>${escapeHTML(selectedTemplate.description || "")}</p>
-    ${
-      editableSection?.image_url
-        ? `<div class="template-preview-image">
-            <img src="${escapeHTML(resolveAssetUrl(editableSection.image_url))}" alt="">
-          </div>`
-        : ""
-    }
+    <p>${escapeHTML(selectedTemplate?.description || "Edita cada bloque de la página de forma independiente.")}</p>
+    ${images[0] ? `<div class="template-preview-image"><img src="${escapeHTML(resolveAssetUrl(images[0]))}" alt=""></div>` : ""}
     <div class="template-section-list">
-      ${
-        sections
-          .map(section => `
-            <span>${escapeHTML(section.title || section.type)}</span>
-          `)
-          .join("")
-      }
+      ${workingSections.map(item => `<span>${escapeHTML(item.title || item.type)}</span>`).join("")}
     </div>
   `;
 
+  renderSectionList();
+  renderSectionImages();
+  postLivePreview();
 }
 
 
@@ -729,36 +841,38 @@ async function uploadStoreImage(kind,file){
 }
 
 
-async function uploadSectionImage(file){
+async function uploadSectionImages(files){
+  const selectedFiles = Array.from(files || []).slice(0,8);
+  if(!selectedFiles.length) return;
 
-  if(!file) return;
+  syncActiveSectionFromInputs();
+  const section = workingSections[activeSectionIndex];
+  const uploaded = [];
 
-  const formData =
-    new FormData();
+  for(const file of selectedFiles){
+    const formData = new FormData();
+    formData.append("image",file);
 
-  formData.append(
-    "image",
-    file
-  );
-
-  const data =
-    await adminRequest(
+    const data = await adminRequest(
       "/admin/uploads",
-      {
-        method:"POST",
-        body:formData
-      }
+      { method:"POST", body:formData }
     );
 
-  sectionImageUrl.value =
-    data.image_url || data.url || "";
+    const image = data.image_url || data.url;
+    if(image) uploaded.push(image);
+  }
+
+  section.images = [
+    ...sectionImageList(section),
+    ...uploaded
+  ].filter((image,index,array) => array.indexOf(image) === index).slice(0,8);
+  section.image_url = section.images[0] || "";
+  sectionImageUrl.value = section.image_url;
 
   updateTemplatePreview();
-
   showMessage(
-    "Imagen de sección lista. Guarda la experiencia para publicarla."
+    `${uploaded.length} imagen${uploaded.length === 1 ? "" : "es"} lista${uploaded.length === 1 ? "" : "s"}. Guarda para publicar.`
   );
-
 }
 
 
@@ -1166,10 +1280,12 @@ window.deletePromotion = (id) => runSafely(
 businessType.addEventListener(
   "change",
   () => {
+    const siteDraft = readSiteEditor();
     renderTemplateOptions();
     setSectionEditorFromSections(
       getSelectedTemplate()?.sections
     );
+    writeSiteEditor(siteDraft);
     updateTemplatePreview();
   }
 );
@@ -1177,18 +1293,25 @@ businessType.addEventListener(
 templateKey.addEventListener(
   "change",
   () => {
+    const siteDraft = readSiteEditor();
     setSectionEditorFromSections(
       getSelectedTemplate()?.sections
     );
+    writeSiteEditor(siteDraft);
     updateTemplatePreview();
   }
 );
 
 [
+  sectionType,
   sectionTitle,
   sectionKicker,
   sectionText,
-  sectionImageUrl
+  sectionImageUrl,
+  sectionCta,
+  sectionLayout,
+  sectionBackground,
+  sectionTextColor
 ].forEach(input => {
 
   input.addEventListener(
@@ -1196,6 +1319,11 @@ templateKey.addEventListener(
     updateTemplatePreview
   );
 
+});
+
+[siteTheme,siteDisplayName,siteHeroTitle,siteHeroText].forEach(input => {
+  input.addEventListener("input",updateTemplatePreview);
+  input.addEventListener("change",updateTemplatePreview);
 });
 
 document
@@ -1234,11 +1362,95 @@ document
 sectionImageInput.addEventListener(
   "change",
   event => runSafely(
-    () => uploadSectionImage(
-      event.target.files[0]
+    () => uploadSectionImages(
+      event.target.files
     )
   )
 );
+
+sectionList.addEventListener("click",event => {
+  const button = event.target.closest("[data-section-index]");
+  if(!button) return;
+
+  syncActiveSectionFromInputs();
+  activeSectionIndex = Number(button.dataset.sectionIndex);
+  loadActiveSection();
+  updateTemplatePreview();
+});
+
+sectionImages.addEventListener("click",event => {
+  const button = event.target.closest("[data-remove-image]");
+  if(!button) return;
+
+  syncActiveSectionFromInputs();
+  const section = workingSections[activeSectionIndex];
+  const images = sectionImageList(section);
+  images.splice(Number(button.dataset.removeImage),1);
+  section.images = images;
+  section.image_url = images[0] || "";
+  sectionImageUrl.value = section.image_url;
+  updateTemplatePreview();
+});
+
+document.getElementById("add-section-btn").addEventListener("click",() => {
+  syncActiveSectionFromInputs();
+  workingSections.push({
+    type:"image_banner",
+    title:"Nueva sección",
+    text:"Describe aquí esta parte de tu página.",
+    images:[],
+    styles:{ background_color:"#ffffff", text_color:"#111827" }
+  });
+  activeSectionIndex = workingSections.length - 1;
+  loadActiveSection();
+  updateTemplatePreview();
+});
+
+document.getElementById("duplicate-section").addEventListener("click",() => {
+  syncActiveSectionFromInputs();
+  const copy = cloneSections([workingSections[activeSectionIndex]])[0];
+  copy.title = `${copy.title || "Sección"} copia`;
+  workingSections.splice(activeSectionIndex + 1,0,copy);
+  activeSectionIndex += 1;
+  loadActiveSection();
+  updateTemplatePreview();
+});
+
+document.getElementById("remove-section").addEventListener("click",() => {
+  if(workingSections.length === 1){
+    showMessage("La página debe conservar al menos una sección.","error");
+    return;
+  }
+
+  workingSections.splice(activeSectionIndex,1);
+  activeSectionIndex = Math.min(activeSectionIndex,workingSections.length - 1);
+  loadActiveSection();
+  updateTemplatePreview();
+});
+
+function moveActiveSection(direction){
+  syncActiveSectionFromInputs();
+  const nextIndex = activeSectionIndex + direction;
+  if(nextIndex < 0 || nextIndex >= workingSections.length) return;
+
+  [workingSections[activeSectionIndex],workingSections[nextIndex]] =
+    [workingSections[nextIndex],workingSections[activeSectionIndex]];
+  activeSectionIndex = nextIndex;
+  loadActiveSection();
+  updateTemplatePreview();
+}
+
+document.getElementById("move-section-up").addEventListener("click",() => moveActiveSection(-1));
+document.getElementById("move-section-down").addEventListener("click",() => moveActiveSection(1));
+
+document.querySelectorAll("[data-preview-size]").forEach(button => {
+  button.addEventListener("click",() => {
+    document.querySelectorAll("[data-preview-size]").forEach(item => item.classList.toggle("active",item === button));
+    document.getElementById("live-preview-shell").classList.toggle("mobile",button.dataset.previewSize === "mobile");
+  });
+});
+
+livePreview?.addEventListener("load",postLivePreview);
 
 promotionForm.addEventListener(
   "submit",

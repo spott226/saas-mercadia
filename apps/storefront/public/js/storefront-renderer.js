@@ -127,11 +127,14 @@ class EcommerceTemplate{
   }
 
   getSections(){
-    if(
-      Array.isArray(this.store?.homepage_sections) &&
-      this.store.homepage_sections.length > 0
-    ){
-      return this.store.homepage_sections;
+    if(Array.isArray(this.store?.homepage_sections)){
+      const visibleSections = this.store.homepage_sections.filter(
+        section => section?.type !== "site_settings"
+      );
+
+      if(visibleSections.length){
+        return visibleSections;
+      }
     }
 
     return (
@@ -329,6 +332,51 @@ function resolveAssetUrl(asset){
   return value;
 }
 
+function getSectionImages(sectionConfig){
+  const images = Array.isArray(sectionConfig?.images)
+    ? sectionConfig.images.filter(Boolean)
+    : [];
+  const primary = sectionConfig?.image_url || sectionConfig?.image;
+
+  if(primary && !images.includes(primary)) images.unshift(primary);
+  return images.slice(0,8);
+}
+
+function safeColor(value,fallback){
+  return /^#[0-9a-f]{3,8}$/i.test(String(value || ""))
+    ? value
+    : fallback;
+}
+
+function applySectionPresentation(section,sectionConfig){
+  const layouts = ["default","image-left","image-right","gallery"];
+  const layout = layouts.includes(sectionConfig?.layout)
+    ? sectionConfig.layout
+    : "default";
+
+  section.classList.add(`section-layout-${layout}`);
+  section.style.setProperty(
+    "--section-background",
+    safeColor(sectionConfig?.styles?.background_color,"transparent")
+  );
+  section.style.setProperty(
+    "--section-text",
+    safeColor(sectionConfig?.styles?.text_color,"")
+  );
+}
+
+function renderSectionMedia(images,className){
+  if(!images.length) return "";
+
+  return `
+    <div class="${className} section-media-count-${Math.min(images.length,4)}">
+      ${images.map((image,index) => `
+        <img src="${escapeHTML(resolveAssetUrl(image))}" loading="lazy" alt="" data-section-image="${index}">
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderSections({ store, slug, products, sections }){
   const insertionPoint = getInsertionPoint();
 
@@ -421,6 +469,7 @@ function renderCategoryTiles({ sectionConfig, slug, products }){
   }
 
   const section = createSection("storefront-category-tiles");
+  applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
     <div class="storefront-section-inner">
       <div class="storefront-section-heading">
@@ -440,14 +489,12 @@ function renderCategoryTiles({ sectionConfig, slug, products }){
 }
 
 function renderImageBanner({ sectionConfig, store }){
-  const image =
-    sectionConfig.image_url ||
-    sectionConfig.image ||
-    store?.hero;
+  const images = getSectionImages(sectionConfig);
 
   const section = createSection("storefront-image-banner");
+  applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
-    ${image ? `<img src="${escapeHTML(resolveAssetUrl(image))}" loading="lazy" alt="">` : ""}
+    ${renderSectionMedia(images,"storefront-section-gallery")}
     <div>
       <p>${escapeHTML(sectionConfig.kicker || sectionConfig.eyebrow || "")}</p>
       <h2>${escapeHTML(sectionConfig.title || store?.name || "")}</h2>
@@ -460,21 +507,17 @@ function renderImageBanner({ sectionConfig, store }){
 }
 
 function renderSplitShowcase({ sectionConfig, store }){
-  const image =
-    sectionConfig.image_url ||
-    sectionConfig.image ||
-    store?.hero;
+  const images = getSectionImages(sectionConfig);
 
   const section = createSection("storefront-split-showcase");
+  applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
     <div class="storefront-split-copy">
       <p>${escapeHTML(sectionConfig.kicker || sectionConfig.eyebrow || "Nueva seleccion")}</p>
       <h2>${escapeHTML(sectionConfig.title || store?.name || "")}</h2>
       <span>${escapeHTML(sectionConfig.text || sectionConfig.description || "")}</span>
     </div>
-    <div class="storefront-split-image">
-      ${image ? `<img src="${escapeHTML(resolveAssetUrl(image))}" loading="lazy" alt="">` : ""}
-    </div>
+    ${renderSectionMedia(images,"storefront-split-image storefront-section-gallery")}
   `;
 
   return section;
@@ -482,6 +525,7 @@ function renderSplitShowcase({ sectionConfig, store }){
 
 function renderEditorialBanner(sectionConfig){
   const section = createSection("storefront-editorial-banner");
+  applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
     <div>
       <p>${escapeHTML(sectionConfig.kicker || sectionConfig.eyebrow || "Editorial")}</p>
@@ -495,6 +539,7 @@ function renderEditorialBanner(sectionConfig){
 
 function renderPromoStrip(sectionConfig){
   const section = createSection("storefront-promo-strip");
+  applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
     <strong>${escapeHTML(sectionConfig.title || "")}</strong>
     <span>${escapeHTML(sectionConfig.text || sectionConfig.description || "")}</span>

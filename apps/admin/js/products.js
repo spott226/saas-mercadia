@@ -5,10 +5,10 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app";
 
 const token =
-  sessionStorage.getItem("token");
+  window.getAdminToken?.() || sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token");
 
 const store_id =
-  sessionStorage.getItem("store_id");
+  window.getAdminStoreId?.() || sessionStorage.getItem("store_id") || localStorage.getItem("mercadia_admin_store_id");
 
 if (!token || !store_id) {
 

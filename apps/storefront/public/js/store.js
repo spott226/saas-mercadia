@@ -149,6 +149,17 @@ return;
 
 }
 
+const siteSettings = Array.isArray(store.homepage_sections)
+  ? store.homepage_sections.find(section => section?.type === "site_settings")
+  : null;
+
+if(siteSettings){
+  if(siteSettings.display_name) store.name = siteSettings.display_name;
+  if(siteSettings.theme) store.theme = siteSettings.theme;
+  if(siteSettings.hero_title) store.hero_title = siteSettings.hero_title;
+  if(siteSettings.hero_text) store.hero_text = siteSettings.hero_text;
+}
+
 storeData = store;
 
 
@@ -308,6 +319,66 @@ document.body.innerHTML = `
 }
 
 }
+
+
+async function applyEditorPreview(previewStore){
+  if(!previewStore || typeof previewStore !== "object") return;
+
+  const store = {
+    ...(storeData || {}),
+    ...previewStore
+  };
+  const slug = getSlugFromDomain();
+  const previewThemes = [
+    "luxury","modern","street","minimal","black",
+    "gray","earth","tenis","lujo","velour"
+  ];
+
+  storeData = store;
+  window.store = store;
+  window.STORE = store;
+
+  previewThemes.forEach(theme =>
+    document.body.classList.remove(`theme-${theme}`)
+  );
+  if(previewThemes.includes(store.theme)){
+    document.body.classList.add(`theme-${store.theme}`);
+  }
+
+  document.title = `${store.name || "Mercadia"} · Vista previa`;
+
+  const title = document.getElementById("store-name");
+  if(title) title.textContent = store.name || "Mercadia";
+
+  const logo = document.getElementById("store-logo");
+  if(logo) logo.src = resolveAssetUrl(store.logo,"/icons/mercadia-app.png");
+
+  const heroTitle = document.getElementById("hero-title");
+  if(heroTitle) heroTitle.textContent = store.hero_title || store.name || "";
+
+  const heroText = document.getElementById("hero-text");
+  if(heroText && store.hero_text) heroText.textContent = store.hero_text;
+
+  const hero = document.getElementById("hero-image");
+  if(hero) hero.src = resolveAssetUrl(store.hero,"/assets/images/hero-default.jpg");
+
+  await renderStorefrontExperience({ store, slug });
+}
+
+window.addEventListener("message",event => {
+  if(
+    !new URLSearchParams(window.location.search).has("editor") ||
+    event.origin !== window.location.origin ||
+    event.source !== window.parent ||
+    event.data?.type !== "mercadia:preview-store"
+  ){
+    return;
+  }
+
+  applyEditorPreview(event.data.store).catch(error =>
+    console.error("STORE PREVIEW ERROR:",error)
+  );
+});
 
 
 // =================================

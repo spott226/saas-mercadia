@@ -100,6 +100,66 @@ async function enableNotifications(){
   ).disabled = true;
 }
 
+async function enableMerchantNotifications(){
+  const token = localStorage.getItem("mercadia_admin_token");
+  const storeId = localStorage.getItem("mercadia_admin_store_id");
+
+  if(!token || !storeId){
+    throw new Error("Abre primero tu cuenta Mercadia para activar las alertas del negocio.");
+  }
+
+  const permission = await Notification.requestPermission();
+  if(permission !== "granted") return;
+
+  const keyResponse = await fetch(`${API_BASE}/customer-auth/push/public-key`,{ cache:"no-store" });
+  const keyData = await keyResponse.json();
+  if(!keyResponse.ok || !keyData.public_key){
+    throw new Error(keyData.error || "Notificaciones no disponibles");
+  }
+
+  const subscription =
+    await registration.pushManager.getSubscription() ||
+    await registration.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:base64ToBytes(keyData.public_key)
+    });
+
+  const response = await fetch(`${API_BASE}/admin/push/subscribe`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${token}`
+    },
+    body:JSON.stringify({ subscription })
+  });
+
+  if(!response.ok){
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error || "No se pudieron activar las alertas");
+  }
+
+  actionButton("pwa-notifications","Alertas de pedidos activadas",enableMerchantNotifications).disabled = true;
+}
+
+async function showMerchantNotifications(){
+  if(
+    document.body.dataset.pwaContext !== "platform" ||
+    !("PushManager" in window) ||
+    !("Notification" in window) ||
+    !localStorage.getItem("mercadia_admin_token")
+  ) return;
+
+  const current = await registration?.pushManager?.getSubscription();
+  const button = actionButton(
+    "pwa-notifications",
+    current ? "Alertas de pedidos activadas" : "Activar alertas de pedidos",
+    () => enableMerchantNotifications().catch(error => window.alert(error.message))
+  );
+  button.disabled = Boolean(current);
+}
+
+window.refreshMerchantNotifications = () => showMerchantNotifications().catch(error => console.error("PWA MERCHANT ERROR:",error));
+
 async function init(){
   if(!("serviceWorker" in navigator)) return;
 
@@ -117,11 +177,16 @@ async function init(){
     });
   });
 
-  if(
-    document.body.dataset.pwaContext !== "platform" &&
+  if(document.body.dataset.pwaContext === "platform"){
+    await showMerchantNotifications();
+  }else if(
     "PushManager" in window &&
     "Notification" in window
   ){
+    const storeId = getStoreId();
+    const session = getCustomerSession(storeId);
+    if(!session?.token || !storeId) return;
+
     const current = await registration.pushManager.getSubscription();
     const button = actionButton(
       "pwa-notifications",

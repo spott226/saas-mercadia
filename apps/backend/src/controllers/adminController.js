@@ -66,12 +66,28 @@ const allowedBusinessTypes = [
 ];
 
 const allowedHomepageSectionTypes = new Set([
+  "site_settings",
   "category_tiles",
   "product_grid",
   "image_banner",
   "editorial_banner",
   "split_showcase",
   "promo_strip"
+]);
+
+const allowedSectionLayouts = new Set([
+  "default",
+  "image-left",
+  "image-right",
+  "gallery"
+]);
+
+const allowedStyleKeys = new Set([
+  "background_color",
+  "text_color",
+  "accent_color",
+  "alignment",
+  "radius"
 ]);
 
 const isValidTemplateKey = (value) => {
@@ -143,8 +159,46 @@ const isValidHomepageSections = (value) => {
       return false;
     }
 
-    return Object.values(section).every(item =>
-      typeof item !== "string" || item.length <= 2000
+    if(
+      section.layout !== undefined &&
+      !allowedSectionLayouts.has(section.layout)
+    ){
+      return false;
+    }
+
+    if(section.images !== undefined){
+      if(
+        !Array.isArray(section.images) ||
+        section.images.length > 8 ||
+        !section.images.every(image =>
+          typeof image === "string" &&
+          image.length <= 2000
+        )
+      ){
+        return false;
+      }
+    }
+
+    if(section.styles !== undefined){
+      if(
+        !section.styles ||
+        typeof section.styles !== "object" ||
+        Array.isArray(section.styles) ||
+        !Object.entries(section.styles).every(([key,item]) =>
+          allowedStyleKeys.has(key) &&
+          typeof item === "string" &&
+          item.length <= 80
+        )
+      ){
+        return false;
+      }
+    }
+
+    return Object.entries(section).every(([key,item]) =>
+      key === "images" ||
+      key === "styles" ||
+      typeof item !== "string" ||
+      item.length <= 2000
     );
 
   });

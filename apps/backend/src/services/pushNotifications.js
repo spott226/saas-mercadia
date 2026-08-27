@@ -49,6 +49,75 @@ async function removeSubscription(endpoint, accountId){
   );
 }
 
+async function saveMerchantSubscription(storeId, merchantId, subscription){
+  const endpoint = String(subscription?.endpoint || "");
+  const p256dh = String(subscription?.keys?.p256dh || "");
+  const auth = String(subscription?.keys?.auth || "");
+
+  if(!endpoint || !p256dh || !auth){
+    const error = new Error("suscripcion push invalida");
+    error.status = 400;
+    throw error;
+  }
+
+  await db.query(
+    `INSERT INTO merchant_push_subscriptions
+       (store_id, merchant_account_id, endpoint, p256dh, auth, updated_at)
+     VALUES ($1,$2,$3,$4,$5,NOW())
+     ON CONFLICT (endpoint)
+     DO UPDATE SET
+       store_id = EXCLUDED.store_id,
+       merchant_account_id = EXCLUDED.merchant_account_id,
+       p256dh = EXCLUDED.p256dh,
+       auth = EXCLUDED.auth,
+       updated_at = NOW()`,
+    [storeId, merchantId, endpoint, p256dh, auth]
+  );
+}
+
+async function deliver(rows,payload,tableName){
+  await Promise.allSettled(
+    rows.map(async row => {
+      try{
+        await webpush.sendNotification(
+          {
+            endpoint: row.endpoint,
+            keys: { p256dh: row.p256dh, auth: row.auth }
+          },
+          payload
+        );
+      }catch(error){
+        if(error.statusCode === 404 || error.statusCode === 410){
+          await db.query(`DELETE FROM ${tableName} WHERE id = $1`,[row.id]);
+          return;
+        }
+        console.error("PUSH ERROR:",error.message);
+      }
+    })
+  );
+}
+
+async function sendNewOrderToMerchant({ storeId, orderId }){
+  if(!configured) return;
+
+  const result = await db.query(
+    `SELECT mps.id,mps.endpoint,mps.p256dh,mps.auth,s.name AS store_name
+     FROM merchant_push_subscriptions mps
+     JOIN stores s ON s.id = mps.store_id
+     WHERE mps.store_id = $1`,
+    [storeId]
+  );
+
+  const payload = JSON.stringify({
+    title:result.rows[0]?.store_name || "Mercadia",
+    body:`Tienes un nuevo pedido #${orderId}.`,
+    url:"/admin/orders.html",
+    tag:`merchant-order-${orderId}`
+  });
+
+  await deliver(result.rows,payload,"merchant_push_subscriptions");
+}
+
 const statusLabels = {
   PENDING: "recibido",
   PAID: "confirmado",
@@ -110,6 +179,8 @@ async function sendOrderStatus({ storeId, phone, orderId, status }){
 module.exports = {
   getPublicKey,
   saveSubscription,
+  saveMerchantSubscription,
   removeSubscription,
-  sendOrderStatus
+  sendOrderStatus,
+  sendNewOrderToMerchant
 };

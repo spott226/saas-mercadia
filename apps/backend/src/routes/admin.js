@@ -4,8 +4,10 @@ const router = express.Router();
 const adminController = require("../controllers/adminController");
 const auth = require("../middleware/auth");
 const upload = require("../config/multer");
+const pushController = require("../controllers/push.controller");
 
 router.post("/login",adminController.login);
+router.post("/push/subscribe",auth.requireAdmin,pushController.subscribeMerchant);
 
 router.get(
   "/store",

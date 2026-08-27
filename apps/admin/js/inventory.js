@@ -3,7 +3,7 @@ const API_URL =
   "https://mercadia-back-production.up.railway.app/api";
 
 const token =
-  sessionStorage.getItem("token");
+  window.getAdminToken?.() || sessionStorage.getItem("token") || localStorage.getItem("mercadia_admin_token");
 
 if(!token){
 

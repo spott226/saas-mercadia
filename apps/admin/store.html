@@ -4,7 +4,8 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#08111f"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/mercadia-app.png">
 
 <title>Mercadia Admin - Tienda</title>
 
@@ -79,6 +80,22 @@ i
 <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
 <a id="store-preview-link" class="action-btn" href="#" target="_blank" rel="noopener">Ver tienda publicada</a>
 </div>
+
+<section class="section-card live-store-preview-card">
+<div class="section-heading">
+<div>
+<h3>Vista previa en vivo</h3>
+<p>Los cambios del editor aparecen aquí antes de guardarlos.</p>
+</div>
+<div class="preview-device-switch" role="group" aria-label="Tamaño de vista previa">
+<button type="button" class="preview-device active" data-preview-size="desktop">Escritorio</button>
+<button type="button" class="preview-device" data-preview-size="mobile">Teléfono</button>
+</div>
+</div>
+<div id="live-preview-shell" class="live-preview-shell">
+<iframe id="live-store-preview" title="Vista previa de la tienda" loading="lazy"></iframe>
+</div>
+</section>
 
 <div class="settings-grid">
 
@@ -186,12 +203,70 @@ i
 
 <div id="template-preview" class="template-preview"></div>
 
+<div class="template-editor site-editor">
+<div class="template-editor-title">Marca y portada principal</div>
+<div class="form-grid template-editor-grid">
+<div class="field-group">
+<label for="site-theme">Estilo general</label>
+<select id="site-theme">
+<option value="modern">Moderno</option>
+<option value="minimal">Minimalista</option>
+<option value="luxury">Lujo</option>
+<option value="street">Urbano</option>
+<option value="black">Negro</option>
+<option value="dark">Oscuro</option>
+<option value="gray">Gris</option>
+<option value="earth">Tonos tierra</option>
+<option value="tenis">Tenis</option>
+<option value="lujo">Lujo editorial</option>
+<option value="velour">Boutique</option>
+</select>
+</div>
+<div class="field-group">
+<label for="site-display-name">Nombre visible</label>
+<input id="site-display-name" maxlength="120" placeholder="Nombre de tu tienda">
+</div>
+<div class="field-group field-wide">
+<label for="site-hero-title">Título de portada</label>
+<input id="site-hero-title" maxlength="180" placeholder="Lo mejor para ti">
+</div>
+<div class="field-group field-wide">
+<label for="site-hero-text">Texto de portada</label>
+<input id="site-hero-text" maxlength="500" placeholder="Describe la propuesta principal de tu tienda">
+</div>
+</div>
+</div>
+
 <div id="section-editor" class="template-editor">
 <div class="template-editor-title">
-Personalizar sección principal
+Editor de secciones
+</div>
+
+<div class="section-builder-toolbar">
+<div id="section-list" class="section-builder-list" role="tablist" aria-label="Secciones de la página"></div>
+<button type="button" id="add-section-btn" class="secondary-action">Agregar sección</button>
+</div>
+
+<div class="section-editor-actions">
+<button type="button" id="move-section-up" class="secondary-action">Subir</button>
+<button type="button" id="move-section-down" class="secondary-action">Bajar</button>
+<button type="button" id="duplicate-section" class="secondary-action">Duplicar</button>
+<button type="button" id="remove-section" class="danger-action">Eliminar</button>
 </div>
 
 <div class="form-grid template-editor-grid">
+
+<div class="field-group">
+<label for="section-type">Tipo de sección</label>
+<select id="section-type">
+<option value="image_banner">Banner con imágenes</option>
+<option value="split_showcase">Texto + imágenes</option>
+<option value="editorial_banner">Editorial</option>
+<option value="promo_strip">Franja promocional</option>
+<option value="category_tiles">Categorías</option>
+<option value="product_grid">Productos</option>
+</select>
+</div>
 
 <div class="field-group">
 <label for="section-title">Título</label>
@@ -208,17 +283,46 @@ Personalizar sección principal
 <input id="section-text" placeholder="Una selección pensada para destacar tu tienda.">
 </div>
 
+<div class="field-group">
+<label for="section-cta">Texto del botón</label>
+<input id="section-cta" placeholder="Ver productos">
+</div>
+
+<div class="field-group">
+<label for="section-layout">Distribución</label>
+<select id="section-layout">
+<option value="default">Automática</option>
+<option value="image-left">Imagen izquierda</option>
+<option value="image-right">Imagen derecha</option>
+<option value="gallery">Galería</option>
+</select>
+</div>
+
+<div class="field-group">
+<label for="section-background">Color de fondo</label>
+<input id="section-background" type="color" value="#ffffff">
+</div>
+
+<div class="field-group">
+<label for="section-text-color">Color del texto</label>
+<input id="section-text-color" type="color" value="#111827">
+</div>
+
 <div class="field-group field-wide">
 <label for="section-image-url">Imagen de sección</label>
 <input id="section-image-url" placeholder="https://... o /uploads/imagen.jpg">
 </div>
 
 <div class="field-group field-wide">
-<label>Subir imagen</label>
+<label>Subir varias imágenes para esta sección</label>
 <label class="file-action section-upload-action">
-Elegir imagen
-<input id="section-image-input" type="file" accept="image/*">
+Elegir imágenes
+<input id="section-image-input" type="file" accept="image/*" multiple>
 </label>
+</div>
+
+<div class="field-group field-wide">
+<div id="section-images" class="section-image-manager"></div>
 </div>
 
 </div>

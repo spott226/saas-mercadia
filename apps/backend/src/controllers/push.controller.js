@@ -40,3 +40,23 @@ exports.unsubscribe = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.subscribeMerchant = async (req,res,next) => {
+  try{
+    if(!req.user.merchant_id){
+      return res.status(403).json({ success:false, error:"merchant account required" });
+    }
+
+    await push.saveMerchantSubscription(
+      req.user.store_id,
+      req.user.merchant_id,
+      req.body.subscription
+    );
+    res.status(201).json({ success:true });
+  }catch(error){
+    if(error.status){
+      return res.status(error.status).json({ success:false, error:error.message });
+    }
+    next(error);
+  }
+};

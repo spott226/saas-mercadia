@@ -38,6 +38,9 @@ function saveSession(data){
   if(data.admin_token){
     sessionStorage.setItem("token", data.admin_token);
     sessionStorage.setItem("store_id", data.merchant.store_id);
+    localStorage.setItem("mercadia_admin_token", data.admin_token);
+    localStorage.setItem("mercadia_admin_store_id", data.merchant.store_id);
+    window.refreshMerchantNotifications?.();
   }
 }
 
@@ -46,6 +49,8 @@ function clearSession(){
   localStorage.removeItem(REFRESH_KEY);
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("store_id");
+  localStorage.removeItem("mercadia_admin_token");
+  localStorage.removeItem("mercadia_admin_store_id");
 }
 
 function escapeHtml(value){
@@ -149,8 +154,25 @@ async function loadAccount(){
     renderAccount(data);
     return true;
   }catch(error){
-    clearSession();
-    return false;
+    const refreshToken = localStorage.getItem(REFRESH_KEY);
+    if(!refreshToken){
+      clearSession();
+      return false;
+    }
+
+    try{
+      const data = await request("/platform/refresh",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ refresh_token:refreshToken })
+      });
+      saveSession(data);
+      renderAccount(data);
+      return true;
+    }catch(refreshError){
+      clearSession();
+      return false;
+    }
   }
 }
 

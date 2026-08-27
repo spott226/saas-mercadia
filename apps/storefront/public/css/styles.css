@@ -381,6 +381,9 @@ margin-top:8px;
 opacity:.68;
 }
 
+html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+body{max-width:100%;overflow-x:hidden}
+
 /* =====================================================
 PROMOTION POPUP
 ===================================================== */
@@ -490,8 +493,8 @@ STOREFRONT SECTIONS
 ===================================================== */
 
 .storefront-dynamic-section{
-background:var(--background);
-color:var(--text);
+background:var(--section-background,var(--background));
+color:var(--section-text,var(--text));
 }
 
 .storefront-section-inner{
@@ -625,12 +628,70 @@ rgba(0,0,0,.12)
 );
 }
 
-.storefront-image-banner > div{
+.storefront-image-banner > div:not(.storefront-section-gallery){
 position:relative;
 z-index:1;
 max-width:620px;
-color:white;
+color:var(--section-text,white);
 }
+
+.storefront-section-gallery{
+display:grid;
+gap:4px;
+overflow:hidden;
+}
+
+.storefront-image-banner > .storefront-section-gallery{
+position:absolute;
+inset:0;
+grid-template-columns:repeat(2,minmax(0,1fr));
+grid-template-rows:repeat(2,minmax(0,1fr));
+z-index:0;
+max-width:none;
+}
+
+.storefront-section-gallery img,
+.storefront-image-banner .storefront-section-gallery img,
+.storefront-split-image.storefront-section-gallery img{
+position:relative;
+inset:auto;
+display:block;
+width:100%;
+height:100%;
+min-height:0;
+object-fit:cover;
+}
+
+.storefront-section-gallery.section-media-count-1{
+display:block;
+}
+
+.storefront-section-gallery.section-media-count-2{
+grid-template-columns:repeat(2,minmax(0,1fr));
+grid-template-rows:1fr;
+}
+
+.storefront-section-gallery.section-media-count-3 img:first-child,
+.storefront-section-gallery.section-media-count-4 img:first-child{
+grid-row:1 / -1;
+}
+
+.storefront-split-image.storefront-section-gallery{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+grid-template-rows:repeat(2,minmax(0,1fr));
+gap:5px;
+}
+
+.storefront-split-image.storefront-section-gallery.section-media-count-1{
+display:block;
+}
+
+.storefront-split-showcase.section-layout-image-left .storefront-split-copy{order:2}
+.storefront-split-showcase.section-layout-image-left .storefront-split-image{order:1}
+.storefront-split-showcase.section-layout-image-right .storefront-split-copy{order:1}
+.storefront-split-showcase.section-layout-image-right .storefront-split-image{order:2}
+.storefront-split-showcase.section-layout-gallery{grid-template-columns:minmax(0,.65fr) minmax(0,1.35fr)}
 
 .storefront-image-banner p,
 .storefront-editorial-banner p:first-child{
