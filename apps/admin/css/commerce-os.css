@@ -16,6 +16,21 @@
   --os-radius:18px;
   --os-shadow:0 12px 34px rgba(15,23,42,.07);
   --os-shadow-hover:0 20px 46px rgba(15,23,42,.11);
+  /* Aliases used by older admin components. Keeping them here prevents the
+     retired beige palette from leaking into nested editors. */
+  --bg:var(--os-bg);
+  --panel:var(--os-panel);
+  --panel-soft:var(--os-panel-2);
+  --ink:var(--os-ink);
+  --muted:var(--os-muted);
+  --line:var(--os-line);
+  --line-strong:#cbd5e1;
+  --brand:var(--os-brand);
+  --brand-dark:var(--os-brand-2);
+  --shadow:var(--os-shadow);
+  --shadow-soft:0 8px 22px rgba(15,23,42,.06);
+  --radius:var(--os-radius);
+  --radius-sm:12px;
 }
 
 html{background:var(--os-bg);-webkit-text-size-adjust:100%;touch-action:manipulation}
@@ -313,11 +328,13 @@ button:disabled{opacity:.55!important;cursor:not-allowed!important;transform:non
   min-height:30px!important;
   padding:0!important;
   border:1px solid #dbe2ee!important;
-  border-radius:10px!important;
-  background:#f8faff!important;
-  color:#667085!important;
+  border-radius:50%!important;
+  background:#f5f3ff!important;
+  color:var(--os-brand-2)!important;
   font-style:normal!important;
   box-shadow:none!important;
+  cursor:pointer!important;
+  touch-action:manipulation;
 }
 .info-dot:hover,.info-dot:focus-visible,.info-dot.is-open{border-color:#b7afff!important;background:#eeecff!important;color:var(--os-brand-2)!important;transform:translateY(-1px)!important}
 .info-dot::after{
@@ -397,7 +414,7 @@ tbody tr:last-child td{border-bottom:0!important}
 .admin-message.success{background:#ecfdf3!important;border-color:#abefc6!important;color:#067647!important}
 .admin-message.error{background:#fef3f2!important;border-color:#fecdca!important;color:#b42318!important}
 
-.media-panel,.template-preview,.popup-preview-card,.promotion-item{
+.media-panel,.template-preview,.template-editor,.popup-preview-card,.promo-preview,.promotion-item{
   border:1px solid var(--os-line)!important;
   border-radius:15px!important;
   background:#fbfcff!important;
@@ -493,7 +510,21 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
   .preview-device-switch{grid-column:1/-1;width:100%}
   .preview-device{flex:1}
   .live-preview-shell iframe{height:600px}
-  .info-dot::after{position:fixed!important;left:14px!important;right:14px!important;bottom:14px!important;top:auto!important;width:auto!important;max-width:none!important}
+  .info-dot:hover,.info-dot:focus-visible,.info-dot.is-open{transform:none!important}
+  .info-dot::after{
+    position:fixed!important;
+    left:14px!important;
+    right:14px!important;
+    bottom:calc(14px + env(safe-area-inset-bottom))!important;
+    top:auto!important;
+    width:auto!important;
+    max-width:none!important;
+    max-height:min(42vh,280px)!important;
+    overflow:auto!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:break-word!important;
+  }
   input,select,textarea{font-size:16px!important}
 }
 
