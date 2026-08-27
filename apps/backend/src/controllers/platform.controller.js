@@ -306,7 +306,25 @@ exports.me = async (req, res, next) => {
       account.status = "payment_pending";
       account.email_verified = true;
     }
-    res.json({ success: true, merchant: merchantView(account), bank: bankDetails() });
+    const adminToken =
+      account.status === "active" && account.store_id
+        ? jwt.sign(
+            {
+              merchant_id: account.id,
+              store_id: account.store_id,
+              role: "admin"
+            },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+          )
+        : null;
+
+    res.json({
+      success: true,
+      merchant: merchantView(account),
+      bank: bankDetails(),
+      admin_token: adminToken
+    });
   }catch(error){
     if(error?.status){
       return res.status(error.status).json({ success: false, error: error.message });

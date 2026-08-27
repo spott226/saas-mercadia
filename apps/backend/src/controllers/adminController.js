@@ -3,6 +3,8 @@ const Store = require("../models/storeModel");
 const Promotion = require("../models/promotionModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const db = require("../db/db");
+const supabaseAuth = require("../services/supabaseAuth");
 const {
   JWT_SECRET,
   JWT_EXPIRES_IN
@@ -171,23 +173,54 @@ exports.login = async (req,res)=>{
     }
 
     const user = await User.getUserByEmail(email);
+    let tokenPayload;
 
-    if(!user){
-      return res.status(401).json({error:"invalid credentials"});
-    }
+    if(user){
+      const valid = await bcrypt.compare(password,user.password);
 
-    const valid = await bcrypt.compare(password,user.password);
+      if(!valid){
+        return res.status(401).json({error:"invalid credentials"});
+      }
 
-    if(!valid){
-      return res.status(401).json({error:"invalid credentials"});
-    }
-
-    const token = jwt.sign(
-      {
+      tokenPayload = {
         user_id:user.id,
         store_id:user.store_id,
         role:"admin"
-      },
+      };
+    }else{
+      let authData;
+
+      try{
+        authData = await supabaseAuth.signIn(email,password);
+      }catch(error){
+        return res.status(401).json({error:"invalid credentials"});
+      }
+
+      const merchantResult = await db.query(
+        `SELECT id, store_id
+         FROM merchant_accounts
+         WHERE supabase_user_id = $1
+           AND email = $2
+           AND status = 'active'
+           AND store_id IS NOT NULL
+         LIMIT 1`,
+        [authData.user?.id, email]
+      );
+      const merchant = merchantResult.rows[0];
+
+      if(!merchant){
+        return res.status(403).json({error:"account is not active"});
+      }
+
+      tokenPayload = {
+        merchant_id:merchant.id,
+        store_id:merchant.store_id,
+        role:"admin"
+      };
+    }
+
+    const token = jwt.sign(
+      tokenPayload,
       JWT_SECRET,
       {
         expiresIn:
@@ -197,7 +230,7 @@ exports.login = async (req,res)=>{
 
     res.json({
       token,
-      store_id:user.store_id
+      store_id:tokenPayload.store_id
     });
 
   }catch(err){

@@ -145,6 +145,7 @@ async function loadAccount(){
   if(!token) return false;
   try{
     const data = await request("/platform/me", { headers: { Authorization: `Bearer ${token}` } });
+    saveSession(data);
     renderAccount(data);
     return true;
   }catch(error){

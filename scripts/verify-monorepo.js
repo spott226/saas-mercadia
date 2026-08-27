@@ -9,6 +9,8 @@ const requiredFiles = [
   "railway.toml",
   "apps/admin/package.json",
   "apps/admin/server.js",
+  "apps/admin/css/commerce-os.css",
+  "apps/admin/js/ui.js",
   "apps/admin/railway.toml",
   "apps/backend/package.json",
   "apps/backend/src/server.js",
