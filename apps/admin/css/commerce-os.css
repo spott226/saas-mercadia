@@ -465,10 +465,14 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
 .section-images-empty{grid-column:1/-1;border:1px dashed #cbd5e1;border-radius:13px;background:#f8fafc}
 
 @media(max-width:900px){
-  .menu-toggle{display:grid!important;position:fixed!important;top:14px!important;left:14px!important;z-index:1200!important}
-  .sidebar{width:min(84vw,310px)!important;padding:78px 18px 20px!important;transform:translateX(-105%);transition:transform .24s ease!important;z-index:1100!important}
+  /* Keep the drawer and its close control above the dimming layer. The old
+     order placed the overlay over the drawer on iOS, blurring it and
+     intercepting every tap. */
+  .menu-toggle{display:grid!important;position:fixed!important;top:14px!important;left:14px!important;z-index:1600!important}
+  .sidebar{width:min(84vw,310px)!important;padding:78px 18px 20px!important;transform:translateX(-105%);transition:transform .24s ease!important;z-index:1500!important}
   .sidebar.open{transform:translateX(0)!important}
-  .sidebar-overlay.active{display:block!important;background:rgba(8,17,31,.55)!important;backdrop-filter:blur(3px)!important}
+  .sidebar-overlay{z-index:1400!important}
+  .sidebar-overlay.active{display:block!important;background:rgba(8,17,31,.55)!important;-webkit-backdrop-filter:blur(3px)!important;backdrop-filter:blur(3px)!important}
   .logo::after{top:120px!important}
   .content{margin-left:0!important;padding:calc(78px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(36px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important}
   .header,.page-heading{align-items:flex-start!important;min-height:0!important;display:grid!important;grid-template-columns:1fr auto!important}
