@@ -22,6 +22,55 @@ function getAdminStoreId(){
 window.getAdminToken = getAdminToken;
 window.getAdminStoreId = getAdminStoreId;
 
+async function recoverAdminSession(){
+  if(getAdminToken() && getAdminStoreId()) return true;
+
+  const ownerToken = localStorage.getItem("mercadia_owner_token");
+  const refreshToken = localStorage.getItem("mercadia_owner_refresh");
+
+  if(!ownerToken && !refreshToken) return false;
+
+  const saveRecoveredSession = data => {
+    if(data.access_token) localStorage.setItem("mercadia_owner_token",data.access_token);
+    if(data.refresh_token) localStorage.setItem("mercadia_owner_refresh",data.refresh_token);
+    if(!data.admin_token || !data.merchant?.store_id) return false;
+
+    sessionStorage.setItem("token",data.admin_token);
+    sessionStorage.setItem("store_id",data.merchant.store_id);
+    localStorage.setItem(ADMIN_TOKEN_KEY,data.admin_token);
+    localStorage.setItem(ADMIN_STORE_KEY,data.merchant.store_id);
+    return true;
+  };
+
+  if(ownerToken){
+    try{
+      const response = await fetch(`${API}/platform/me`,{
+        headers:{ Authorization:`Bearer ${ownerToken}` }
+      });
+      if(response.ok && saveRecoveredSession(await response.json())) return true;
+    }catch(error){
+      console.warn("No se pudo renovar la sesión del panel",error);
+    }
+  }
+
+  if(refreshToken){
+    try{
+      const response = await fetch(`${API}/platform/refresh`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ refresh_token:refreshToken })
+      });
+      if(response.ok && saveRecoveredSession(await response.json())) return true;
+    }catch(error){
+      console.warn("No se pudo refrescar la sesión del panel",error);
+    }
+  }
+
+  return false;
+}
+
+window.adminSessionReady = recoverAdminSession();
+
 /* =========================
 LOGIN
 ========================= */
@@ -100,7 +149,7 @@ sessionStorage.removeItem("store_id");
 localStorage.removeItem(ADMIN_TOKEN_KEY);
 localStorage.removeItem(ADMIN_STORE_KEY);
 
-window.location.href = "login.html";
+window.location.href = "/?login=1";
 
 }
 
@@ -110,14 +159,9 @@ PROTEGER PÁGINAS
 ========================= */
 
 function protect(){
-
-const token = getAdminToken();
-
-if(!token){
-
-window.location.href = "login.html";
-
-}
+window.adminSessionReady.then(ready => {
+  if(!ready) window.location.href = "/?login=1";
+});
 
 }
 

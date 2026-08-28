@@ -212,7 +212,41 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try{
-    const authData = await supabaseAuth.signIn(email(req.body.email), String(req.body.password || ""));
+    const userEmail = email(req.body.email);
+    const password = String(req.body.password || "");
+
+    if(!userEmail || !password){
+      return res.status(400).json({ success:false, error:"Escribe correo y contraseña." });
+    }
+
+    const localResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1 AND role = 'superadmin' LIMIT 1",
+      [userEmail]
+    );
+    const localSuperadmin = localResult.rows[0];
+
+    if(localSuperadmin){
+      const validPassword = await bcrypt.compare(password,String(localSuperadmin.password || ""));
+
+      if(!validPassword){
+        return res.status(401).json({ success:false, error:"Correo o contraseña incorrectos." });
+      }
+
+      const token = jwt.sign(
+        { user_id:localSuperadmin.id, role:"superadmin" },
+        JWT_SECRET,
+        { expiresIn:JWT_EXPIRES_IN }
+      );
+
+      return res.json({
+        success:true,
+        role:"superadmin",
+        token,
+        redirect:"/platform.html"
+      });
+    }
+
+    const authData = await supabaseAuth.signIn(userEmail, password);
     const account = await accountByAuthUser(authData.user);
     if(!account){
       return res.status(403).json({ success: false, error: "La cuenta no está registrada en Mercadia." });
@@ -239,6 +273,7 @@ exports.login = async (req, res, next) => {
 
     res.json({
       success: true,
+      role:"admin",
       ...sessionPayload(authData),
       admin_token: adminToken,
       merchant: merchantView(account),
@@ -246,9 +281,14 @@ exports.login = async (req, res, next) => {
     });
   }catch(error){
     if(error?.status){
+      const detail = String(error.message || "").toLowerCase();
+      const publicMessage =
+        detail.includes("invalid") || detail.includes("credentials")
+          ? "Correo o contraseña incorrectos."
+          : String(error.message || "No se pudo iniciar sesión.");
       return res.status(error.status < 500 ? error.status : 502).json({
         success: false,
-        error: String(error.message || "No se pudo iniciar sesión.")
+        error: publicMessage
       });
     }
     next(error);

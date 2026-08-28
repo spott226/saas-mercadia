@@ -5,6 +5,16 @@ const REFRESH_KEY = "mercadia_owner_refresh";
 const authDialog = document.getElementById("auth-dialog");
 const resetDialog = document.getElementById("reset-dialog");
 const message = document.getElementById("auth-message");
+const guestNav = document.getElementById("guest-nav");
+const sessionNav = document.getElementById("session-nav");
+const platformToken =
+  sessionStorage.getItem("mercadia_platform_token") ||
+  localStorage.getItem("mercadia_platform_token");
+
+function setAuthenticatedHeader(authenticated){
+  guestNav?.classList.toggle("hidden",authenticated);
+  sessionNav?.classList.toggle("hidden",!authenticated);
+}
 
 function setMessage(text, ok = false){
   message.textContent = text || "";
@@ -33,6 +43,14 @@ async function request(path, options = {}){
 }
 
 function saveSession(data){
+  if(data.role === "superadmin" && data.token){
+    clearSession();
+    sessionStorage.setItem("mercadia_platform_token",data.token);
+    localStorage.setItem("mercadia_platform_token",data.token);
+    setAuthenticatedHeader(true);
+    return;
+  }
+
   if(data.access_token) localStorage.setItem(TOKEN_KEY, data.access_token);
   if(data.refresh_token) localStorage.setItem(REFRESH_KEY, data.refresh_token);
   if(data.admin_token){
@@ -42,6 +60,7 @@ function saveSession(data){
     localStorage.setItem("mercadia_admin_store_id", data.merchant.store_id);
     window.refreshMerchantNotifications?.();
   }
+  setAuthenticatedHeader(Boolean(data.access_token || localStorage.getItem(TOKEN_KEY)));
 }
 
 function clearSession(){
@@ -51,6 +70,9 @@ function clearSession(){
   sessionStorage.removeItem("store_id");
   localStorage.removeItem("mercadia_admin_token");
   localStorage.removeItem("mercadia_admin_store_id");
+  sessionStorage.removeItem("mercadia_platform_token");
+  localStorage.removeItem("mercadia_platform_token");
+  setAuthenticatedHeader(false);
 }
 
 function escapeHtml(value){
@@ -76,6 +98,7 @@ function renderAccount(data){
   document.getElementById("steps-view").classList.add("hidden");
   document.getElementById("account-view").classList.remove("hidden");
   document.getElementById("account-title").textContent = merchant.business_name;
+  setAuthenticatedHeader(true);
 
   if(merchant.status === "active"){
     document.getElementById("account-content").innerHTML = `
@@ -147,7 +170,11 @@ async function reportPayment(event){
 
 async function loadAccount(){
   const token = localStorage.getItem(TOKEN_KEY);
-  if(!token) return false;
+  if(!token){
+    setAuthenticatedHeader(false);
+    return false;
+  }
+  setAuthenticatedHeader(true);
   try{
     const data = await request("/platform/me", { headers: { Authorization: `Bearer ${token}` } });
     saveSession(data);
@@ -200,6 +227,10 @@ document.getElementById("login-form").addEventListener("submit", async event => 
     const body = Object.fromEntries(new FormData(event.currentTarget));
     const data = await request("/platform/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     saveSession(data);
+    if(data.role === "superadmin"){
+      location.href = data.redirect || "/platform.html";
+      return;
+    }
     authDialog.close();
     renderAccount(data);
   }catch(error){ setMessage(error.message); }
@@ -233,6 +264,11 @@ if(new URLSearchParams(location.search).get("verified") === "1"){
   );
 }
 
+if(new URLSearchParams(location.search).get("login") === "1"){
+  showTab("login");
+  authDialog.showModal();
+}
+
 document.getElementById("reset-form").addEventListener("submit", async event => {
   event.preventDefault();
   const resetMessage = document.getElementById("reset-message");
@@ -244,4 +280,9 @@ document.getElementById("reset-form").addEventListener("submit", async event => 
   }catch(error){ resetMessage.textContent = error.message; }
 });
 
-loadAccount();
+if(platformToken){
+  location.replace("/platform.html");
+}else{
+  setAuthenticatedHeader(Boolean(localStorage.getItem(TOKEN_KEY)));
+  loadAccount();
+}

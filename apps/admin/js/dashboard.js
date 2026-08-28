@@ -1,5 +1,7 @@
 import { getProducts } from "./api.js";
 
+await window.adminSessionReady;
+
 const API_URL =
   window.MERCADIA_CONFIG?.API_URL ||
   "https://mercadia-back-production.up.railway.app/api";
@@ -13,7 +15,7 @@ const store =
 if (!store || !token) {
 
   window.location =
-    "login.html";
+    "/?login=1";
 
 }
 

@@ -36,7 +36,7 @@ async function loadAccounts(){
       </div></article>`).join(""):"<div class='status-card'><h2>No hay cuentas registradas</h2></div>";
     bindActions();
   }catch(error){
-    if(/token|access/i.test(error.message)){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/admin/login.html");return;}
+    if(/token|access/i.test(error.message)){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/?login=1");return;}
     list.innerHTML=`<p class="form-message">${escapeHtml(error.message)}</p>`;
   }
 }
@@ -54,5 +54,5 @@ function bindActions(){
   }));
 }
 document.getElementById("refresh-accounts").addEventListener("click",loadAccounts);
-logout.addEventListener("click",()=>{sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/admin/login.html");});
-if(getToken())loadAccounts();else location.replace("/admin/login.html");
+logout.addEventListener("click",()=>{sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.replace("/?login=1");});
+if(getToken())loadAccounts();else location.replace("/?login=1");

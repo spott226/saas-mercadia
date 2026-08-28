@@ -2,6 +2,8 @@ const API_URL =
   window.MERCADIA_CONFIG?.API_URL ||
   "https://mercadia-back-production.up.railway.app/api";
 
+await window.adminSessionReady;
+
 const BACKEND_ORIGIN =
   window.MERCADIA_CONFIG?.BACKEND_ORIGIN ||
   API_URL.replace(/\/api\/?$/, "") ||
@@ -15,7 +17,7 @@ const token =
 
 if(!token){
 
-  window.location = "login.html";
+  window.location = "/?login=1";
 
 }
 

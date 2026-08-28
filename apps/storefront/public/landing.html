@@ -16,9 +16,12 @@
 <body data-pwa-context="platform">
   <header class="topbar">
     <a class="brand" href="/"><img src="/icons/mercadia-app.png" alt=""><span>Mercadia</span></a>
-    <nav>
+    <nav id="guest-nav">
       <button class="link-button" data-open="login">Iniciar sesión</button>
       <button class="primary small" data-open="register">Crear cuenta</button>
+    </nav>
+    <nav id="session-nav" class="hidden" aria-label="Sesión activa">
+      <a class="link-button" href="#account-view">Mi cuenta</a>
     </nav>
   </header>
 
