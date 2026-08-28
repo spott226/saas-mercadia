@@ -77,6 +77,8 @@ i
 
 <div id="store-message" class="admin-message" role="status"></div>
 
+<button type="button" id="mobile-preview-toggle" class="mobile-preview-toggle">Ver cambios en vivo</button>
+
 <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
 <a id="store-preview-link" class="action-btn" href="#" target="_blank" rel="noopener">Ver tienda publicada</a>
 </div>
@@ -87,6 +89,7 @@ i
 <h3>Vista previa en vivo</h3>
 <p>Los cambios del editor aparecen aquí antes de guardarlos.</p>
 </div>
+<button type="button" id="mobile-preview-close" class="mobile-preview-close" aria-label="Cerrar vista previa">×</button>
 <div class="preview-device-switch" role="group" aria-label="Tamaño de vista previa">
 <button type="button" class="preview-device active" data-preview-size="desktop">Escritorio</button>
 <button type="button" class="preview-device" data-preview-size="mobile">Teléfono</button>
@@ -183,6 +186,8 @@ i
 
 <form id="experience-form">
 
+<div class="editor-step-heading"><span>1</span><div><strong>Elige el tipo de negocio</strong><small>Esto cambia la estructura, navegación y llamadas a la acción de tu página.</small></div></div>
+
 <div class="form-grid settings-form-grid">
 
 <div class="field-group">
@@ -191,6 +196,7 @@ i
 <option value="ecommerce">Ecommerce</option>
 <option value="restaurant">Restaurante</option>
 <option value="appointments">Citas</option>
+<option value="professional">Servicios profesionales</option>
 </select>
 </div>
 
@@ -204,7 +210,7 @@ i
 <div id="template-preview" class="template-preview"></div>
 
 <div class="template-editor site-editor">
-<div class="template-editor-title">Marca y portada principal</div>
+<div class="editor-step-heading"><span>2</span><div><strong>Completa tu portada</strong><small>Nombre, mensaje principal y estilo visual.</small></div></div>
 <div class="form-grid template-editor-grid">
 <div class="field-group">
 <label for="site-theme">Estilo general</label>
@@ -237,10 +243,8 @@ i
 </div>
 </div>
 
-<div id="section-editor" class="template-editor">
-<div class="template-editor-title">
-Editor de secciones
-</div>
+<details id="section-editor" class="template-editor advanced-editor">
+<summary><span>3</span><div><strong>Personaliza las secciones</strong><small>Opcional: cambia el orden, textos, imágenes y composición.</small></div></summary>
 
 <div class="section-builder-toolbar">
 <div id="section-list" class="section-builder-list" role="tablist" aria-label="Secciones de la página"></div>
@@ -326,7 +330,7 @@ Elegir imágenes
 </div>
 
 </div>
-</div>
+</details>
 
 <div class="form-actions">
 <button type="submit" id="save-experience-btn">

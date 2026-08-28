@@ -2101,9 +2101,89 @@ background:var(--primary);
 color:var(--background);
 }
 
+/* Cada plantilla cambia composición, ritmo y jerarquía; no sólo la paleta. */
+body.template-restaurant-3 .hero{height:360px;border-radius:0 0 48px 48px;overflow:hidden}
+body.template-restaurant-3 .storefront-split-showcase{grid-template-columns:minmax(280px,.82fr) minmax(0,1.18fr);gap:0;padding:0;overflow:hidden;border-radius:30px;background:#fff}
+body.template-restaurant-3 .storefront-split-copy{justify-content:center;padding:clamp(30px,6vw,72px)}
+body.template-restaurant-3 .storefront-split-image{min-height:520px;border-radius:0}
+body.template-restaurant-3 .storefront-category-grid{display:flex;justify-content:center;flex-wrap:wrap}
+body.template-restaurant-3 .storefront-category-grid a{min-width:auto;padding:13px 22px;border-radius:999px}
+
+body.template-restaurant-4{--background:#fff8e7;--card:#fff;--text:#201109;--primary:#e54819;--border:#ffce7a}
+body.template-restaurant-4 .hero{height:390px;transform:skewY(-2deg);transform-origin:left top;margin-bottom:42px}
+body.template-restaurant-4 .hero>*{transform:skewY(2deg)}
+body.template-restaurant-4 .storefront-image-banner{border:4px solid #201109;border-radius:22px;box-shadow:10px 10px 0 #ffbd2e}
+body.template-restaurant-4 #products{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+body.template-restaurant-4 .product-card{display:grid;grid-template-columns:112px 1fr;align-items:center;border:2px solid #201109;border-radius:18px;box-shadow:5px 5px 0 #ffbd2e}
+body.template-restaurant-4 .product-card img{height:112px;border-radius:12px}
+
+body.template-restaurant-5{--background:#f4f0e8;--card:#f4f0e8;--text:#1f2822;--primary:#47604d;--border:#b9c0b5}
+body.template-restaurant-5 .hero{height:610px;width:min(1320px,calc(100% - 48px));margin:24px auto 0;border-radius:2px}
+body.template-restaurant-5 .storefront-editorial-banner{display:grid;grid-template-columns:.65fr 1.35fr;gap:clamp(30px,8vw,120px);text-align:left;border-top:1px solid;border-bottom:1px solid;border-radius:0}
+body.template-restaurant-5 #products{grid-template-columns:1fr 1fr;gap:0 36px}
+body.template-restaurant-5 .product-card{display:grid;grid-template-columns:150px 1fr;gap:18px;border-width:0 0 1px;border-radius:0;padding:18px 0}
+
+body.template-appointments-2{--background:#f4f8f6;--primary:#276b61;--border:#cfe0dc}
+body.template-appointments-2 .hero{height:360px;border-radius:0 0 52% 12%;overflow:hidden}
+body.template-appointments-2 .storefront-split-showcase{grid-template-columns:1fr 1fr;align-items:stretch;padding:0;border-radius:40px;background:#dfeee9}
+body.template-appointments-2 .storefront-split-copy{padding:clamp(36px,7vw,88px)}
+body.template-appointments-2 .storefront-split-image{min-height:500px;border-radius:40px}
+body.template-appointments-2 .product-card{border-radius:24px;padding:14px}
+
+body.template-appointments-3{--background:#f7f7ff;--primary:#5b4de8;--border:#dedafc}
+body.template-appointments-3 .hero{height:330px}
+body.template-appointments-3 .storefront-image-banner{min-height:360px;border-radius:32px;background:#17152e}
+body.template-appointments-3 .storefront-promo-strip{position:sticky;top:74px;z-index:12;border-radius:999px;box-shadow:0 12px 32px rgba(40,30,120,.16)}
+body.template-appointments-3 #products{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+body.template-appointments-3 .product-card{display:grid;grid-template-columns:96px 1fr;border-radius:18px}
+body.template-appointments-3 .product-card img{height:96px;border-radius:12px}
+
+body.template-appointments-4{--background:#f4f8fc;--primary:#1769aa;--border:#cbddea}
+body.template-appointments-4 header{border-bottom:3px solid #1769aa}
+body.template-appointments-4 .hero{height:400px}
+body.template-appointments-4 .storefront-editorial-banner{display:grid;grid-template-columns:1fr 1fr;align-items:center;text-align:left;border-left:7px solid #1769aa;border-radius:6px}
+body.template-appointments-4 .storefront-category-grid{grid-template-columns:repeat(3,1fr)}
+body.template-appointments-4 .storefront-category-grid a{min-height:120px;justify-content:flex-start;border-radius:6px}
+
+body.storefront-professional{--background:#f5f7fb;--card:#fff;--card-elevated:#edf2f8;--text:#101828;--muted:#5d6879;--primary:#2959c7;--border:#d8e0ec}
+body.storefront-professional .product-card{background:var(--card);border:1px solid var(--border)}
+body.storefront-professional .product-btn,body.storefront-professional .promotion-button{background:var(--primary);color:#fff}
+body.template-professional-1 .hero{height:420px}
+body.template-professional-1 .storefront-split-showcase{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);border-left:8px solid var(--primary);border-radius:8px}
+body.template-professional-1 .storefront-split-copy{padding:clamp(34px,6vw,76px)}
+body.template-professional-1 .storefront-category-grid{grid-template-columns:repeat(3,1fr)}
+body.template-professional-1 .storefront-category-grid a{min-height:140px;align-items:flex-end;border-radius:8px}
+
+body.template-professional-2{--background:#0c1019;--card:#151b28;--card-elevated:#1b2333;--text:#f6f7fb;--muted:#a8b0c0;--primary:#7c5cff;--border:#2a3447}
+body.template-professional-2 header,body.template-professional-2 footer{background:#0c1019;color:#fff;border-color:#2a3447}
+body.template-professional-2 .hero{height:70vh;min-height:520px}
+body.template-professional-2 .storefront-editorial-banner{text-align:left;padding:clamp(55px,10vw,140px) max(24px,8vw);border-radius:0;background:transparent}
+body.template-professional-2 .storefront-editorial-banner h2{max-width:850px;font-size:clamp(44px,8vw,100px);line-height:.92}
+body.template-professional-2 .storefront-image-banner{min-height:620px;border-radius:4px}
+body.template-professional-2 #products{grid-template-columns:repeat(2,1fr)}
+body.template-professional-2 .product-card{border-radius:4px}
+
+body.template-professional-3{--background:#fff;--card:#fff;--text:#17211d;--primary:#087f5b;--border:#d2e3dc}
+body.template-professional-3 .hero{height:320px}
+body.template-professional-3 .storefront-promo-strip{margin-top:28px;border-radius:12px;background:#087f5b;color:#fff}
+body.template-professional-3 .storefront-split-showcase{grid-template-columns:1.2fr .8fr;border:1px solid #bcd8ce;border-radius:12px;box-shadow:18px 18px 0 #e0f2eb}
+body.template-professional-3 .storefront-split-copy{padding:clamp(34px,6vw,80px)}
+body.template-professional-3 #products{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+body.template-professional-3 .product-card{border-radius:12px;border-left:5px solid #087f5b}
+
+body.template-fashion-editorial-1 .storefront-split-showcase{grid-template-columns:.8fr 1.2fr;padding:0;border-radius:0}
+body.template-fashion-editorial-1 .storefront-split-copy{padding:clamp(40px,8vw,100px)}
+body.template-fashion-editorial-1 .storefront-split-image{min-height:620px;border-radius:0}
+body.template-boutique-grid-1 #products{grid-template-columns:repeat(4,1fr);gap:12px}
+body.template-boutique-grid-1 .product-card{border-radius:0}
+body.template-mobile-first-1 main{max-width:760px;margin-inline:auto}
+body.template-mobile-first-1 .hero{height:330px}
+body.template-mobile-first-1 #products{grid-template-columns:repeat(2,1fr);gap:10px}
+
 @media(max-width:700px){
 body.storefront-restaurant .hero,
-body.storefront-appointments .hero{
+body.storefront-appointments .hero,
+body.storefront-professional .hero{
 height:390px;
 }
 
@@ -2111,6 +2191,27 @@ body.storefront-restaurant .product-card,
 body.storefront-appointments .product-card{
 padding:7px;
 }
+
+body.template-restaurant-3 .storefront-split-showcase,
+body.template-appointments-2 .storefront-split-showcase,
+body.template-professional-1 .storefront-split-showcase,
+body.template-professional-3 .storefront-split-showcase{grid-template-columns:1fr}
+body.template-restaurant-3 .storefront-split-image,
+body.template-appointments-2 .storefront-split-image{min-height:330px}
+body.template-restaurant-4 .product-card,
+body.template-appointments-3 .product-card,
+body.template-restaurant-5 .product-card{grid-template-columns:92px 1fr}
+body.template-restaurant-4 .product-card img,
+body.template-appointments-3 .product-card img{height:92px}
+body.template-restaurant-5 .hero{width:calc(100% - 24px);height:460px;margin-top:12px}
+body.template-restaurant-5 .storefront-editorial-banner,
+body.template-appointments-4 .storefront-editorial-banner{grid-template-columns:1fr}
+body.template-restaurant-5 #products,
+body.template-professional-2 #products{grid-template-columns:1fr}
+body.template-appointments-4 .storefront-category-grid,
+body.template-professional-1 .storefront-category-grid{grid-template-columns:1fr}
+body.template-professional-2 .storefront-editorial-banner h2{font-size:clamp(40px,14vw,70px)}
+body.template-boutique-grid-1 #products{grid-template-columns:repeat(2,1fr)}
 }
 
 /* =====================================================

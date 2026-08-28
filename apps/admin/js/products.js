@@ -42,6 +42,42 @@ VARIANTES ERP
 
 let variants = [];
 
+const itemTypeInput = document.getElementById("item-type");
+const trackInventoryInput = document.getElementById("track-inventory");
+const variantsSection = document.getElementById("variants-section");
+const simpleInventory = document.getElementById("simple-inventory");
+const simpleStockFields = document.getElementById("simple-stock-fields");
+
+function hasVariantMode(){
+  return document.querySelector('[name="selling-mode"]:checked')?.value === "variants";
+}
+
+function updateProductMode(){
+  const isService = itemTypeInput.value === "service";
+  const isDigital = itemTypeInput.value === "digital";
+  const advanced = hasVariantMode();
+
+  variantsSection.classList.toggle("is-hidden",!advanced);
+  simpleInventory.classList.toggle("is-hidden",advanced);
+
+  if(isService || isDigital){
+    trackInventoryInput.checked = false;
+    trackInventoryInput.disabled = true;
+  }else{
+    trackInventoryInput.disabled = false;
+  }
+
+  simpleStockFields.classList.toggle("is-hidden",!trackInventoryInput.checked);
+  document.getElementById("item-type-help").textContent = isService
+    ? "Para consultas, citas, instalaciones o cualquier trabajo que agendas."
+    : isDigital
+      ? "Para archivos, accesos, cursos o contenido que no usa existencias físicas."
+      : "Ideal para artículos que entregas, envías o recogen en tu negocio.";
+  document.getElementById("inventory-copy").textContent = trackInventoryInput.checked
+    ? "Mercadia avisará cuando queden pocas unidades."
+    : "Se podrá solicitar sin limitar la cantidad disponible.";
+}
+
 function addVariant(){
 
   const color =
@@ -84,32 +120,9 @@ function addVariant(){
   VALIDACIÓN ERP
   ========================= */
 
-  if(!editingProduct){
-
-    if(
-      !color ||
-      !sizesInput ||
-      !price
-    ){
-
-      alert(
-        "Completa color, tallas y precio"
-      );
-
-      return;
-
-    }
-
-    if(!imageInput.files[0]){
-
-      alert(
-        "Selecciona imagen para ese color"
-      );
-
-      return;
-
-    }
-
+  if(!color || !sizesInput || !price){
+    alert("Completa el nombre de la opción, sus valores y el precio");
+    return;
   }
 
 
@@ -147,15 +160,14 @@ function addVariant(){
   VALIDAR DUPLICADOS
   ========================= */
 
-  const exists =
-    variants.find(
-      v => v.color === color
-    );
+  const exists = variants.find(
+    v => v.color.trim().toLowerCase() === color.trim().toLowerCase()
+  );
 
   if(exists){
 
     alert(
-      "Ese color ya fue agregado"
+      "Ese grupo de opciones ya fue agregado"
     );
 
     return;
@@ -170,7 +182,8 @@ function addVariant(){
   const sizes =
     sizesInput
       .split(",")
-      .map(s => s.trim());
+      .map(s => s.trim())
+      .filter(Boolean);
 
   variants.push({
 
@@ -267,7 +280,7 @@ function renderVariants(){
 
         <br>
 
-        Tallas:
+        Opciones:
         ${v.sizes.join(", ")}
 
         <br>
@@ -379,9 +392,11 @@ async function loadProducts(){
         );
 
       const stockStatus =
-        totalStock <= 5
-        ? `<span class="stock-low">Bajo</span>`
-        : `<span class="stock-ok">OK</span>`;
+        p.track_inventory === false
+        ? `<span class="stock-ok">Sin límite</span>`
+        : totalStock <= 5
+          ? `<span class="stock-low">Bajo</span>`
+          : `<span class="stock-ok">OK</span>`;
 
       rowsHTML += `
       <tr>
@@ -390,7 +405,7 @@ async function loadProducts(){
 
         <td>$${p.price || 0}</td>
 
-        <td>${totalStock}</td>
+        <td>${p.track_inventory === false ? "No aplica" : totalStock}</td>
 
         <td>${stockStatus}</td>
 
@@ -417,7 +432,10 @@ async function loadProducts(){
             ${p.featured},
             ${JSON.stringify(
               p.variants || []
-            )}
+            )},
+            ${JSON.stringify(p.item_type || "product")},
+            ${p.has_variants === true},
+            ${p.track_inventory !== false}
           )'
         >
         Editar
@@ -727,6 +745,13 @@ async function createProduct(){
     featured
   );
 
+  const itemType = itemTypeInput.value;
+  const usesVariants = hasVariantMode();
+  const trackInventory = itemType === "product" && trackInventoryInput.checked;
+  formData.append("item_type",itemType);
+  formData.append("has_variants",usesVariants);
+  formData.append("track_inventory",trackInventory);
+
 
   /* =========================
   VARIANTES
@@ -734,7 +759,23 @@ async function createProduct(){
 
   let finalVariants = [];
 
-  variants.forEach(v=>{
+  if(usesVariants && variants.length === 0){
+    alert("Agrega al menos una opción o selecciona ‘una sola opción’.");
+    return;
+  }
+
+  if(!usesVariants){
+    finalVariants.push({
+      color:"Única",
+      size:"Única",
+      price,
+      stock:trackInventory ? (document.getElementById("simple-stock").value || 0) : 0,
+      sku:document.getElementById("simple-sku").value.trim(),
+      cost:document.getElementById("simple-cost").value || 0
+    });
+  }
+
+  if(usesVariants) variants.forEach(v=>{
 
     v.sizes.forEach(size=>{
 
@@ -768,7 +809,7 @@ async function createProduct(){
   IMÁGENES COLOR
   ========================= */
 
-  variants.forEach(v=>{
+  if(usesVariants) variants.forEach(v=>{
 
     if(v.image){
 
@@ -781,14 +822,14 @@ async function createProduct(){
 
   });
 
-  if(
+  if(usesVariants &&
     variants.some(v=>v.image)
   ){
 
     formData.append(
       "image_colors",
       JSON.stringify(
-        variants.map(v => v.color)
+        variants.filter(v => v.image).map(v => v.color)
       )
     );
 
@@ -875,6 +916,11 @@ async function createProduct(){
     )
     .innerText = "Agregar";
 
+  document.querySelector('[name="selling-mode"][value="simple"]').checked = true;
+  itemTypeInput.value = "product";
+  trackInventoryInput.checked = true;
+  updateProductMode();
+
   loadProducts();
 
 }
@@ -891,7 +937,10 @@ function editProduct(
   price,
   category,
   featured,
-  productVariants
+  productVariants,
+  itemType = "product",
+  hasVariants = false,
+  trackInventory = true
 ){
 
   editingProduct = id;
@@ -915,6 +964,14 @@ function editProduct(
   document.getElementById(
     "featured"
   ).checked = featured;
+
+  itemTypeInput.value = itemType || "product";
+  const inferredVariants = hasVariants === true || productVariants.some(v =>
+    String(v.color || "").toLowerCase() !== "única" ||
+    String(v.size || "").toLowerCase() !== "única"
+  );
+  document.querySelector(`[name="selling-mode"][value="${inferredVariants ? "variants" : "simple"}"]`).checked = true;
+  trackInventoryInput.checked = trackInventory !== false;
 
   const grouped = {};
 
@@ -952,7 +1009,15 @@ function editProduct(
   });
 
   variants =
-    Object.values(grouped);
+    inferredVariants ? Object.values(grouped) : [];
+
+  if(!inferredVariants && productVariants[0]){
+    document.getElementById("simple-stock").value = productVariants[0].stock || 0;
+    document.getElementById("simple-sku").value = productVariants[0].sku || "";
+    document.getElementById("simple-cost").value = productVariants[0].cost || 0;
+  }
+
+  updateProductMode();
 
   renderVariants();
 
@@ -962,6 +1027,11 @@ function editProduct(
     )
     .innerText =
       "Guardar cambios";
+
+  document.getElementById("product-form")?.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
 
 }
 
@@ -999,4 +1069,38 @@ window.deleteProduct = deleteProduct;
 
 window.createProduct = createProduct;
 
+document.querySelectorAll('[name="selling-mode"]').forEach(input =>
+  input.addEventListener("change",updateProductMode)
+);
+itemTypeInput.addEventListener("change",updateProductMode);
+trackInventoryInput.addEventListener("change",updateProductMode);
+
+async function loadProductContext(){
+  try{
+    const response = await fetch(`${API_URL}/api/admin/store`,{
+      headers:{ Authorization:`Bearer ${token}` }
+    });
+    const data = await response.json();
+    const type = data.store?.business_type || "ecommerce";
+    const nameLabel = document.querySelector('label[for="name"]');
+    const nameInput = document.getElementById("name");
+    const categoryInput = document.getElementById("category");
+
+    if(type === "restaurant"){
+      nameLabel.textContent = "Nombre del platillo o producto";
+      nameInput.placeholder = "Ej. Hamburguesa especial";
+      categoryInput.placeholder = "Ej. Bebidas, entradas o postres";
+    }else if(type === "appointments" || type === "professional"){
+      nameLabel.textContent = "Nombre del servicio";
+      nameInput.placeholder = "Ej. Consulta inicial";
+      categoryInput.placeholder = "Ej. Consultas, paquetes o tratamientos";
+      itemTypeInput.value = "service";
+    }
+  }catch(error){
+    console.warn("No se pudo personalizar el formulario",error);
+  }
+  updateProductMode();
+}
+
+await loadProductContext();
 loadProducts();

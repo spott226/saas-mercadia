@@ -242,7 +242,10 @@ exports.createProduct = async (
       image,
       category,
       store_id,
-      featured
+      featured,
+      item_type,
+      has_variants,
+      track_inventory
     } = data;
 
     const result = await db.query(
@@ -255,9 +258,12 @@ exports.createProduct = async (
         image,
         category,
         store_id,
-        featured
+        featured,
+        item_type,
+        has_variants,
+        track_inventory
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *
       `,
       [
@@ -267,7 +273,10 @@ exports.createProduct = async (
         image,
         category,
         store_id,
-        featured || false
+        featured || false,
+        item_type || "product",
+        has_variants === true,
+        track_inventory !== false
       ]
     );
 
@@ -304,7 +313,10 @@ exports.updateProduct = async (
       price,
       image,
       category,
-      featured
+      featured,
+      item_type,
+      has_variants,
+      track_inventory
     } = data;
 
     const result = await db.query(
@@ -316,9 +328,12 @@ exports.updateProduct = async (
         price=$3,
         image=COALESCE($4,image),
         category=$5,
-        featured=COALESCE($6,featured)
-      WHERE id=$7
-      AND store_id=$8
+        featured=COALESCE($6,featured),
+        item_type=COALESCE($7,item_type),
+        has_variants=COALESCE($8,has_variants),
+        track_inventory=COALESCE($9,track_inventory)
+      WHERE id=$10
+      AND store_id=$11
       RETURNING *
       `,
       [
@@ -328,6 +343,9 @@ exports.updateProduct = async (
         image,
         category,
         featured,
+        item_type,
+        has_variants,
+        track_inventory,
         id,
         store_id
       ]

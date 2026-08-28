@@ -267,7 +267,7 @@ export async function loadProducts(slug){
           </div>
 
           <button class="product-btn add-cart">
-            Añadir
+            ${product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir"}
           </button>
 
         </div>
@@ -319,6 +319,25 @@ export async function loadProducts(slug){
             product.variants
           );
 
+          const defaultVariant = product.variants?.[0];
+          if(product.has_variants === false && defaultVariant){
+            addToCart({
+              id:product.id,
+              variant_id:defaultVariant.id || defaultVariant.variant_id,
+              color:null,
+              size:null,
+              name:product.name,
+              price:Number(defaultVariant.price || product.price || 0),
+              image:imageUrl,
+              qty:1
+            });
+            btn.textContent = product.item_type === "service" ? "Solicitud agregada" : "Agregado";
+            setTimeout(() => {
+              btn.textContent = product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir";
+            },1200);
+            return;
+          }
+
           // ================================
           // HAS VARIANTS
           // ================================
@@ -357,11 +376,11 @@ export async function loadProducts(slug){
                       <div>
 
                         <div class="variant-option-title">
-                          ${String(getVariantSize(v, index)).toUpperCase()}
+                          ${String(v.color || getVariantSize(v, index)).toUpperCase()}
                         </div>
 
                         <div class="variant-option-meta">
-                          Talla
+                          ${getVariantSize(v,index)}
                         </div>
 
                         <div class="variant-option-price">
@@ -399,7 +418,7 @@ export async function loadProducts(slug){
                     </div>
 
                     <div class="variant-subtitle">
-                      Selecciona talla
+                      Selecciona una opción
                     </div>
 
                   </div>

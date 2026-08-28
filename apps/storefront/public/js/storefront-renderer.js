@@ -100,6 +100,21 @@ const DEFAULT_PRESETS = {
     { type: "editorial_banner", kicker: "Atencion personalizada", title: "Una agenda limpia para vender servicios", text: "Pensada para dentistas, clinicas, spas, barbers y asesores." },
     { type: "category_tiles", title: "Categorias de servicio" },
     { type: "product_grid", title: "Agenda tu cita" }
+  ],
+  professional_1: [
+    { type: "split_showcase", kicker: "Experiencia comprobada", title: "Una solución profesional para tus clientes", text: "Explica con claridad qué haces, para quién y por qué deben elegirte." },
+    { type: "category_tiles", title: "Áreas de especialidad" },
+    { type: "product_grid", title: "Servicios disponibles" }
+  ],
+  professional_2: [
+    { type: "editorial_banner", kicker: "Ideas que avanzan", title: "Trabajo creativo con resultados", text: "Una portada editorial que pone el mensaje y los proyectos al frente." },
+    { type: "image_banner", kicker: "Portafolio", title: "Proyectos que hablan por nosotros", cta: "Ver proyectos", layout: "gallery" },
+    { type: "product_grid", title: "Soluciones y paquetes" }
+  ],
+  professional_3: [
+    { type: "promo_strip", title: "Respuesta rápida", text: "Cuéntanos qué necesitas y recibe una propuesta personalizada." },
+    { type: "split_showcase", kicker: "Hecho a tu medida", title: "De una necesidad a una solución clara", text: "Ideal para construcción, eventos, consultoría, mantenimiento y servicios por proyecto." },
+    { type: "product_grid", title: "¿Qué necesitas cotizar?" }
   ]
 };
 
@@ -113,7 +128,7 @@ class EcommerceTemplate{
   applyShell(){
     document.body.classList.add(
       "storefront-ecommerce",
-      `template-${this.getTemplateKey()}`
+      `template-${this.getTemplateKey().replaceAll("_","-")}`
     );
 
     setText("storefront-featured-title","Productos destacados");
@@ -228,6 +243,20 @@ class AppointmentsTemplate extends EcommerceTemplate{
     setText("storefront-primary-link","Servicios");
     setText("storefront-category-link","Categorias");
     setText("storefront-hero-cta","Ver servicios");
+  }
+}
+
+class ProfessionalTemplate extends EcommerceTemplate{
+  applyShell(){
+    document.body.classList.add(
+      "storefront-professional",
+      `template-${this.getTemplateKey().replaceAll("_","-")}`
+    );
+
+    setText("storefront-featured-title","Servicios y soluciones");
+    setText("storefront-primary-link","Servicios");
+    setText("storefront-category-link","Especialidades");
+    setText("storefront-hero-cta","Solicitar cotización");
   }
 }
 
@@ -583,6 +612,10 @@ export async function renderStorefrontExperience({ store, slug }){
     businessType === "appointments"
   ){
     template = new AppointmentsTemplate({ store, slug });
+  }else if(
+    businessType === "professional"
+  ){
+    template = new ProfessionalTemplate({ store, slug });
   }else{
     template = new EcommerceTemplate({ store, slug });
   }

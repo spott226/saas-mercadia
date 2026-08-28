@@ -549,7 +549,7 @@ i
 Agregar producto
 </h3>
 <p>
-Llena la información principal y luego agrega variantes con stock para que el producto quede listo para vender.
+Elige qué vendes. Mercadia mostrará solamente los campos que necesitas.
 </p>
 </div>
 <button class="info-dot" type="button" aria-label="Información para agregar producto" data-info="El botón Agregar guarda el producto con sus variantes. Si editas un producto, este mismo botón cambia a Guardar cambios.">
@@ -561,6 +561,30 @@ i
 id="product-form"
 onsubmit="event.preventDefault(); createProduct();"
 >
+
+<div class="product-setup-grid">
+<div class="field-group">
+<label for="item-type">¿Qué vas a publicar?</label>
+<select id="item-type">
+<option value="product">Producto físico</option>
+<option value="service">Servicio o cita</option>
+<option value="digital">Producto digital</option>
+</select>
+<small id="item-type-help">Ideal para artículos que se entregan o recogen.</small>
+</div>
+
+<fieldset class="selling-mode" id="selling-mode">
+<legend>¿Tiene opciones diferentes?</legend>
+<label class="choice-card">
+<input type="radio" name="selling-mode" value="simple" checked>
+<span><strong>No, es una sola opción</strong><small>Ej. café americano, consulta, collar único.</small></span>
+</label>
+<label class="choice-card">
+<input type="radio" name="selling-mode" value="variants">
+<span><strong>Sí, tiene variantes</strong><small>Ej. tallas, colores, sabores o duraciones.</small></span>
+</label>
+</fieldset>
+</div>
 
 <div class="form-grid product-main-grid">
 
@@ -632,6 +656,18 @@ Destacado
 
 </div>
 
+<div id="simple-inventory" class="simple-inventory-panel">
+<div class="simple-inventory-head">
+<div><strong>Disponibilidad</strong><small id="inventory-copy">Controla cuántas unidades puedes vender.</small></div>
+<label class="inventory-switch"><input type="checkbox" id="track-inventory" checked> Controlar existencias</label>
+</div>
+<div class="form-grid simple-stock-grid" id="simple-stock-fields">
+<div class="field-group"><label for="simple-stock">Cantidad disponible</label><input id="simple-stock" type="number" min="0" value="0"></div>
+<div class="field-group"><label for="simple-sku">Código o SKU <span class="optional-label">Opcional</span></label><input id="simple-sku" placeholder="Ej. PROD-001"></div>
+<div class="field-group"><label for="simple-cost">Costo interno <span class="optional-label">Opcional</span></label><input id="simple-cost" type="number" min="0" step="0.01" placeholder="0.00"></div>
+</div>
+</div>
+
 <div class="form-actions">
 <button
 id="save-btn"
@@ -646,7 +682,7 @@ Agregar
 
 <!-- VARIANTES ERP -->
 
-<div class="subsection-card">
+<div class="subsection-card variants-section is-hidden" id="variants-section">
 
 <div class="section-heading compact">
 <div>
@@ -654,7 +690,7 @@ Agregar
 Variantes e inventario
 </h3>
 <p>
-Agrega cada color con sus tallas, SKU, costo, precio y stock inicial.
+Agrega solamente las opciones que cambien, como talla, color, sabor o duración.
 </p>
 </div>
 <button class="info-dot" type="button" aria-label="Información de variantes" data-info="Cada variante representa combinaciones de color y talla. El stock inicial alimenta inventario; usa una imagen por color para que el catálogo se vea claro.">
@@ -666,23 +702,23 @@ i
 
 <div class="field-group">
 <label for="variant-color">
-Color
+Nombre de la opción
 </label>
 
 <input
 id="variant-color"
-placeholder="Color (ej: rojo)"
+placeholder="Ej. Rojo, 60 minutos o Chocolate"
 >
 </div>
 
 <div class="field-group">
 <label for="variant-size">
-Tallas
+Valores
 </label>
 
 <input
 id="variant-size"
-placeholder="Tallas (ej: S,M,L)"
+placeholder="Ej. S,M,L o Individual,Familiar"
 >
 </div>
 
@@ -735,7 +771,7 @@ placeholder="Costo"
 
 <div class="field-group">
 <label for="variant-image">
-Imagen por color
+Imagen de esta opción <span class="optional-label">Opcional</span>
 </label>
 
 <input

@@ -213,6 +213,38 @@ const templatesByType = {
         { type:"product_grid", title:"Agenda tu cita" }
       ]
     }
+  ],
+  professional:[
+    {
+      value:"professional_1",
+      label:"Perfil profesional",
+      description:"Presenta confianza, especialidades y servicios con una portada corporativa.",
+      sections:[
+        { type:"split_showcase", eyebrow:"Experiencia comprobada", title:"Una solución profesional para tus clientes", text:"Explica con claridad qué haces, para quién y por qué deben elegirte." },
+        { type:"category_tiles", title:"Áreas de especialidad" },
+        { type:"product_grid", title:"Servicios disponibles" }
+      ]
+    },
+    {
+      value:"professional_2",
+      label:"Agencia y portafolio",
+      description:"Una estructura visual y creativa para agencias, estudios, freelancers y proyectos.",
+      sections:[
+        { type:"editorial_banner", eyebrow:"Ideas que avanzan", title:"Trabajo creativo con resultados", text:"Una portada editorial que pone el mensaje y los proyectos al frente." },
+        { type:"image_banner", eyebrow:"Portafolio", title:"Proyectos que hablan por nosotros", cta:"Ver proyectos", layout:"gallery" },
+        { type:"product_grid", title:"Soluciones y paquetes" }
+      ]
+    },
+    {
+      value:"professional_3",
+      label:"Cotización directa",
+      description:"Página enfocada en convertir visitas en solicitudes y conversaciones por WhatsApp.",
+      sections:[
+        { type:"promo_strip", title:"Respuesta rápida", text:"Cuéntanos qué necesitas y recibe una propuesta personalizada." },
+        { type:"split_showcase", eyebrow:"Hecho a tu medida", title:"De una necesidad a una solución clara", text:"Ideal para construcción, eventos, consultoría, mantenimiento y servicios por proyecto." },
+        { type:"product_grid", title:"¿Qué necesitas cotizar?" }
+      ]
+    }
   ]
 };
 
@@ -221,6 +253,7 @@ let promotions = [];
 let workingSections = [];
 let activeSectionIndex = 0;
 let workingSiteSettings = {};
+let livePreviewTimer = null;
 
 const message =
   document.getElementById("store-message");
@@ -713,6 +746,11 @@ function postLivePreview(){
   },window.location.origin);
 }
 
+function scheduleLivePreview(delay = 70){
+  clearTimeout(livePreviewTimer);
+  livePreviewTimer = setTimeout(postLivePreview,delay);
+}
+
 
 function updateTemplatePreview(){
   if(!templatePreview) return;
@@ -737,7 +775,7 @@ function updateTemplatePreview(){
 
   renderSectionList();
   renderSectionImages();
-  postLivePreview();
+  scheduleLivePreview();
 }
 
 
@@ -1450,7 +1488,40 @@ document.querySelectorAll("[data-preview-size]").forEach(button => {
   });
 });
 
-livePreview?.addEventListener("load",postLivePreview);
+function openMobilePreview(){
+  document.body.classList.add("mobile-preview-open");
+  document.querySelectorAll("[data-preview-size]").forEach(item =>
+    item.classList.toggle("active",item.dataset.previewSize === "mobile")
+  );
+  document.getElementById("live-preview-shell")?.classList.add("mobile");
+  postLivePreview();
+}
+
+function closeMobilePreview(){
+  document.body.classList.remove("mobile-preview-open");
+}
+
+document.getElementById("mobile-preview-toggle")?.addEventListener("click",openMobilePreview);
+document.getElementById("mobile-preview-close")?.addEventListener("click",closeMobilePreview);
+document.addEventListener("keydown",event => {
+  if(event.key === "Escape") closeMobilePreview();
+});
+
+window.addEventListener("message",event => {
+  if(
+    event.origin === window.location.origin &&
+    event.source === livePreview?.contentWindow &&
+    event.data?.type === "mercadia:preview-ready"
+  ){
+    postLivePreview();
+  }
+});
+
+livePreview?.addEventListener("load",() => {
+  postLivePreview();
+  setTimeout(postLivePreview,180);
+  setTimeout(postLivePreview,600);
+});
 
 promotionForm.addEventListener(
   "submit",

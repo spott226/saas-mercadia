@@ -1,5 +1,8 @@
 import { getStore } from "./api.js";
 import { renderStorefrontExperience } from "./storefront-renderer.js";
+
+let editorDraftStore = null;
+let storeInitialized = false;
 import { initPromotionPopup } from "./promotion-popup.js";
 import { initChatbot } from "./chatbot.js";
 
@@ -305,6 +308,22 @@ initPromotionPopup(slug);
 
 initChatbot();
 
+storeInitialized = true;
+
+if(editorDraftStore){
+  await applyEditorPreview(editorDraftStore);
+}
+
+if(
+  window.parent !== window &&
+  new URLSearchParams(window.location.search).has("editor")
+){
+  window.parent.postMessage(
+    { type:"mercadia:preview-ready" },
+    window.location.origin
+  );
+}
+
 }catch(error){
 
 console.error("STORE INIT ERROR:", error);
@@ -375,7 +394,13 @@ window.addEventListener("message",event => {
     return;
   }
 
-  applyEditorPreview(event.data.store).catch(error =>
+  editorDraftStore = event.data.store;
+
+  if(!storeInitialized){
+    return;
+  }
+
+  applyEditorPreview(editorDraftStore).catch(error =>
     console.error("STORE PREVIEW ERROR:",error)
   );
 });

@@ -208,6 +208,16 @@ exports.createProduct = async (req, res) => {
       req.body.featured === true ||
       req.body.featured === "on";
 
+    const itemType = ["product","service","digital"].includes(req.body.item_type)
+      ? req.body.item_type
+      : "product";
+    const hasVariants = req.body.has_variants === "true" || req.body.has_variants === true;
+    const trackInventory = !(
+      req.body.track_inventory === "false" ||
+      req.body.track_inventory === false ||
+      itemType === "service"
+    );
+
     const data = {
 
       name: req.body.name,
@@ -225,7 +235,10 @@ exports.createProduct = async (req, res) => {
 
       store_id,
 
-      featured
+      featured,
+      item_type:itemType,
+      has_variants:hasVariants,
+      track_inventory:trackInventory
 
     };
 
@@ -320,12 +333,7 @@ exports.createProduct = async (req, res) => {
         const variant =
           variants[i];
 
-        if (
-          !variant.color ||
-          !variant.size
-        ) {
-          continue;
-        }
+        if (!variant.color || !variant.size) continue;
 
         await Product.createVariant({
 
@@ -410,6 +418,16 @@ exports.updateProduct = async (
 
     }
 
+    const itemType = ["product","service","digital"].includes(req.body.item_type)
+      ? req.body.item_type
+      : undefined;
+    const hasVariants = req.body.has_variants === undefined
+      ? undefined
+      : req.body.has_variants === "true" || req.body.has_variants === true;
+    const trackInventory = req.body.track_inventory === undefined
+      ? undefined
+      : req.body.track_inventory === "true" || req.body.track_inventory === true;
+
     const data = {
 
       name:
@@ -426,7 +444,10 @@ exports.updateProduct = async (
 
       image,
 
-      featured
+      featured,
+      item_type:itemType,
+      has_variants:hasVariants,
+      track_inventory:itemType === "service" ? false : trackInventory
 
     };
 

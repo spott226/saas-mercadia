@@ -157,8 +157,8 @@ function renderProduct(product){
 
   const variantLabel = createText(
     "p",
-    product.variants?.length
-      ? "Selecciona talla"
+    product.has_variants === true && product.variants?.length
+      ? "Selecciona una opción"
       : "Disponible",
     "product-detail-variant-label"
   );
@@ -174,7 +174,7 @@ function renderProduct(product){
   const variantGrid = document.createElement("div");
   variantGrid.className = "product-detail-variants";
 
-  if(product.variants?.length){
+  if(product.has_variants === true && product.variants?.length){
     product.variants.forEach((variant, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -189,7 +189,7 @@ function renderProduct(product){
 
       const detail = document.createElement("span");
       detail.className = "variant-pill-detail";
-      detail.textContent = "Talla";
+      detail.textContent = variant.color || "Opción";
 
       button.append(size, detail);
 
@@ -213,12 +213,17 @@ function renderProduct(product){
   const addButton = document.createElement("button");
   addButton.type = "button";
   addButton.className = "product-detail-add";
-  addButton.textContent = "Anadir al carrito";
+  const actionLabel = product.item_type === "service"
+    ? "Solicitar servicio"
+    : product.item_type === "digital"
+      ? "Comprar"
+      : "Añadir al carrito";
+  addButton.textContent = actionLabel;
 
   addButton.addEventListener("click", () => {
     const image = getProductImage(product, selectedVariant);
     const variantName =
-      selectedVariant
+      product.has_variants === true && selectedVariant
         ? getVariantSize(selectedVariant)
         : "";
 
@@ -228,8 +233,8 @@ function renderProduct(product){
         selectedVariant?.id ||
         selectedVariant?.variant_id ||
         null,
-      color: selectedVariant?.color || null,
-      size: selectedVariant ? getVariantSize(selectedVariant) : null,
+      color: product.has_variants === true ? selectedVariant?.color || null : null,
+      size: product.has_variants === true && selectedVariant ? getVariantSize(selectedVariant) : null,
       name: variantName
         ? `${product.name} - ${variantName}`
         : product.name,
@@ -241,14 +246,16 @@ function renderProduct(product){
     addButton.textContent = "Agregado";
 
     setTimeout(() => {
-      addButton.textContent = "Anadir al carrito";
+      addButton.textContent = actionLabel;
     }, 1200);
   });
 
   const description = createText(
     "p",
     product.description ||
-      "Producto disponible para pedido. Selecciona una variante y agrega al carrito para coordinar tu compra por WhatsApp.",
+      product.item_type === "service"
+        ? "Servicio disponible para solicitud. Agrégalo y coordina fecha y horario con el negocio."
+        : "Disponible para pedido. Agrégalo y coordina los detalles con la tienda.",
     "product-detail-description"
   );
 

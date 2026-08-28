@@ -38,6 +38,34 @@ async function ensureCustomerAccountSchema(){
 
       await pool.query(
         `
+        ALTER TABLE products
+          ADD COLUMN IF NOT EXISTS item_type VARCHAR(20) NOT NULL DEFAULT 'product',
+          ADD COLUMN IF NOT EXISTS has_variants BOOLEAN NOT NULL DEFAULT FALSE,
+          ADD COLUMN IF NOT EXISTS track_inventory BOOLEAN NOT NULL DEFAULT TRUE
+        `
+      );
+
+      await pool.query(
+        `
+        UPDATE products p
+        SET has_variants = TRUE
+        WHERE has_variants = FALSE
+          AND EXISTS (
+            SELECT 1
+            FROM product_variants pv
+            WHERE pv.product_id = p.id
+            GROUP BY pv.product_id
+            HAVING COUNT(*) > 1
+              OR BOOL_OR(
+                LOWER(COALESCE(pv.color, '')) NOT IN ('', 'unica', 'única')
+                OR LOWER(COALESCE(pv.size, '')) NOT IN ('', 'unica', 'única')
+              )
+          )
+        `
+      );
+
+      await pool.query(
+        `
         CREATE TABLE IF NOT EXISTS merchant_accounts (
           id BIGSERIAL PRIMARY KEY,
           supabase_user_id UUID UNIQUE,

@@ -67,6 +67,7 @@ exports.getInventory = async (
         ON p.id = pv.product_id
 
         WHERE p.store_id = $1
+        AND p.track_inventory = TRUE
 
         ORDER BY pv.id DESC
         `,

@@ -62,7 +62,8 @@ const promotionPayload = (
 const allowedBusinessTypes = [
   "ecommerce",
   "restaurant",
-  "appointments"
+  "appointments",
+  "professional"
 ];
 
 const allowedHomepageSectionTypes = new Set([

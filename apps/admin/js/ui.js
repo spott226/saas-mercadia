@@ -38,15 +38,57 @@
     if(!link.querySelector('.nav-icon')) link.insertAdjacentHTML('afterbegin', `<span class="nav-icon">${svg(name)}</span>`);
   });
 
+  let helpPopover = null;
+  let helpOwner = null;
+
+  const closeHelp = () => {
+    helpPopover?.remove();
+    helpPopover = null;
+    helpOwner?.classList.remove('is-open');
+    helpOwner?.setAttribute('aria-expanded','false');
+    helpOwner = null;
+  };
+
+  const placeHelp = () => {
+    if(!helpPopover || !helpOwner) return;
+    if(matchMedia('(max-width: 700px)').matches){
+      helpPopover.style.left = '14px';
+      helpPopover.style.right = '14px';
+      helpPopover.style.bottom = 'calc(14px + env(safe-area-inset-bottom))';
+      helpPopover.style.top = 'auto';
+      helpPopover.style.width = 'auto';
+      return;
+    }
+    const rect = helpOwner.getBoundingClientRect();
+    const width = Math.min(330,window.innerWidth - 28);
+    const left = Math.max(14,Math.min(rect.right - width,window.innerWidth - width - 14));
+    const estimatedHeight = helpPopover.offsetHeight || 110;
+    const below = rect.bottom + 10;
+    const top = below + estimatedHeight < window.innerHeight
+      ? below
+      : Math.max(14,rect.top - estimatedHeight - 10);
+    Object.assign(helpPopover.style,{left:`${left}px`,right:'auto',top:`${top}px`,bottom:'auto',width:`${width}px`});
+  };
+
   document.querySelectorAll('.info-dot').forEach(button => {
     button.innerHTML = `<span class="help-icon">${svg('help')}</span>`;
     button.setAttribute('role','button');
     button.setAttribute('tabindex','0');
     button.setAttribute('aria-label','Mostrar ayuda');
+    button.setAttribute('aria-expanded','false');
     button.addEventListener('click', event => {
       event.stopPropagation();
-      document.querySelectorAll('.info-dot.is-open').forEach(item => item !== button && item.classList.remove('is-open'));
-      button.classList.toggle('is-open');
+      if(helpOwner === button){ closeHelp(); return; }
+      closeHelp();
+      helpOwner = button;
+      helpOwner.classList.add('is-open');
+      helpOwner.setAttribute('aria-expanded','true');
+      helpPopover = document.createElement('div');
+      helpPopover.className = 'help-popover';
+      helpPopover.setAttribute('role','status');
+      helpPopover.textContent = button.dataset.info || 'Ayuda no disponible.';
+      document.body.appendChild(helpPopover);
+      placeHelp();
     });
     button.addEventListener('keydown', event => {
       if(event.key === 'Enter' || event.key === ' '){
@@ -56,7 +98,9 @@
     });
   });
 
-  document.addEventListener('click', () => document.querySelectorAll('.info-dot.is-open').forEach(item => item.classList.remove('is-open')));
+  document.addEventListener('click', closeHelp);
+  window.addEventListener('resize',placeHelp);
+  window.addEventListener('scroll',closeHelp,{passive:true});
 
   const toggle = document.querySelector('.menu-toggle');
   if(toggle) toggle.innerHTML = `<span class="toggle-icon">${svg('menu')}</span>`;

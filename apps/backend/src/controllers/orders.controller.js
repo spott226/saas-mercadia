@@ -235,7 +235,7 @@ exports.createOrder = async (
       const variantResult =
         await client.query(
           `
-          SELECT pv.*, p.name
+          SELECT pv.*, p.name, p.track_inventory, p.has_variants
           FROM product_variants pv
           JOIN products p
           ON p.id = pv.product_id
@@ -264,7 +264,7 @@ exports.createOrder = async (
         Number(variant.stock || 0) -
         Number(variant.reserved_stock || 0);
 
-      if(availableStock < item.quantity){
+      if(variant.track_inventory !== false && availableStock < item.quantity){
         const error = new Error(
           `Stock insuficiente para ${variant.name}`
         );
@@ -296,19 +296,23 @@ exports.createOrder = async (
           order.id,
           variant.id,
           variant.name,
-          `${variant.color} / ${variant.size}`,
+          variant.has_variants === false
+            ? "Opción única"
+            : `${variant.color} / ${variant.size}`,
           item.quantity,
           variant.price,
           subtotal
         ]
       );
 
-      await client.query(
-        `UPDATE product_variants
-         SET reserved_stock = COALESCE(reserved_stock, 0) + $1
-         WHERE id = $2`,
-        [item.quantity, variant.id]
-      );
+      if(variant.track_inventory !== false){
+        await client.query(
+          `UPDATE product_variants
+           SET reserved_stock = COALESCE(reserved_stock, 0) + $1
+           WHERE id = $2`,
+          [item.quantity, variant.id]
+        );
+      }
 
     }
 
@@ -666,7 +670,7 @@ exports.updateOrderStatus = async (
         const variantResult =
           await client.query(
             `
-            SELECT pv.*
+            SELECT pv.*, p.track_inventory
             FROM product_variants pv
             JOIN products p ON p.id = pv.product_id
             WHERE pv.id = $1 AND p.store_id = $2
@@ -685,6 +689,8 @@ exports.updateOrderStatus = async (
           );
 
         }
+
+        if(variant.track_inventory === false) continue;
 
         if(Number(variant.reserved_stock || 0) < Number(item.quantity)){
 
@@ -753,7 +759,7 @@ exports.updateOrderStatus = async (
     ){
       for(const item of items){
         const variantResult = await client.query(
-          `SELECT pv.*
+           `SELECT pv.*, p.track_inventory
            FROM product_variants pv
            JOIN products p ON p.id = pv.product_id
            WHERE pv.id = $1 AND p.store_id = $2
@@ -764,6 +770,7 @@ exports.updateOrderStatus = async (
         if(!variant){
           throw new Error("Variante no encontrada");
         }
+        if(variant.track_inventory === false) continue;
         const releaseQuantity = Math.min(
           Number(variant.reserved_stock || 0),
           Number(item.quantity)
@@ -790,7 +797,7 @@ exports.updateOrderStatus = async (
         const variantResult =
           await client.query(
             `
-            SELECT pv.*
+            SELECT pv.*, p.track_inventory
             FROM product_variants pv
             JOIN products p ON p.id = pv.product_id
             WHERE pv.id = $1 AND p.store_id = $2
@@ -809,6 +816,8 @@ exports.updateOrderStatus = async (
           );
 
         }
+
+        if(variant.track_inventory === false) continue;
 
         const previousStock =
           Number(variant.stock);
