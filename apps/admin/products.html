@@ -467,8 +467,8 @@ align-items:flex-start;
 
 </style>
 
-<link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260828-2">
+<link rel="stylesheet" href="css/admin-polish.css?v=20260828-3">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260828-3">
 <script defer src="js/ui.js?v=20260828-2"></script>
 
 </head>
@@ -602,7 +602,7 @@ required
 
 <div class="field-group">
 <label for="price">
-Precio base
+Precio público
 </label>
 
 <input
@@ -611,6 +611,7 @@ type="number"
 placeholder="0.00"
 required
 >
+<small>Lo que pagará tu cliente. Si usas variantes, cada una puede tener su propio precio.</small>
 </div>
 
 <div class="field-group">
@@ -664,7 +665,7 @@ Destacado
 <div class="form-grid simple-stock-grid" id="simple-stock-fields">
 <div class="field-group"><label for="simple-stock">Cantidad disponible</label><input id="simple-stock" type="number" min="0" value="0"></div>
 <div class="field-group"><label for="simple-sku">Código o SKU <span class="optional-label">Opcional</span></label><input id="simple-sku" placeholder="Ej. PROD-001"></div>
-<div class="field-group"><label for="simple-cost">Costo interno <span class="optional-label">Opcional</span></label><input id="simple-cost" type="number" min="0" step="0.01" placeholder="0.00"></div>
+<div class="field-group"><label for="simple-cost">Costo para ti <span class="optional-label">Opcional</span></label><input id="simple-cost" type="number" min="0" step="0.01" placeholder="0.00"><small>Lo que te cuesta comprarlo o producirlo. Se usa para calcular inversión y ganancia.</small></div>
 </div>
 </div>
 
@@ -693,7 +694,7 @@ Variantes e inventario
 Agrega solamente las opciones que cambien, como talla, color, sabor o duración.
 </p>
 </div>
-<button class="info-dot" type="button" aria-label="Información de variantes" data-info="Cada variante representa combinaciones de color y talla. El stock inicial alimenta inventario; usa una imagen por color para que el catálogo se vea claro.">
+<button class="info-dot" type="button" aria-label="Información de variantes" data-info="Cada opción puede tener su propio precio público, cantidad, código y costo para ti. Con esos datos Mercadia calcula el valor y la ganancia potencial del inventario.">
 i
 </button>
 </div>
@@ -724,19 +725,19 @@ placeholder="Ej. S,M,L o Individual,Familiar"
 
 <div class="field-group">
 <label for="variant-price">
-Precio variante
+Precio público
 </label>
 
 <input
 id="variant-price"
 type="number"
-placeholder="Precio variante"
+placeholder="Lo que pagará tu cliente"
 >
 </div>
 
 <div class="field-group">
 <label for="variant-stock">
-Stock inicial
+Cantidad disponible
 </label>
 
 <input
@@ -748,7 +749,7 @@ placeholder="Stock inicial"
 
 <div class="field-group">
 <label for="variant-sku">
-SKU
+Código o SKU
 </label>
 
 <input
@@ -759,13 +760,13 @@ placeholder="SKU"
 
 <div class="field-group">
 <label for="variant-cost">
-Costo
+Costo para ti
 </label>
 
 <input
 id="variant-cost"
 type="number"
-placeholder="Costo"
+placeholder="Lo que te cuesta"
 >
 </div>
 
@@ -893,7 +894,7 @@ Nombre
 </th>
 
 <th>
-Precio
+Precio público
 </th>
 
 <th>
@@ -971,7 +972,7 @@ overlay.classList.toggle("active");
 <script src="config.js"></script>
 <script src="js/auth.js"></script>
 
-<script type="module" src="js/products.js"></script>
+<script type="module" src="js/products.js?v=20260828-3"></script>
 
 </body>
 </html>

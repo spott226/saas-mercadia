@@ -338,8 +338,8 @@ font-size:26px;
 
 </style>
 
-<link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260828-2">
+<link rel="stylesheet" href="css/admin-polish.css?v=20260828-3">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260828-3">
 <script defer src="js/ui.js?v=20260828-2"></script>
 
 </head>
@@ -423,6 +423,33 @@ Descargar reporte
 </div>
 
 
+<section class="dashboard-period" aria-label="Periodo de estadísticas">
+<div class="period-heading">
+<div>
+<strong>Periodo de estadísticas</strong>
+<small>Consulta ventas, pedidos y utilidad por mes, año, día o rango.</small>
+</div>
+<button class="info-dot" type="button" aria-label="Información del periodo" data-info="El periodo se aplica a ventas, pedidos, utilidad y ticket promedio. Las existencias muestran el inventario actual.">i</button>
+</div>
+<div class="period-controls">
+<select id="report-period" aria-label="Tipo de periodo">
+<option value="month">Por mes</option>
+<option value="year">Por año</option>
+<option value="date">Fecha específica</option>
+<option value="custom">Rango de fechas</option>
+<option value="all">Todo el historial</option>
+</select>
+<input id="report-month" type="month" aria-label="Mes">
+<input id="report-year" type="number" min="2020" max="2100" aria-label="Año">
+<input id="report-date" type="date" aria-label="Fecha específica">
+<input id="report-from" type="date" aria-label="Fecha inicial">
+<input id="report-to" type="date" aria-label="Fecha final">
+<button id="apply-period" type="button">Aplicar</button>
+</div>
+<p class="period-summary" id="period-summary">Mostrando el mes actual</p>
+</section>
+
+
 <!-- KPI CARDS -->
 
 <div class="stats-grid">
@@ -434,7 +461,7 @@ Descargar reporte
 </h3>
 
 <p>
-Pedidos
+Pedidos del periodo
 </p>
 
 </div>
@@ -442,12 +469,25 @@ Pedidos
 
 <div class="stat-card">
 
-<h3 id="month-sales">
+<h3 id="period-sales">
+$0
+</h3>
+
+<p id="period-sales-label">
+Ventas del periodo
+</p>
+
+</div>
+
+
+<div class="stat-card">
+
+<h3 id="period-profit">
 $0
 </h3>
 
 <p>
-Ventas del mes
+Utilidad bruta estimada
 </p>
 
 </div>
@@ -486,7 +526,68 @@ $0
 </h3>
 
 <p>
-Ingresos totales
+Ventas del historial
+</p>
+
+</div>
+
+
+<div class="stat-card">
+
+<h3 id="inventory-cost">
+$0
+</h3>
+
+<p>
+Inventario al costo
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="inventory-profit">
+$0
+</h3>
+
+<p>
+Ganancia potencial
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="inventory-revenue">
+$0
+</h3>
+
+<p>
+Venta potencial del stock
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="available-units">
+0
+</h3>
+
+<p>
+Unidades disponibles
+</p>
+
+</div>
+
+<div class="stat-card">
+
+<h3 id="active-variants">
+0
+</h3>
+
+<p>
+Opciones activas con stock
 </p>
 
 </div>
@@ -570,8 +671,8 @@ No hay pedidos
 <div class="section-card">
 
 <div class="section-title">
-Productos destacados
-<button class="info-dot" type="button" aria-label="Información de productos destacados" data-info="Lista productos marcados como destacados; si no hay destacados, muestra algunos productos recientes.">
+Más vendidos del periodo
+<button class="info-dot" type="button" aria-label="Información de productos más vendidos" data-info="Ordena los productos por unidades vendidas dentro del periodo seleccionado.">
 i
 </button>
 </div>
@@ -626,7 +727,7 @@ overlay.classList.toggle("active");
 
 </script>
 
-<script type="module" src="js/dashboard.js"></script>
+<script type="module" src="js/dashboard-v2.js?v=20260828-3"></script>
 
 </body>
 </html>

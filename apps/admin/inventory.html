@@ -405,8 +405,8 @@ font-size:24px;
 
 </style>
 
-<link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260828-2">
+<link rel="stylesheet" href="css/admin-polish.css?v=20260828-3">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260828-3">
 <script defer src="js/ui.js?v=20260828-2"></script>
 
 </head>
@@ -471,7 +471,7 @@ Cerrar sesión
 Inventario ERP
 </h1>
 
-<button class="info-dot page-info-dot" type="button" aria-label="Información de inventario" data-info="Controla stock por variante, valor de inventario calculado con costo por stock y movimientos de entrada o salida.">
+<button class="info-dot page-info-dot" type="button" aria-label="Información de inventario" data-info="Consulta cuánto tienes invertido, cuánto podrías vender y la ganancia potencial de tus existencias. Los cálculos usan cantidad disponible, precio público y costo para ti.">
 i
 </button>
 
@@ -483,7 +483,7 @@ i
 <div class="kpi-card">
 
 <div class="kpi-title">
-Valor inventario
+Valor al costo
 </div>
 
 <div
@@ -543,6 +543,16 @@ id="total-stock"
 
 </div>
 
+<div class="kpi-card">
+<div class="kpi-title">Venta potencial</div>
+<div class="kpi-value" id="potential-revenue">$0</div>
+</div>
+
+<div class="kpi-card">
+<div class="kpi-title">Ganancia potencial</div>
+<div class="kpi-value" id="potential-profit">$0</div>
+</div>
+
 </div>
 
 
@@ -594,7 +604,7 @@ ADJUSTMENT
 
 <div class="table-title">
 Inventario actual
-<button class="info-dot" type="button" aria-label="Información de inventario actual" data-info="Muestra cada variante con su stock, costo y valor calculado como stock por costo.">
+<button class="info-dot" type="button" aria-label="Información de inventario actual" data-info="Valor al costo es cantidad por costo para ti. Ganancia potencial es cantidad por la diferencia entre precio público y costo.">
 i
 </button>
 </div>
@@ -629,13 +639,13 @@ SKU
 Stock
 </th>
 
-<th>
-Costo
-</th>
+<th>Precio público</th>
 
-<th>
-Valor
-</th>
+<th>Costo para ti</th>
+
+<th>Valor al costo</th>
+
+<th>Ganancia potencial</th>
 
 <th>
 Estado
@@ -649,7 +659,7 @@ Estado
 
 <tr>
 
-<td colspan="9" class="empty">
+<td colspan="11" class="empty">
 Cargando inventario...
 </td>
 
@@ -759,7 +769,7 @@ overlay.classList.toggle("active");
 <script src="config.js"></script>
 <script src="js/auth.js"></script>
 
-<script type="module" src="js/inventory.js"></script>
+<script type="module" src="js/inventory.js?v=20260828-3"></script>
 
 </body>
 </html>

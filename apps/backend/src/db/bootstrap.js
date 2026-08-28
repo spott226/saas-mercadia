@@ -47,6 +47,23 @@ async function ensureCustomerAccountSchema(){
 
       await pool.query(
         `
+        ALTER TABLE order_items
+          ADD COLUMN IF NOT EXISTS unit_cost NUMERIC(12,2)
+        `
+      );
+
+      await pool.query(
+        `
+        UPDATE order_items oi
+        SET unit_cost = COALESCE(pv.cost, 0)
+        FROM product_variants pv
+        WHERE oi.variant_id = pv.id
+          AND oi.unit_cost IS NULL
+        `
+      );
+
+      await pool.query(
+        `
         UPDATE products p
         SET has_variants = TRUE
         WHERE has_variants = FALSE

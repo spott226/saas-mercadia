@@ -69,7 +69,19 @@ function updateProductMode(){
     trackInventoryInput.disabled = false;
   }
 
-  simpleStockFields.classList.toggle("is-hidden",!trackInventoryInput.checked);
+  const stockField = document.getElementById("simple-stock")?.closest(".field-group");
+  const inventorySwitch = trackInventoryInput.closest(".inventory-switch");
+  stockField?.classList.toggle("is-hidden",!trackInventoryInput.checked);
+  simpleStockFields.classList.remove("is-hidden");
+  inventorySwitch?.classList.toggle("is-hidden",isService || isDigital);
+  const availabilityTitle = simpleInventory.querySelector(".simple-inventory-head strong");
+  if(availabilityTitle){
+    availabilityTitle.textContent = isService
+      ? "Costo del servicio"
+      : isDigital
+        ? "Datos del producto digital"
+        : "Disponibilidad";
+  }
   document.getElementById("item-type-help").textContent = isService
     ? "Para consultas, citas, instalaciones o cualquier trabajo que agendas."
     : isDigital
@@ -77,7 +89,7 @@ function updateProductMode(){
       : "Ideal para artículos que entregas, envías o recogen en tu negocio.";
   document.getElementById("inventory-copy").textContent = trackInventoryInput.checked
     ? "Mercadia avisará cuando queden pocas unidades."
-    : "Se podrá solicitar sin limitar la cantidad disponible.";
+    : "Agrega tu código y costo para calcular la utilidad, aunque no manejes existencias.";
 }
 
 function addVariant(){

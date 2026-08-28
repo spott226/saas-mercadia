@@ -288,9 +288,10 @@ exports.createOrder = async (
           variant_name,
           quantity,
           price,
+          unit_cost,
           subtotal
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
         `,
         [
           order.id,
@@ -301,6 +302,7 @@ exports.createOrder = async (
             : `${variant.color} / ${variant.size}`,
           item.quantity,
           variant.price,
+          variant.cost || 0,
           subtotal
         ]
       );
@@ -495,9 +497,13 @@ exports.getOrders = async (
       const itemsResult =
         await pool.query(
           `
-          SELECT *
-          FROM order_items
-          WHERE order_id = ANY($1)
+          SELECT
+            oi.*,
+            COALESCE(oi.unit_cost, pv.cost, 0) AS unit_cost
+          FROM order_items oi
+          LEFT JOIN product_variants pv
+            ON pv.id = oi.variant_id
+          WHERE oi.order_id = ANY($1)
           `,
           [orderIds]
         );

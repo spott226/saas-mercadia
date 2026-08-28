@@ -57,6 +57,8 @@ exports.getInventory = async (
 
           p.image,
 
+          p.has_variants,
+
           (
             pv.stock * pv.cost
           ) AS inventory_value
@@ -83,7 +85,7 @@ exports.getInventory = async (
     ========================= */
 
     const totalVariants =
-      inventory.length;
+      inventory.filter(item => item.has_variants === true).length;
 
     const lowStock =
       inventory.filter(
@@ -109,6 +111,26 @@ exports.getInventory = async (
         0
       );
 
+    const potentialRevenue =
+      inventory.reduce(
+        (acc,item) =>
+          acc + (
+            Number(item.available_stock || 0) *
+            Number(item.price || 0)
+          ),
+        0
+      );
+
+    const potentialProfit =
+      inventory.reduce(
+        (acc,item) =>
+          acc + (
+            Number(item.available_stock || 0) *
+            (Number(item.price || 0) - Number(item.cost || 0))
+          ),
+        0
+      );
+
 
     res.json({
 
@@ -122,7 +144,11 @@ exports.getInventory = async (
 
         totalInventoryValue,
 
-        totalStock
+        totalStock,
+
+        potentialRevenue,
+
+        potentialProfit
 
       },
 

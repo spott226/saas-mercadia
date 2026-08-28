@@ -194,6 +194,20 @@ function getAvailableStock(item){
 
 }
 
+function getPotentialRevenue(item){
+
+  return getAvailableStock(item) *
+    toNumber(item.price);
+
+}
+
+function getPotentialProfit(item){
+
+  return getAvailableStock(item) *
+    (toNumber(item.price) - toNumber(item.cost));
+
+}
+
 
 function getInventoryKPIs(data){
 
@@ -207,7 +221,7 @@ function getInventoryKPIs(data){
       ),
 
     totalVariants:
-      data.length,
+      data.filter(item => item.has_variants === true).length,
 
     lowStock:
       data.filter(
@@ -219,6 +233,18 @@ function getInventoryKPIs(data){
       data.reduce(
         (acc,item)=>
           acc + getAvailableStock(item),
+        0
+      ),
+
+    potentialRevenue:
+      data.reduce(
+        (acc,item) => acc + getPotentialRevenue(item),
+        0
+      ),
+
+    potentialProfit:
+      data.reduce(
+        (acc,item) => acc + getPotentialProfit(item),
         0
       )
 
@@ -254,6 +280,16 @@ function renderInventoryKPIs(data){
   ).innerText =
     kpis.totalStock || 0;
 
+  document.getElementById(
+    "potential-revenue"
+  ).innerText =
+    formatMoney(kpis.potentialRevenue);
+
+  document.getElementById(
+    "potential-profit"
+  ).innerText =
+    formatMoney(kpis.potentialProfit);
+
 }
 
 
@@ -274,7 +310,7 @@ function renderInventoryTable(data){
 
     table.innerHTML = `
     <tr>
-      <td colspan="9" class="empty">
+      <td colspan="11" class="empty">
         No hay inventario
       </td>
     </tr>
@@ -321,6 +357,9 @@ function renderInventoryTable(data){
     const inventoryValue =
       getInventoryValue(item);
 
+    const potentialProfit =
+      getPotentialProfit(item);
+
     const stockClass =
       stock <= 5
       ? "stock-low"
@@ -363,9 +402,9 @@ function renderInventoryTable(data){
       </td>
 
       <td>
-        ${item.color || "-"}
-        /
-        ${item.size || "-"}
+        ${item.has_variants === true
+          ? `${item.color || "-"} / ${item.size || "-"}`
+          : "Sin variantes"}
       </td>
 
       <td>
@@ -385,6 +424,15 @@ function renderInventoryTable(data){
           white-space:nowrap;
         "
       >
+        ${formatMoney(item.price)}
+      </td>
+
+      <td
+        style="
+          min-width:120px;
+          white-space:nowrap;
+        "
+      >
         ${formatMoney(cost)}
       </td>
 
@@ -396,6 +444,16 @@ function renderInventoryTable(data){
         "
       >
         ${formatMoney(inventoryValue)}
+      </td>
+
+      <td
+        style="
+          min-width:160px;
+          font-weight:700;
+          white-space:nowrap;
+        "
+      >
+        ${formatMoney(potentialProfit)}
       </td>
 
       <td>
