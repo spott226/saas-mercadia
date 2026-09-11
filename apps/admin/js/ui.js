@@ -33,9 +33,24 @@
   document.body.classList.toggle('os-login', page === 'login');
   document.body.dataset.adminPage = page;
 
+  const menu = document.querySelector('.sidebar .menu');
+  if(menu?.querySelector('a[href="store.html"]')){
+    const storeLink = menu.querySelector('a[href="store.html"]');
+    const ordersLink = menu.querySelector('a[href="orders.html"]');
+    if(ordersLink) ordersLink.after(storeLink);
+    let previous = storeLink;
+    for(const [name,label] of [['business','Datos del negocio'],['promotions','Promociones']]){
+      let link = menu.querySelector(`a[href="${name}.html"]`);
+      if(!link){ link = document.createElement('a'); link.href = `${name}.html`; link.textContent = label; }
+      previous.after(link);
+      if(page === name){ link.classList.add('active'); link.setAttribute('aria-current','page'); }
+      previous = link;
+    }
+  }
+
   document.querySelectorAll('.menu a').forEach(link => {
     const name = link.getAttribute('href')?.split('.')[0] || 'dashboard';
-    if(!link.querySelector('.nav-icon')) link.insertAdjacentHTML('afterbegin', `<span class="nav-icon">${svg(name)}</span>`);
+    if(!link.querySelector('.nav-icon')) link.insertAdjacentHTML('afterbegin', `<span class="nav-icon">${svg(name === 'business' ? 'store' : name === 'promotions' ? 'external' : name)}</span>`);
   });
 
   let helpPopover = null;
@@ -129,7 +144,7 @@
     ['.login-box button','login']
   ];
   buttonRules.forEach(([selector,name]) => document.querySelectorAll(selector).forEach(button => {
-    if(!button.querySelector('.button-icon')) button.insertAdjacentHTML('afterbegin', `<span class="button-icon">${svg(name)}</span>`);
+    if(!button.querySelector('.button-icon')) button.insertAdjacentHTML('afterbegin', `<span class="button-icon">${svg(name === 'business' ? 'store' : name === 'promotions' ? 'external' : name)}</span>`);
   }));
 
   const decorateActions = root => {

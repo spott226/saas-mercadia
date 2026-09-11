@@ -241,3 +241,9 @@ export async function createOrder(orderData){
   });
 
 }
+
+export async function getActivePromotions(slug){
+  if(!slug) return [];
+  const response = await apiRequest(`/stores/${encodeURIComponent(slug)}/promotions`);
+  return response?.success && Array.isArray(response.promotions) ? response.promotions : [];
+}

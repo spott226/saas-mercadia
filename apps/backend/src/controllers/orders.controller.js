@@ -161,7 +161,7 @@ exports.createOrder = async (
     const storeResult =
       await client.query(
         `
-        SELECT id
+        SELECT id, whatsapp
         FROM stores
         WHERE id = $1
         LIMIT 1
@@ -176,6 +176,10 @@ exports.createOrder = async (
         });
 
     }
+
+    let businessWhatsapp;
+    try { businessWhatsapp = require('../services/commerceValidation').phone(storeResult.rows[0].whatsapp); } catch { businessWhatsapp = ''; }
+    if(!businessWhatsapp) return res.status(409).json({error:'El negocio todavía no ha configurado un número válido para recibir pedidos.'});
 
     await client.query("BEGIN");
 
@@ -429,6 +433,7 @@ exports.createOrder = async (
       success: true,
 
       order_id: order.id,
+      whatsapp: businessWhatsapp,
 
       status: "PENDING"
 

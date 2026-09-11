@@ -1,3 +1,4 @@
+import {normalizeBusinessWhatsapp} from './whatsapp.js';
 import { createOrder } from "./api.js";
 import {
   getCustomerProfile,
@@ -336,7 +337,9 @@ function buildWhatsappMessage({ cart, orderId, total, customer }){
 ENVIAR PEDIDO ERP
 ======================= */
 
+let checkoutSending = false;
 export async function sendCheckout(){
+  if(checkoutSending) return;
   const submitButton = document.querySelector(
     "#checkout-modal [data-checkout-submit]"
   );
@@ -364,6 +367,15 @@ export async function sendCheckout(){
       alert("Completa los datos obligatorios");
       return;
     }
+
+    if(!normalizeBusinessWhatsapp(window.store?.whatsapp)){
+      alert('El negocio todavía no ha configurado un número válido para recibir pedidos.');
+      return;
+    }
+    const summaryTotal = cart.reduce((sum,p) => sum + Number(p.price || 0)*Number(p.qty || 0),0);
+    const summary = buildWhatsappMessage({cart,orderId:'por confirmar',total:summaryTotal,customer});
+    if(!confirm(`RESUMEN DEL PEDIDO\n\n${summary}\n\n¿Confirmar y continuar a WhatsApp?`)) return;
+    checkoutSending = true;
 
     saveCustomerProfile(
       window.store?.id,
@@ -405,19 +417,8 @@ export async function sendCheckout(){
       0
     );
 
-    const whatsapp = window.store?.whatsapp;
-
-    if(!whatsapp){
-      alert("Numero de WhatsApp no configurado.");
-      return;
-    }
-
-    const phone = String(whatsapp).replace(/\D/g,"");
-
-    if(!phone){
-      alert("Numero de WhatsApp invalido.");
-      return;
-    }
+    const phone = normalizeBusinessWhatsapp(data.whatsapp);
+    if(!phone) throw new Error('El negocio todavía no ha configurado un número válido para recibir pedidos.');
 
     const message = buildWhatsappMessage({
       cart,
@@ -427,27 +428,16 @@ export async function sendCheckout(){
     });
 
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    if(isMobile){
-      window.location.href = url;
-    }else{
-      const whatsappWindow = window.open(url, "_blank");
-
-      if(!whatsappWindow){
-        alert("Permite ventanas emergentes para abrir WhatsApp.");
-        return;
-      }
-    }
-
     localStorage.removeItem(CART_KEY);
     updateCartCount();
     closeCheckout();
     closeCart();
+    window.location.assign(url);
   }catch(err){
     console.error(err);
     alert(err.message || "Error procesando pedido");
   }finally{
+    checkoutSending = false;
     if(submitButton){
       submitButton.disabled = false;
       submitButton.textContent = "Enviar pedido";

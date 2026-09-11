@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#08111f"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/mercadia-app.png">
+
+<title>Mercadia Admin - Promociones</title>
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260828-2">
+<script defer src="js/ui.js?v=20260828-2"></script>
+
+<link rel="stylesheet" href="css/promotions.css">
+</head>
+
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">
+☰
+</button>
+
+<div class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar">
+
+<div class="logo">
+Mercadia
+</div>
+
+<div class="menu">
+
+<a href="dashboard.html">
+Dashboard
+</a>
+
+<a href="products.html">
+Productos
+</a>
+
+<a href="orders.html">
+Pedidos
+</a>
+
+<a href="inventory.html">
+Inventario
+</a>
+
+<a href="customers.html">
+Clientes
+</a>
+
+<a href="store.html">
+Tienda
+</a>
+
+</div>
+
+<button class="logout" onclick="logout()">
+Cerrar sesión
+</button>
+
+</div>
+
+<div class="content">
+
+<div class="page-heading">
+<h1 class="page-title">Promociones</h1>
+</div>
+
+<div id="store-message" class="admin-message" role="status"></div>
+
+<section class="section-card promotions-section">
+
+<div class="section-heading">
+<div>
+<h3>Promociones</h3>
+<p>Crea, edita y activa promociones visibles para clientes.</p>
+</div>
+<button class="info-dot" type="button" aria-label="Información de promociones" data-info="Puedes tener promociones con imagen, fechas, botón y estado activo. Se previsualizan antes de guardar. Mayor prioridad aparece primero; los popups se muestran uno por uno.">
+i
+</button>
+</div>
+
+<div class="promotion-layout">
+
+<form id="promotion-form" class="promotion-form">
+
+<input id="promotion-id" type="hidden">
+
+<div class="form-grid promotion-form-grid">
+<div class="field-group"><label for="promo-internal-name">Nombre interno</label><input id="promo-internal-name" maxlength="160"></div>
+<div class="field-group"><label for="promo-type">Tipo</label><select id="promo-type"><option value="popup">Popup/emergente</option><option value="banner">Banner</option><option value="top_notice">Aviso superior</option><option value="featured">Promoción destacada</option></select></div>
+<div class="field-group"><label for="promo-priority">Prioridad (mayor primero)</label><input id="promo-priority" type="number" min="-100000" max="100000" value="0"></div>
+
+<div class="field-group">
+<label for="promo-title">Título</label>
+<input id="promo-title" placeholder="Nuevo usuario" required>
+</div>
+
+<div class="field-group">
+<label for="promo-discount">Texto de descuento</label>
+<input id="promo-discount" placeholder="10% OFF">
+</div>
+
+<div class="field-group field-wide">
+<label for="promo-description">Descripción</label>
+<input id="promo-description" placeholder="Regístrate y obtén un 10% de descuento">
+</div>
+
+<div class="field-group">
+<label for="promo-button-text">Texto del botón</label>
+<input id="promo-button-text" placeholder="Registrarme">
+</div>
+
+<div class="field-group">
+<label for="promo-button-url">URL del botón</label>
+<input id="promo-button-url" placeholder="/registro">
+</div>
+
+<div class="field-group">
+<label for="promo-starts">Fecha inicio</label>
+<input id="promo-starts" type="datetime-local">
+</div>
+
+<div class="field-group">
+<label for="promo-ends">Fecha fin</label>
+<input id="promo-ends" type="datetime-local">
+</div>
+
+<div class="field-group">
+<label for="promo-image">Imagen opcional</label>
+<input id="promo-image" type="file" accept="image/*">
+</div>
+
+<label class="check-card">
+<input id="promo-active" type="checkbox" checked>
+Activa
+</label>
+
+</div>
+
+<div class="form-actions split-actions">
+<button type="button" class="secondary-action" id="reset-promotion-btn">
+Limpiar
+</button>
+<button type="submit" id="save-promotion-btn">
+Crear promoción
+</button>
+</div>
+
+</form>
+
+<aside class="popup-preview-card">
+<div class="meta-label">Preview</div>
+<div id="promotion-preview" aria-label="Vista previa de la promoción"></div>
+</aside>
+
+</div>
+
+<div class="table-card promotions-table-card">
+
+<div class="table-title">
+Promociones existentes
+<button class="info-dot" type="button" aria-label="Información de lista de promociones" data-info="Edita, activa/desactiva o elimina promociones sin tocar base de datos manualmente.">
+i
+</button>
+</div>
+
+<div id="promotions-list" class="promotions-list">
+<div class="empty">Cargando promociones...</div>
+</div>
+
+</div>
+
+</section>
+</div>
+
+<script src="config.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+
+function toggleMenu(){
+
+const sidebar = document.querySelector(".sidebar");
+const overlay = document.querySelector(".sidebar-overlay");
+
+sidebar.classList.toggle("open");
+overlay.classList.toggle("active");
+
+}
+
+</script>
+
+<script type="module" src="js/promotions.js"></script>
+
+</body>
+</html>

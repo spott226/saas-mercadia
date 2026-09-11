@@ -1,153 +1,25 @@
 const db = require("../db/db");
-
-exports.getPromotionsByStore = async (
-  store_id
-) => {
-
-  const result = await db.query(
-    `
-    SELECT *
-    FROM store_promotions
-    WHERE store_id = $1
-    ORDER BY id DESC
-    `,
-    [store_id]
-  );
-
-  return result.rows;
-
+const validation = require('../services/commerceValidation');
+const fields = ['internal_name','title','description','discount_text','button_text','button_url','image_url','is_active','starts_at','ends_at','type','priority'];
+exports.getPromotionsByStore = async storeId => (await db.query('SELECT * FROM store_promotions WHERE store_id = $1 ORDER BY priority DESC, id DESC',[storeId])).rows;
+exports.getActivePromotionsByStore = async storeId => (await db.query(`SELECT * FROM store_promotions WHERE store_id = $1 AND is_active = true AND (starts_at IS NULL OR starts_at <= NOW()) AND (ends_at IS NULL OR ends_at >= NOW()) ORDER BY priority DESC, id DESC`,[storeId])).rows;
+exports.getActivePromotionByStore = async storeId => (await exports.getActivePromotionsByStore(storeId)).find(p => p.type === 'popup') || null;
+exports.createPromotion = async (storeId, data) => {
+  const keys = fields.filter(key => data[key] !== undefined);
+  return (await db.query(`INSERT INTO store_promotions (store_id, ${keys.join(',')}) VALUES ($1, ${keys.map((_,i) => '$' + (i+2)).join(',')}) RETURNING *`,[storeId,...keys.map(key => data[key])])).rows[0];
 };
-
-exports.getActivePromotionByStore = async (
-  store_id
-) => {
-
-  const result = await db.query(
-    `
-    SELECT *
-    FROM store_promotions
-    WHERE store_id = $1
-    AND is_active = true
-    AND (
-      starts_at IS NULL
-      OR starts_at <= NOW()
-    )
-    AND (
-      ends_at IS NULL
-      OR ends_at >= NOW()
-    )
-    ORDER BY id DESC
-    LIMIT 1
-    `,
-    [store_id]
-  );
-
-  return result.rows[0] || null;
-
+exports.updatePromotion = async (id, storeId, data) => {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const current = (await client.query('SELECT * FROM store_promotions WHERE id = $1 AND store_id = $2 FOR UPDATE',[id,storeId])).rows[0];
+    if(!current){ await client.query('ROLLBACK'); return null; }
+    validation.promotion({starts_at: data.starts_at === undefined ? (current.starts_at ? new Date(current.starts_at).toISOString() : null) : data.starts_at, ends_at: data.ends_at === undefined ? (current.ends_at ? new Date(current.ends_at).toISOString() : null) : data.ends_at});
+    const keys = fields.filter(key => data[key] !== undefined);
+    if(!keys.length){ await client.query('COMMIT'); return current; }
+    const result = await client.query(`UPDATE store_promotions SET ${keys.map((key,i) => key + ' = $' + (i+1)).join(',')}, updated_at = NOW() WHERE id = $${keys.length+1} AND store_id = $${keys.length+2} RETURNING *`,[...keys.map(key => data[key]),id,storeId]);
+    await client.query('COMMIT');
+    return result.rows[0];
+  } catch(error){ await client.query('ROLLBACK'); throw error; } finally { client.release(); }
 };
-
-exports.createPromotion = async (
-  store_id,
-  data
-) => {
-
-  const result = await db.query(
-    `
-    INSERT INTO store_promotions
-    (
-      store_id,
-      title,
-      description,
-      discount_text,
-      button_text,
-      button_url,
-      image_url,
-      is_active,
-      starts_at,
-      ends_at
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-    RETURNING *
-    `,
-    [
-      store_id,
-      data.title,
-      data.description,
-      data.discount_text,
-      data.button_text,
-      data.button_url,
-      data.image_url,
-      data.is_active ?? true,
-      data.starts_at,
-      data.ends_at
-    ]
-  );
-
-  return result.rows[0];
-
-};
-
-exports.updatePromotion = async (
-  id,
-  store_id,
-  data
-) => {
-
-  const result = await db.query(
-    `
-    UPDATE store_promotions
-    SET
-      title = COALESCE($1,title),
-      description = COALESCE($2,description),
-      discount_text = COALESCE($3,discount_text),
-      button_text = COALESCE($4,button_text),
-      button_url = COALESCE($5,button_url),
-      image_url = COALESCE($6,image_url),
-      is_active = COALESCE($7,is_active),
-      starts_at = COALESCE($8,starts_at),
-      ends_at = COALESCE($9,ends_at),
-      updated_at = NOW()
-    WHERE id = $10
-    AND store_id = $11
-    RETURNING *
-    `,
-    [
-      data.title,
-      data.description,
-      data.discount_text,
-      data.button_text,
-      data.button_url,
-      data.image_url,
-      data.is_active,
-      data.starts_at,
-      data.ends_at,
-      id,
-      store_id
-    ]
-  );
-
-  return result.rows[0] || null;
-
-};
-
-exports.deletePromotion = async (
-  id,
-  store_id
-) => {
-
-  const result = await db.query(
-    `
-    DELETE FROM store_promotions
-    WHERE id = $1
-    AND store_id = $2
-    RETURNING id
-    `,
-    [
-      id,
-      store_id
-    ]
-  );
-
-  return result.rows[0] || null;
-
-};
+exports.deletePromotion = async (id,storeId) => (await db.query('DELETE FROM store_promotions WHERE id = $1 AND store_id = $2 RETURNING id',[id,storeId])).rows[0] || null;

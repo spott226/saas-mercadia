@@ -9,4 +9,5 @@ router.get("/:slug/products", storeController.getStoreProducts);
 
 router.get("/:slug/promotion", storeController.getStorePromotion);
 
+router.get("/:slug/promotions", storeController.getStorePromotions);
 module.exports = router;

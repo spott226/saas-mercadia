@@ -70,7 +70,7 @@ Cerrar sesión
 <h1 class="page-title">
 Configuración de tienda
 </h1>
-<button class="info-dot" type="button" aria-label="Información de tienda" data-info="Administra identidad visual, tipo de experiencia, plantilla y promociones de la tienda.">
+<button class="info-dot" type="button" aria-label="Información de tienda" data-info="Administra identidad visual, tipo de experiencia, plantilla de la tienda.">
 i
 </button>
 </div>
@@ -343,113 +343,7 @@ Guardar experiencia
 
 </div>
 
-<section class="section-card promotions-section">
 
-<div class="section-heading">
-<div>
-<h3>Promoción emergente</h3>
-<p>Crea, edita y activa promociones visibles para clientes.</p>
-</div>
-<button class="info-dot" type="button" aria-label="Información de promociones" data-info="Puedes tener promociones con imagen, fechas, botón y estado activo. El popup se previsualiza antes de guardar.">
-i
-</button>
-</div>
-
-<div class="promotion-layout">
-
-<form id="promotion-form" class="promotion-form">
-
-<input id="promotion-id" type="hidden">
-
-<div class="form-grid promotion-form-grid">
-
-<div class="field-group">
-<label for="promo-title">Título</label>
-<input id="promo-title" placeholder="Nuevo usuario" required>
-</div>
-
-<div class="field-group">
-<label for="promo-discount">Texto de descuento</label>
-<input id="promo-discount" placeholder="10% OFF">
-</div>
-
-<div class="field-group field-wide">
-<label for="promo-description">Descripción</label>
-<input id="promo-description" placeholder="Regístrate y obtén un 10% de descuento">
-</div>
-
-<div class="field-group">
-<label for="promo-button-text">Texto del botón</label>
-<input id="promo-button-text" placeholder="Registrarme">
-</div>
-
-<div class="field-group">
-<label for="promo-button-url">URL del botón</label>
-<input id="promo-button-url" placeholder="/registro">
-</div>
-
-<div class="field-group">
-<label for="promo-starts">Fecha inicio</label>
-<input id="promo-starts" type="date">
-</div>
-
-<div class="field-group">
-<label for="promo-ends">Fecha fin</label>
-<input id="promo-ends" type="date">
-</div>
-
-<div class="field-group">
-<label for="promo-image">Imagen opcional</label>
-<input id="promo-image" type="file" accept="image/*">
-</div>
-
-<label class="check-card">
-<input id="promo-active" type="checkbox" checked>
-Activa
-</label>
-
-</div>
-
-<div class="form-actions split-actions">
-<button type="button" class="secondary-action" id="reset-promotion-btn">
-Limpiar
-</button>
-<button type="submit" id="save-promotion-btn">
-Crear promoción
-</button>
-</div>
-
-</form>
-
-<aside class="popup-preview-card">
-<div class="meta-label">Preview</div>
-<div class="promo-preview">
-<img id="preview-image" alt="Preview promoción">
-<div id="preview-discount" class="promo-preview-discount">10% OFF</div>
-<h4 id="preview-title">Nuevo usuario</h4>
-<p id="preview-description">Regístrate y obtén un 10% de descuento</p>
-<button id="preview-button" type="button">Registrarme</button>
-</div>
-</aside>
-
-</div>
-
-<div class="table-card promotions-table-card">
-
-<div class="table-title">
-Promociones existentes
-<button class="info-dot" type="button" aria-label="Información de lista de promociones" data-info="Edita, activa/desactiva o elimina promociones sin tocar base de datos manualmente.">
-i
-</button>
-</div>
-
-<div id="promotions-list" class="promotions-list">
-<div class="empty">Cargando promociones...</div>
-</div>
-
-</div>
-
-</section>
 
 </div>
 

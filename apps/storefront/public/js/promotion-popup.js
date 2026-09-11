@@ -1,133 +1,45 @@
-import { getActivePromotion } from "./api.js";
-
-function hasClosedPromotion(slug, promotion){
-  const version =
-    promotion.updated_at ||
-    promotion.ends_at ||
-    promotion.starts_at ||
-    "current";
-
-  const key =
-    `mercadia_promotion_closed_${slug}_${promotion.id}_${version}`;
-
-  return sessionStorage.getItem(key) === "1";
-}
-
-function markPromotionClosed(slug, promotion){
-  const version =
-    promotion.updated_at ||
-    promotion.ends_at ||
-    promotion.starts_at ||
-    "current";
-
-  const key =
-    `mercadia_promotion_closed_${slug}_${promotion.id}_${version}`;
-
-  sessionStorage.setItem(key, "1");
-}
-
-function createText(tag, text, className){
-  const element = document.createElement(tag);
-  element.textContent = text || "";
-
-  if(className){
-    element.className = className;
-  }
-
-  return element;
-}
-
-function renderPromotionPopup(slug, promotion){
-  if(!promotion || hasClosedPromotion(slug, promotion)){
-    return;
-  }
-
-  const overlay = document.createElement("div");
-  overlay.className = "promotion-popup";
-
-  const panel = document.createElement("div");
-  panel.className = "promotion-panel";
-
-  const closeButton = document.createElement("button");
-  closeButton.type = "button";
-  closeButton.className = "promotion-close";
-  closeButton.textContent = "x";
-  closeButton.setAttribute("aria-label", "Cerrar promocion");
-
-  closeButton.addEventListener("click", () => {
-    markPromotionClosed(slug, promotion);
-    overlay.remove();
-  });
-
-  const imageUrl =
-    promotion.image_url ||
-    promotion.image;
-
-  if(imageUrl){
-    const image = document.createElement("img");
-    image.src = imageUrl;
-    image.alt = promotion.title || "Promocion";
-    image.loading = "lazy";
-    image.className = "promotion-image";
-    panel.appendChild(image);
-  }
-
-  const content = document.createElement("div");
-  content.className = "promotion-content";
-
-  if(promotion.discount_text){
-    content.appendChild(
-      createText(
-        "p",
-        promotion.discount_text,
-        "promotion-discount"
-      )
-    );
-  }
-
-  content.appendChild(
-    createText(
-      "h2",
-      promotion.title || "Promocion",
-      "promotion-title"
-    )
-  );
-
-  if(promotion.description){
-    content.appendChild(
-      createText(
-        "p",
-        promotion.description,
-        "promotion-description"
-      )
-    );
-  }
-
-  if(promotion.button_text && promotion.button_url){
-    const link = document.createElement("a");
-    link.href = promotion.button_url;
-    link.className = "promotion-button";
-    link.textContent = promotion.button_text;
-
-    content.appendChild(link);
-  }
-
-  panel.append(closeButton, content);
-  overlay.appendChild(panel);
-  document.body.appendChild(overlay);
-}
-
+import {getActivePromotions} from './api.js';
+import {createPromotionCard} from './promotion-card.js';
+function closedKey(slug,p){ return `mercadia_promotion_closed_${slug}_${p.id}_${p.updated_at || 'current'}`; }
+function wasClosed(slug,p){ try { return sessionStorage.getItem(closedKey(slug,p)) === '1'; } catch { return false; } }
 export async function initPromotionPopup(slug){
-  try{
-    const promotion =
-      await getActivePromotion(slug);
-
-    if(!promotion || promotion.is_active === false){
-      return;
+  try {
+    if(!document.querySelector('link[data-promotions]')){
+      const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = new URL('../css/promotions.css',import.meta.url).href; style.dataset.promotions = 'true'; document.head.append(style);
     }
-
-    renderPromotionPopup(slug, promotion);
-  }catch(error){
-    console.error("PROMOTION ERROR:", error);
-  }
+    const promotions = await getActivePromotions(slug);
+    document.querySelectorAll('[data-commerce-promotions]').forEach(element => element.remove());
+    const groups = {};
+    for(const type of ['top_notice','banner','featured']){
+      const entries = promotions.filter(p => p.type === type);
+      if(!entries.length) continue;
+      const group = document.createElement('div'); group.dataset.commercePromotions = type;
+      group.className = 'commerce-promotions' + (type === 'top_notice' ? ' commerce-promotions--top' : '');
+      for(const p of entries) group.append(createPromotionCard(p));
+      groups[type] = group;
+    }
+    const main = document.querySelector('main') || document.querySelector('#products')?.parentElement || document.body;
+    if(groups.top_notice) document.body.prepend(groups.top_notice);
+    if(groups.banner) main.prepend(groups.banner);
+    if(groups.featured) main.append(groups.featured);
+    const queue = promotions.filter(p => (p.type || 'popup') === 'popup' && !wasClosed(slug,p));
+    function next(){
+      const p = queue.shift(); if(!p) return;
+      const previousFocus = document.activeElement;
+      const overlay = document.createElement('div'); overlay.className = 'commerce-popup-overlay'; overlay.dataset.commercePromotions = 'popup';
+      const card = createPromotionCard(p); card.setAttribute('role','dialog'); card.setAttribute('aria-modal','true'); card.setAttribute('aria-label',p.title || 'Promoción');
+      const close = document.createElement('button'); close.type = 'button'; close.className = 'commerce-popup-close'; close.textContent = '×'; close.setAttribute('aria-label','Cerrar promoción');
+      close.addEventListener('click',() => { try { sessionStorage.setItem(closedKey(slug,p),'1'); } catch {} overlay.remove(); previousFocus?.focus(); next(); });
+      overlay.addEventListener('keydown',event => {
+        if(event.key === 'Escape') close.click();
+        if(event.key === 'Tab'){
+          const focusable = [...card.querySelectorAll('a,button')]; const first = focusable[0], last = focusable.at(-1);
+          if(event.shiftKey && document.activeElement === first){event.preventDefault();last.focus();}
+          else if(!event.shiftKey && document.activeElement === last){event.preventDefault();first.focus();}
+        }
+      });
+      card.prepend(close); overlay.append(card); document.body.append(overlay); close.focus();
+    }
+    next();
+  } catch(error){ console.error('PROMOTION ERROR:',error); }
 }

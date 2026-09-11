@@ -10,54 +10,8 @@ const {
   JWT_EXPIRES_IN
 } = require("../config/auth");
 
-const parseBoolean = (value) => {
-
-  if(value === undefined){
-    return undefined;
-  }
-
-  return (
-    value === true ||
-    value === "true" ||
-    value === "on" ||
-    value === "1"
-  );
-
-};
-
-const promotionPayload = (
-  body,
-  imageUrl
-) => ({
-
-  title:
-    body.title,
-
-  description:
-    body.description,
-
-  discount_text:
-    body.discount_text,
-
-  button_text:
-    body.button_text,
-
-  button_url:
-    body.button_url,
-
-  image_url:
-    imageUrl || body.image_url,
-
-  is_active:
-    parseBoolean(body.is_active),
-
-  starts_at:
-    body.starts_at || null,
-
-  ends_at:
-    body.ends_at || null
-
-});
+const commerceValidation = require('../services/commerceValidation');
+const promotionPayload = (body,imageUrl) => commerceValidation.promotion({...body,...(imageUrl ? {image_url:imageUrl} : {})});
 
 const allowedBusinessTypes = [
   "ecommerce",
@@ -651,8 +605,8 @@ exports.createPromotion = async (
 
     console.error("CREATE PROMOTION ERROR:", err);
 
-    res.status(500).json({
-      error:"server error"
+    res.status(err.status || 500).json({
+      error:err.status === 400 ? err.message : "server error"
     });
 
   }
@@ -700,8 +654,8 @@ exports.updatePromotion = async (
 
     console.error("UPDATE PROMOTION ERROR:", err);
 
-    res.status(500).json({
-      error:"server error"
+    res.status(err.status || 500).json({
+      error:err.status === 400 ? err.message : "server error"
     });
 
   }
@@ -738,10 +692,20 @@ exports.deletePromotion = async (
 
     console.error("DELETE PROMOTION ERROR:", err);
 
-    res.status(500).json({
-      error:"server error"
+    res.status(err.status || 500).json({
+      error:err.status === 400 ? err.message : "server error"
     });
 
   }
 
+};
+
+exports.updateBusiness = async (req,res,next) => {
+  try {
+    const data = commerceValidation.business(req.body);
+    const keys = Object.keys(data);
+    const result = await db.query(`UPDATE stores SET ${keys.map((key,i) => key + ' = $' + (i+1)).join(',')} WHERE id = $${keys.length+1} RETURNING *`,[...keys.map(key => data[key]),req.user.store_id]);
+    if(!result.rows.length) return res.status(404).json({error:'Tienda no encontrada'});
+    res.json({success:true,store:result.rows[0]});
+  } catch(error){ if(error.status === 400) return res.status(400).json({error:error.message}); next(error); }
 };

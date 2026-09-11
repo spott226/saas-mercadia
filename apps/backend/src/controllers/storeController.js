@@ -187,3 +187,11 @@ exports.getStorePromotion = async (req, res) => {
   }
 
 };
+
+exports.getStorePromotions = async (req,res) => {
+  try {
+    const store = await Store.getStoreBySlug(req.params.slug);
+    if(!store) return res.status(404).json({error:'Store not found'});
+    res.json({success:true,promotions:await Promotion.getActivePromotionsByStore(store.id)});
+  } catch(error){ res.status(500).json({error:'Server error'}); }
+};

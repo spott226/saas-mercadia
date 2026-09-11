@@ -1,3 +1,4 @@
+import {normalizeBusinessWhatsapp} from './whatsapp.js';
 export function initChatbot(){
 
 const container = document.getElementById("chatbot-container");
@@ -94,14 +95,15 @@ alert(response);
 
 else if(action === "whatsapp"){
 
-if(!window.store?.whatsapp){
+const phone = normalizeBusinessWhatsapp(window.store?.whatsapp);
+if(!phone){
 
 alert("No se encontró el WhatsApp de la tienda.");
 return;
 
 }
 
-const phone = String(window.store.whatsapp).replace(/\D/g,"");
+
 
 // 🔥 AQUÍ ESTÁ EL CAMBIO (mensaje dinámico)
 let message = "";

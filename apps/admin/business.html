@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#08111f"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/mercadia-app.png">
+
+<title>Mercadia Admin - Datos del negocio</title>
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260828-2">
+<script defer src="js/ui.js?v=20260828-2"></script>
+
+</head>
+
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">
+☰
+</button>
+
+<div class="sidebar-overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar">
+
+<div class="logo">
+Mercadia
+</div>
+
+<div class="menu">
+
+<a href="dashboard.html">
+Dashboard
+</a>
+
+<a href="products.html">
+Productos
+</a>
+
+<a href="orders.html">
+Pedidos
+</a>
+
+<a href="inventory.html">
+Inventario
+</a>
+
+<a href="customers.html">
+Clientes
+</a>
+
+<a href="store.html">
+Tienda
+</a>
+
+</div>
+
+<button class="logout" onclick="logout()">
+Cerrar sesión
+</button>
+
+</div>
+
+<div class="content">
+
+<div class="page-heading">
+<h1 class="page-title">Datos del negocio</h1>
+</div>
+
+<div id="store-message" class="admin-message" role="status"></div>
+
+<section class="section-card">
+<form id="business-form">
+<div class="form-grid">
+<div class="field-group"><label for="business-name">Nombre del negocio</label><input id="business-name" name="name" maxlength="120" required></div>
+<div class="field-group"><label for="business-owner_name">Propietario/responsable</label><input id="business-owner_name" name="owner_name" maxlength="120"></div>
+<div class="field-group"><label for="business-whatsapp">WhatsApp para recibir pedidos (con código de país)</label><input id="business-whatsapp" name="whatsapp" maxlength="30" type="tel" placeholder="525512345678"></div>
+<div class="field-group"><label for="business-phone">Teléfono (con código de país)</label><input id="business-phone" name="phone" maxlength="30" type="tel"></div>
+<div class="field-group field-wide"><label for="business-address">Dirección/ubicación</label><textarea id="business-address" name="address" maxlength="500" rows="3"></textarea></div>
+<div class="field-group field-wide"><label for="business-business_hours">Horarios</label><textarea id="business-business_hours" name="business_hours" maxlength="1000" rows="4" placeholder="Lunes a viernes: 9:00 a 18:00"></textarea></div>
+</div>
+<p>Incluye el código de país en los teléfonos. Sin WhatsApp, los clientes no podrán enviar pedidos.</p>
+<button type="submit">Guardar datos del negocio</button>
+</form>
+</section>
+</div>
+
+<script src="config.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+
+function toggleMenu(){
+
+const sidebar = document.querySelector(".sidebar");
+const overlay = document.querySelector(".sidebar-overlay");
+
+sidebar.classList.toggle("open");
+overlay.classList.toggle("active");
+
+}
+
+</script>
+
+<script type="module" src="js/business.js"></script>
+
+</body>
+</html>
