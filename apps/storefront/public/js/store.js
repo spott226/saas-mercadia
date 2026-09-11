@@ -293,6 +293,13 @@ resolveAssetUrl(
 
 
 // =================================
+// PROMOCION ACTIVA
+// =================================
+
+const promotionsReady = initPromotionPopup(slug);
+
+
+// =================================
 // RENDER STOREFRONT
 // =================================
 
@@ -301,12 +308,7 @@ store,
 slug
 });
 
-
-// =================================
-// PROMOCION ACTIVA
-// =================================
-
-initPromotionPopup(slug);
+await promotionsReady;
 
 
 // =================================

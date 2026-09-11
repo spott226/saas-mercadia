@@ -98,7 +98,7 @@ async function deliver(rows,payload,tableName){
   );
 }
 
-async function sendNewOrderToMerchant({ storeId, orderId }){
+async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
   if(!configured) return;
 
   const result = await db.query(
@@ -109,9 +109,12 @@ async function sendNewOrderToMerchant({ storeId, orderId }){
     [storeId]
   );
 
+  const cleanCustomerName = String(customerName || "").trim();
   const payload = JSON.stringify({
     title:result.rows[0]?.store_name || "Mercadia",
-    body:`Tienes un nuevo pedido #${orderId}.`,
+    body:cleanCustomerName
+      ? `Nuevo pedido de ${cleanCustomerName} (#${orderId}).`
+      : `Tienes un nuevo pedido #${orderId}.`,
     url:"/admin/orders.html",
     tag:`merchant-order-${orderId}`
   });

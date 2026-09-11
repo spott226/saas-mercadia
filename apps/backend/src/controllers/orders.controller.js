@@ -423,7 +423,8 @@ exports.createOrder = async (
 
     pushNotifications.sendNewOrderToMerchant({
       storeId:store_id,
-      orderId:order.id
+      orderId:order.id,
+      customerName:normalizedCustomerName
     }).catch(error => {
       console.error("PUSH MERCHANT ORDER ERROR:",error);
     });
