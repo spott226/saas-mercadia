@@ -2974,4 +2974,10 @@ body.template-gym-active-1 .account-summary,body.template-gym-active-1 .account-
 body.template-gym-active-1 .account-form .btn-primary,body.template-gym-active-1 .account-tab-active{color:#06100b}
 @media(max-width:768px){body.template-restaurant-5 #products-list,body.template-professional-2 #products-list,body.template-boutique-grid-1 #products-list{grid-template-columns:1fr!important}}
 
+.checkout-panel{width:min(620px,calc(100vw - 24px));overflow:hidden}
+.checkout-grid{gap:12px;padding:18px 20px 8px}
+.checkout-input{border-radius:12px;background:color-mix(in srgb,var(--card) 86%,var(--background));font-size:16px}
+.checkout-input::placeholder{color:color-mix(in srgb,var(--text-muted) 84%,transparent)}
+.checkout-panel .modal-actions{padding:14px 20px 20px}
+@media(max-width:640px){.checkout-panel{width:100%;max-height:88dvh;border-radius:22px 22px 0 0}.checkout-grid{grid-template-columns:1fr!important;padding:14px;gap:10px}.checkout-input{min-height:48px}.checkout-panel .modal-actions{padding:12px 14px 16px}}
 

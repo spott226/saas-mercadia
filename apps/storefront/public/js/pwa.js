@@ -19,6 +19,10 @@ function getStoreId(){
   return session?.store_id || sessionStorage.getItem("store_id");
 }
 
+function isMerchantContext(){
+  return document.body.dataset.pwaContext === "platform";
+}
+
 function getActions(){
   let actions = document.getElementById("pwa-actions");
   if(actions) return actions;
@@ -26,6 +30,17 @@ function getActions(){
   actions = document.createElement("div");
   actions.id = "pwa-actions";
   actions.className = "pwa-actions";
+
+  if(isMerchantContext()){
+    actions.classList.add("pwa-actions-admin");
+    const content = document.querySelector(".content");
+    const heading = content?.querySelector(".page-heading,.header,.os-heading-wrap");
+    if(heading?.parentElement){
+      heading.parentElement.insertBefore(actions, heading.nextSibling);
+      return actions;
+    }
+  }
+
   document.body.append(actions);
   return actions;
 }
@@ -194,9 +209,13 @@ async function init(){
   if(!("serviceWorker" in navigator)) return;
 
   registration = await navigator.serviceWorker.register("/service-worker.js");
+  registration.update?.();
 
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
+    if(isMerchantContext() || window.matchMedia("(display-mode: standalone)").matches){
+      return;
+    }
     deferredInstallPrompt = event;
 
     actionButton("pwa-install", "Instalar app", async () => {

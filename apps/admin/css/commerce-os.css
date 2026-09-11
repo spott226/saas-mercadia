@@ -705,20 +705,15 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
   body[data-admin-page="orders"] .actions select,body[data-admin-page="orders"] .actions button{width:100%!important}
 }
 .pwa-actions{
-  position:fixed!important;
-  right:18px!important;
-  bottom:18px!important;
-  z-index:1200!important;
   display:flex!important;
   flex-wrap:wrap!important;
-  justify-content:flex-end!important;
+  justify-content:flex-start!important;
   gap:8px!important;
-  pointer-events:none!important;
+  margin:0 0 18px!important;
 }
 .pwa-actions:empty{display:none!important}
 .pwa-actions button{
-  pointer-events:auto!important;
-  min-height:44px!important;
+  min-height:42px!important;
   padding:0 16px!important;
   border:0!important;
   border-radius:999px!important;
@@ -726,9 +721,16 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
   color:#fff!important;
   font-size:13px!important;
   font-weight:850!important;
-  box-shadow:0 14px 34px rgba(15,23,42,.25)!important;
+  box-shadow:0 10px 24px rgba(15,23,42,.16)!important;
   cursor:pointer!important;
 }
-.pwa-actions button:disabled{opacity:.72!important;cursor:default!important}
-@media(max-width:700px){.pwa-actions{right:14px!important;left:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important}.pwa-actions button{width:100%!important}}
+.pwa-actions button:disabled{opacity:.78!important;cursor:default!important}
+@media(max-width:700px){.pwa-actions{display:grid!important}.pwa-actions button{width:100%!important}}
+
+.products-create-only .content,.promotions-page .content{padding-top:28px!important}
+.products-create-only .form-card,.promotions-page .section-card{max-width:1120px;margin-left:auto!important;margin-right:auto!important}
+.products-create-only .product-setup-grid,.products-create-only .product-main-grid,.promotions-page .promotion-form-grid{gap:14px!important}
+.products-create-only .field-group,.promotions-page .field-group{gap:6px!important}
+.products-create-only .section-heading,.promotions-page .section-heading{margin-bottom:16px!important}
+@media(max-width:900px){.products-create-only .content,.promotions-page .content{padding-top:calc(72px + env(safe-area-inset-top))!important}.products-create-only .form-card,.promotions-page .section-card{padding:18px!important}}
 
