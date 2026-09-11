@@ -17,6 +17,28 @@ function getQueryParam(param){
 
 }
 
+function getCurrentStoreSlug(){
+  const configuredSlug =
+    window.MERCADIA_CONFIG?.STORE_SLUG;
+
+  if(configuredSlug){
+    return configuredSlug;
+  }
+
+  const pathMatch =
+    window.location.pathname.match(/^\/tienda\/([^/]+)/i);
+
+  if(pathMatch?.[1]){
+    return decodeURIComponent(pathMatch[1]);
+  }
+
+  return (
+    getQueryParam("slug") ||
+    getQueryParam("store") ||
+    ""
+  );
+}
+
 function getProductUrl(product){
 
   const params =
@@ -25,8 +47,7 @@ function getProductUrl(product){
   params.set("id", product.id);
 
   const slug =
-    getQueryParam("slug") ||
-    getQueryParam("store");
+    getCurrentStoreSlug();
 
   if(slug){
     params.set("slug", slug);

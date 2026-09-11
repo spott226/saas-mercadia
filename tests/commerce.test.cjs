@@ -352,3 +352,23 @@ test('Custom-domain routing remains scoped to one store and works on every store
   }
   assert.match(read('apps/backend/src/server.js'),/getStoreByCustomDomain/);
 });
+
+test('Storefront product and category links preserve the active store slug',() => {
+  const products=read('apps/storefront/public/js/products.js');
+  const detail=read('apps/storefront/public/js/product-detail.js');
+  const renderer=read('apps/storefront/public/js/storefront-renderer.js');
+  const homepage=read('apps/storefront/public/index.html');
+  const productsPage=read('apps/storefront/public/products.html');
+  const productPage=read('apps/storefront/public/product.html');
+
+  assert.match(products,/function getCurrentStoreSlug/);
+  assert.match(products,/pathname\.match\(\^?\/?[\s\S]*\\\/tienda\\\/\(\[\^\/\]\+\)/);
+  assert.match(products,/params\.set\("slug", slug\)/);
+  assert.match(detail,/pathname\.match\(\^?\/?[\s\S]*\\\/tienda\\\/\(\[\^\/\]\+\)/);
+  assert.match(renderer,/function getProductsUrl/);
+  assert.match(renderer,/params\.set\("slug", slug\)/);
+  assert.match(renderer,/getProductsUrl\(store\?\.slug/);
+  assert.match(homepage,/products\.js\?v=20260911-5/);
+  assert.match(productsPage,/products\.js\?v=20260911-5/);
+  assert.match(productPage,/product-detail\.js\?v=20260911-5/);
+});

@@ -373,17 +373,22 @@ function clearProductSectionPresentation(){
 function getCategoryUrl(slug, category){
   const params = new URLSearchParams();
 
-  const host = window.location.hostname;
-  const isLocal =
-    host === "localhost" ||
-    host === "127.0.0.1";
-
-  if(isLocal && slug){
+  if(slug && !window.MERCADIA_CONFIG?.STORE_SLUG){
     params.set("slug", slug);
   }
 
   params.set("category", category);
 
+  return `/products.html?${params.toString()}`;
+}
+
+function getProductsUrl(slug){
+  if(!slug || window.MERCADIA_CONFIG?.STORE_SLUG){
+    return "/products.html";
+  }
+
+  const params = new URLSearchParams();
+  params.set("slug",slug);
   return `/products.html?${params.toString()}`;
 }
 
@@ -604,7 +609,7 @@ function renderImageBanner({ sectionConfig, store }){
       <p>${escapeHTML(sectionConfig.kicker || sectionConfig.eyebrow || "")}</p>
       <h2>${escapeHTML(sectionConfig.title || store?.name || "")}</h2>
       <span>${escapeHTML(sectionConfig.text || sectionConfig.description || "")}</span>
-      ${sectionConfig.cta ? `<a href="/products.html">${escapeHTML(sectionConfig.cta)}</a>` : ""}
+      ${sectionConfig.cta ? `<a href="${getProductsUrl(store?.slug || sectionConfig.slug || "")}">${escapeHTML(sectionConfig.cta)}</a>` : ""}
     </div>
   `;
 

@@ -10,6 +10,14 @@ function getParam(name){
 function getSlug(){
   const configuredSlug = window.MERCADIA_CONFIG?.STORE_SLUG;
   if(configuredSlug) return configuredSlug;
+
+  const pathMatch =
+    window.location.pathname.match(/^\/tienda\/([^/]+)/i);
+
+  if(pathMatch?.[1]){
+    return decodeURIComponent(pathMatch[1]);
+  }
+
   const slugParam = getParam("slug") || getParam("store");
 
   if(slugParam){
