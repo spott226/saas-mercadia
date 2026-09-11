@@ -163,8 +163,30 @@ function formatMoney(value){
 
 }
 
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+const itemTypeLabels = {
+  product:"Producto físico",
+  dish:"Platillo o bebida",
+  service:"Servicio",
+  appointment:"Cita o reservación",
+  digital:"Producto digital",
+  quote:"Proyecto para cotizar"
+};
+
 
 function getInventoryValue(item){
+
+  if(item.track_inventory === false) return 0;
 
   const stock =
     toNumber(item.stock);
@@ -186,6 +208,8 @@ function getInventoryValue(item){
 
 function getAvailableStock(item){
 
+  if(item.track_inventory === false) return 0;
+
   return toNumber(
     item.available_stock !== undefined
       ? item.available_stock
@@ -196,12 +220,16 @@ function getAvailableStock(item){
 
 function getPotentialRevenue(item){
 
+  if(item.track_inventory === false) return 0;
+
   return getAvailableStock(item) *
     toNumber(item.price);
 
 }
 
 function getPotentialProfit(item){
+
+  if(item.track_inventory === false) return 0;
 
   return getAvailableStock(item) *
     (toNumber(item.price) - toNumber(item.cost));
@@ -221,11 +249,15 @@ function getInventoryKPIs(data){
       ),
 
     totalVariants:
-      data.filter(item => item.has_variants === true).length,
+      data.filter(item =>
+        item.track_inventory === true &&
+        item.has_variants === true
+      ).length,
 
     lowStock:
       data.filter(
         item =>
+          item.track_inventory === true &&
           getAvailableStock(item) <= 5
       ).length,
 
@@ -310,8 +342,8 @@ function renderInventoryTable(data){
 
     table.innerHTML = `
     <tr>
-      <td colspan="11" class="empty">
-        No hay inventario
+      <td colspan="13" class="empty">
+        No hay productos ni servicios publicados
       </td>
     </tr>
     `;
@@ -337,6 +369,8 @@ function renderInventoryTable(data){
   const paginatedData =
     data.slice(start,end);
 
+  const renderedProductActions = new Set();
+
 
   /* =========================
   TABLE DATA
@@ -344,6 +378,10 @@ function renderInventoryTable(data){
 
   const rowsHTML =
     paginatedData.map(item=>{
+
+    const productId = Number(item.product_id);
+    const showActions = !renderedProductActions.has(productId);
+    renderedProductActions.add(productId);
 
     const stock =
       getAvailableStock(item);
@@ -374,7 +412,11 @@ function renderInventoryTable(data){
     <tr>
 
       <td>
-        ${item.product_name || "-"}
+        ${escapeHTML(item.product_name || "-")}
+      </td>
+
+      <td>
+        ${escapeHTML(itemTypeLabels[item.item_type] || "Producto físico")}
       </td>
 
       <td>
@@ -383,7 +425,7 @@ function renderInventoryTable(data){
           item.image
           ? `
             <img
-              src="${item.image}"
+              src="${escapeHTML(item.image)}"
               style="
                 width:60px;
                 height:60px;
@@ -398,22 +440,22 @@ function renderInventoryTable(data){
       </td>
 
       <td>
-        ${item.category || "-"}
+        ${escapeHTML(item.category || "-")}
       </td>
 
       <td>
         ${item.has_variants === true
-          ? `${item.color || "-"} / ${item.size || "-"}`
+          ? `${escapeHTML(item.color || "-")} / ${escapeHTML(item.size || "-")}`
           : "Sin variantes"}
       </td>
 
       <td>
-        ${item.sku || "-"}
+        ${escapeHTML(item.sku || "-")}
       </td>
 
       <td>
-        ${stock}
-        ${reservedStock > 0
+        ${item.track_inventory === false ? "No aplica" : stock}
+        ${item.track_inventory !== false && reservedStock > 0
           ? `<small style="display:block;color:#667085">${reservedStock} reservadas</small>`
           : ""}
       </td>
@@ -424,7 +466,7 @@ function renderInventoryTable(data){
           white-space:nowrap;
         "
       >
-        ${formatMoney(item.price)}
+        ${item.item_type === "quote" ? "Por cotizar" : formatMoney(item.price)}
       </td>
 
       <td
@@ -458,12 +500,21 @@ function renderInventoryTable(data){
 
       <td>
 
-        <span class="${stockClass}">
+        <span class="${item.track_inventory === false ? "" : stockClass}">
 
-          ${stockLabel}
+          ${item.track_inventory === false ? "Sin control de stock" : stockLabel}
 
         </span>
 
+      </td>
+
+      <td>
+        ${showActions ? `
+          <div class="actions">
+            <button type="button" class="action-btn edit-btn" onclick="editInventoryProduct(${productId})">Editar</button>
+            <button type="button" class="action-btn delete-btn" onclick="deleteInventoryProduct(${productId})">Eliminar</button>
+          </div>
+        ` : ""}
       </td>
 
     </tr>
@@ -761,6 +812,11 @@ function setupFilters(){
       "filter-movement"
     );
 
+  const offerTypeFilter =
+    document.getElementById(
+      "filter-offer-type"
+    );
+
   searchInput.addEventListener(
     "keyup",
     () => {
@@ -777,6 +833,11 @@ function setupFilters(){
   );
 
   movementFilter.addEventListener(
+    "change",
+    applyFilters
+  );
+
+  offerTypeFilter.addEventListener(
     "change",
     applyFilters
   );
@@ -805,6 +866,13 @@ function applyFilters(resetPage = true){
       )
       .value;
 
+  const offerType =
+    document
+      .getElementById(
+        "filter-offer-type"
+      )
+      .value;
+
 
   /* =========================
   INVENTORY FILTER
@@ -828,6 +896,21 @@ function applyFilters(resetPage = true){
         .toLowerCase()
         .includes(search)
 
+        ||
+
+        (item.category || "")
+        .toLowerCase()
+        .includes(search)
+
+      );
+
+  }
+
+  if(offerType){
+
+    filteredInventory =
+      filteredInventory.filter(
+        item => item.item_type === offerType
       );
 
   }
@@ -888,3 +971,81 @@ function applyFilters(resetPage = true){
   );
 
 }
+
+
+function getEditableProduct(productId){
+
+  const rows = inventoryData.filter(
+    item => Number(item.product_id) === Number(productId)
+  );
+
+  const first = rows[0];
+  if(!first) return null;
+
+  return {
+    id:first.product_id,
+    name:first.product_name,
+    description:first.description,
+    price:first.price,
+    category:first.category,
+    featured:first.featured,
+    item_type:first.item_type,
+    has_variants:first.has_variants,
+    track_inventory:first.track_inventory,
+    variants:rows
+      .filter(item => item.id)
+      .map(item => ({
+        id:item.id,
+        color:item.color,
+        size:item.size,
+        price:item.price,
+        stock:item.stock,
+        reserved_stock:item.reserved_stock,
+        sku:item.sku,
+        cost:item.cost
+      }))
+  };
+
+}
+
+
+window.editInventoryProduct = productId => {
+
+  const product = getEditableProduct(productId);
+  if(!product) return;
+
+  sessionStorage.setItem(
+    "mercadia_edit_product",
+    JSON.stringify(product)
+  );
+
+  window.location.href =
+    `products.html?edit=${encodeURIComponent(productId)}`;
+
+};
+
+
+window.deleteInventoryProduct = async productId => {
+
+  if(!window.confirm("¿Eliminar este producto o servicio?")) return;
+
+  const response = await fetch(
+    `${API_URL}/products/${encodeURIComponent(productId)}`,
+    {
+      method:"DELETE",
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    }
+  );
+
+  if(!response.ok){
+    const data = await response.json().catch(() => null);
+    window.alert(data?.error || "No se pudo eliminar");
+    return;
+  }
+
+  await loadInventory();
+  applyFilters();
+
+};

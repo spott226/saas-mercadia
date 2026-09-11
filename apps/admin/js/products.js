@@ -56,13 +56,17 @@ function hasVariantMode(){
 
 function updateProductMode(){
   const isService = itemTypeInput.value === "service";
+  const isAppointment = itemTypeInput.value === "appointment";
   const isDigital = itemTypeInput.value === "digital";
+  const isDish = itemTypeInput.value === "dish";
+  const isQuote = itemTypeInput.value === "quote";
+  const skipsInventory = isService || isAppointment || isDigital || isQuote;
   const advanced = hasVariantMode();
 
   variantsSection.classList.toggle("is-hidden",!advanced);
   simpleInventory.classList.toggle("is-hidden",advanced);
 
-  if(isService || isDigital){
+  if(skipsInventory){
     trackInventoryInput.checked = false;
     trackInventoryInput.disabled = true;
   }else{
@@ -73,23 +77,75 @@ function updateProductMode(){
   const inventorySwitch = trackInventoryInput.closest(".inventory-switch");
   stockField?.classList.toggle("is-hidden",!trackInventoryInput.checked);
   simpleStockFields.classList.remove("is-hidden");
-  inventorySwitch?.classList.toggle("is-hidden",isService || isDigital);
+  inventorySwitch?.classList.toggle("is-hidden",skipsInventory);
   const availabilityTitle = simpleInventory.querySelector(".simple-inventory-head strong");
   if(availabilityTitle){
-    availabilityTitle.textContent = isService
+    availabilityTitle.textContent = isAppointment
+      ? "Datos de la cita"
+      : isService
       ? "Costo del servicio"
       : isDigital
         ? "Datos del producto digital"
+        : isQuote
+          ? "Datos internos para cotizar"
         : "Disponibilidad";
   }
-  document.getElementById("item-type-help").textContent = isService
-    ? "Para consultas, citas, instalaciones o cualquier trabajo que agendas."
+  document.getElementById("item-type-help").textContent = isAppointment
+    ? "Para consultas, sesiones, clases o espacios que el cliente reserva."
+    : isService
+    ? "Para instalaciones, mantenimiento o cualquier trabajo que ofreces."
     : isDigital
       ? "Para archivos, accesos, cursos o contenido que no usa existencias físicas."
+      : isDish
+        ? "Para alimentos y bebidas, con tamaños, sabores o presentaciones opcionales."
+        : isQuote
+          ? "Para proyectos cuyo precio depende de una evaluación, como paneles solares o construcción."
       : "Ideal para artículos que entregas, envías o recogen en tu negocio.";
   document.getElementById("inventory-copy").textContent = trackInventoryInput.checked
     ? "Mercadia avisará cuando queden pocas unidades."
     : "Agrega tu código y costo para calcular la utilidad, aunque no manejes existencias.";
+
+  const priceField = document.getElementById("price")?.closest(".field-group");
+  const priceInput = document.getElementById("price");
+  priceField?.classList.toggle("is-hidden",isQuote);
+  if(priceInput){
+    priceInput.required = !isQuote;
+    if(isQuote) priceInput.value = "";
+  }
+
+  const optionInput = document.getElementById("variant-color");
+  const valuesInput = document.getElementById("variant-size");
+  const nameLabel = document.querySelector('label[for="name"]');
+  const nameInput = document.getElementById("name");
+  const priceLabel = document.querySelector('label[for="price"]');
+  const descriptions = {
+    product:["Nombre del producto","Ej. Playera oversize negra","Precio público"],
+    dish:["Nombre del platillo o bebida","Ej. Hamburguesa especial","Precio del menú"],
+    service:["Nombre del servicio","Ej. Instalación de paneles","Precio del servicio"],
+    appointment:["Nombre de la cita o reservación","Ej. Consulta inicial","Precio de la cita"],
+    digital:["Nombre del producto digital","Ej. Curso de fotografía","Precio público"],
+    quote:["Nombre del proyecto","Ej. Sistema de paneles solares","Se cotiza después"]
+  };
+  const copy = descriptions[itemTypeInput.value] || descriptions.product;
+  if(nameLabel) nameLabel.textContent = copy[0];
+  if(nameInput) nameInput.placeholder = copy[1];
+  if(priceLabel) priceLabel.textContent = copy[2];
+  if(optionInput && valuesInput){
+    optionInput.placeholder = isAppointment
+      ? "Ej. Duración o modalidad"
+      : isDish
+        ? "Ej. Tamaño, sabor o preparación"
+        : isQuote
+          ? "Ej. Tipo de proyecto o alcance"
+          : "Ej. Color, material o presentación";
+    valuesInput.placeholder = isAppointment
+      ? "Ej. 30 minutos,60 minutos"
+      : isDish
+        ? "Ej. Individual,Familiar"
+        : isQuote
+          ? "Ej. Residencial,Comercial"
+          : "Ej. S,M,L";
+  }
 }
 
 function addVariant(){
@@ -134,8 +190,10 @@ function addVariant(){
   VALIDACIÓN ERP
   ========================= */
 
-  if(!color || !sizesInput || !price){
-    alert("Completa el nombre de la opción, sus valores y el precio");
+  if(!color || !sizesInput || (!price && itemTypeInput.value !== "quote")){
+    alert(itemTypeInput.value === "quote"
+      ? "Completa el nombre de la opción y sus valores"
+      : "Completa el nombre de la opción, sus valores y el precio");
     return;
   }
 
@@ -205,7 +263,7 @@ function addVariant(){
 
     sizes,
 
-    price,
+    price:itemTypeInput.value === "quote" ? 0 : price,
 
     stock,
 
@@ -727,10 +785,15 @@ async function createProduct(){
       "featured"
     ).checked;
 
-  if(!name || !price){
+  const isQuote = itemTypeInput.value === "quote";
+  const publicPrice = isQuote ? 0 : price;
+
+  if(!name || (!isQuote && !price)){
 
     alert(
-      "Nombre y precio son obligatorios"
+      isQuote
+        ? "El nombre es obligatorio"
+        : "Nombre y precio son obligatorios"
     );
 
     return;
@@ -747,7 +810,7 @@ async function createProduct(){
     description
   );
 
-  formData.append("price",price);
+  formData.append("price",publicPrice);
 
   formData.append(
     "category",
@@ -761,7 +824,7 @@ async function createProduct(){
 
   const itemType = itemTypeInput.value;
   const usesVariants = hasVariantMode();
-  const trackInventory = itemType === "product" && trackInventoryInput.checked;
+  const trackInventory = ["product","dish"].includes(itemType) && trackInventoryInput.checked;
   formData.append("item_type",itemType);
   formData.append("has_variants",usesVariants);
   formData.append("track_inventory",trackInventory);
@@ -782,7 +845,7 @@ async function createProduct(){
     finalVariants.push({
       color:"Única",
       size:"Única",
-      price,
+      price:publicPrice,
       stock:trackInventory ? (document.getElementById("simple-stock").value || 0) : 0,
       sku:document.getElementById("simple-sku").value.trim(),
       cost:document.getElementById("simple-cost").value || 0
@@ -912,6 +975,7 @@ async function createProduct(){
 
   }
 
+  const wasEditing = Boolean(editingProduct);
   editingProduct = null;
 
   variants = [];
@@ -934,8 +998,8 @@ async function createProduct(){
   itemTypeInput.value = "product";
   trackInventoryInput.checked = true;
   updateProductMode();
-
-  loadProducts();
+  window.history.replaceState({},"","products.html");
+  alert(wasEditing ? "Cambios guardados" : "Producto agregado");
 
 }
 
@@ -1104,11 +1168,12 @@ async function loadProductContext(){
       nameLabel.textContent = "Nombre del platillo o producto";
       nameInput.placeholder = "Ej. Hamburguesa especial";
       categoryInput.placeholder = "Ej. Bebidas, entradas o postres";
+      itemTypeInput.value = "dish";
     }else if(type === "appointments" || type === "professional"){
       nameLabel.textContent = "Nombre del servicio";
       nameInput.placeholder = "Ej. Consulta inicial";
       categoryInput.placeholder = "Ej. Consultas, paquetes o tratamientos";
-      itemTypeInput.value = "service";
+      itemTypeInput.value = type === "appointments" ? "appointment" : "service";
     }
   }catch(error){
     console.warn("No se pudo personalizar el formulario",error);
@@ -1117,4 +1182,33 @@ async function loadProductContext(){
 }
 
 await loadProductContext();
-loadProducts();
+
+function restoreInventoryEdit(){
+  const params = new URLSearchParams(window.location.search);
+  const requestedId = Number(params.get("edit"));
+  const raw = sessionStorage.getItem("mercadia_edit_product");
+  if(!requestedId || !raw) return;
+
+  try{
+    const product = JSON.parse(raw);
+    if(Number(product.id) !== requestedId) return;
+    editProduct(
+      product.id,
+      product.name || "",
+      product.description || "",
+      product.price || 0,
+      product.category || "",
+      Boolean(product.featured),
+      Array.isArray(product.variants) ? product.variants : [],
+      product.item_type || "product",
+      Boolean(product.has_variants),
+      product.track_inventory !== false
+    );
+  }catch(error){
+    console.warn("No se pudo abrir el producto seleccionado",error);
+  }finally{
+    sessionStorage.removeItem("mercadia_edit_product");
+  }
+}
+
+restoreInventoryEdit();

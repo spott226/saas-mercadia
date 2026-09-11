@@ -153,3 +153,66 @@ test('Promotion renderer escapes content and popup queue never mounts overlappin
   overlays()[0].children[0].children[0].listeners.click();assert.equal(overlays().length,1);
   overlays()[0].children[0].children[0].listeners.click();assert.equal(overlays().length,0);
 });
+
+test('Quote and appointment offers are accepted without stock control',async () => {
+  const created=[];
+  const variants=[];
+  const Product={
+    countProductsByStore:async()=>0,
+    createProduct:async data=>{created.push(data);return {id:41,...data};},
+    createVariant:async data=>variants.push(data)
+  };
+  const controller=loadController('apps/backend/src/controllers/productController.js',{
+    '../models/productModel':Product,
+    '../models/storeModel':{getProductLimit:async()=>100}
+  });
+
+  for(const itemType of ['quote','appointment']){
+    const res=response();
+    await controller.createProduct({
+      user:{store_id:7},
+      body:{
+        name:itemType,
+        price:'0',
+        item_type:itemType,
+        track_inventory:'true',
+        variants:JSON.stringify([{color:'Única',size:'Única',price:0,stock:0}])
+      },
+      files:{}
+    },res);
+    assert.equal(res.code,201);
+  }
+
+  assert.deepEqual(created.map(item=>item.item_type),['quote','appointment']);
+  assert.ok(created.every(item=>item.store_id===7 && item.track_inventory===false));
+  assert.equal(variants.length,2);
+});
+
+test('Inventory returns every store offer while KPIs count only tracked stock',async () => {
+  const calls=[];
+  const rows=[
+    {product_id:1,item_type:'product',track_inventory:true,has_variants:true,stock:4,available_stock:4,inventory_value:20,price:10,cost:5},
+    {product_id:2,item_type:'quote',track_inventory:false,has_variants:false,stock:0,available_stock:0,inventory_value:0,price:0,cost:0}
+  ];
+  const controller=loadController('apps/backend/src/controllers/inventory.controller.js',{
+    '../db/db':{query:async(sql,args)=>{calls.push({sql,args});return {rows};}}
+  });
+  const res=response();
+  await controller.getInventory({user:{store_id:7}},res,error=>{throw error;});
+  assert.equal(res.data.inventory.length,2);
+  assert.equal(res.data.kpis.totalVariants,1);
+  assert.equal(res.data.kpis.lowStock,1);
+  assert.match(calls[0].sql,/FROM products p\s+LEFT JOIN product_variants pv/);
+  assert.doesNotMatch(calls[0].sql,/p\.track_inventory\s*=\s*TRUE/);
+  assert.deepEqual(Array.from(calls[0].args),[7]);
+});
+
+test('Products focuses on creation and published offers are managed in inventory',() => {
+  const products=read('apps/admin/products.html');
+  const inventory=read('apps/admin/inventory.html');
+  assert.match(products,/product-catalog-management is-hidden/);
+  for(const type of ['dish','appointment','digital','quote']) assert.match(products,new RegExp(`value="${type}"`));
+  assert.match(inventory,/Productos, servicios e inventario/);
+  assert.match(inventory,/id="filter-offer-type"/);
+  assert.match(read('apps/admin/js/inventory.js'),/editInventoryProduct/);
+});

@@ -263,11 +263,11 @@ export async function loadProducts(slug){
           </div>
 
           <div class="product-price">
-            $${price}
+            ${product.item_type === "quote" ? "Por cotizar" : `$${price}`}
           </div>
 
           <button class="product-btn add-cart">
-            ${product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir"}
+            ${product.item_type === "quote" ? "Cotizar" : product.item_type === "appointment" ? "Agendar" : product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir"}
           </button>
 
         </div>
@@ -331,9 +331,9 @@ export async function loadProducts(slug){
               image:imageUrl,
               qty:1
             });
-            btn.textContent = product.item_type === "service" ? "Solicitud agregada" : "Agregado";
+            btn.textContent = ["service","appointment","quote"].includes(product.item_type) ? "Solicitud agregada" : "Agregado";
             setTimeout(() => {
-              btn.textContent = product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir";
+              btn.textContent = product.item_type === "quote" ? "Cotizar" : product.item_type === "appointment" ? "Agendar" : product.item_type === "service" ? "Solicitar" : product.item_type === "digital" ? "Comprar" : "Añadir";
             },1200);
             return;
           }

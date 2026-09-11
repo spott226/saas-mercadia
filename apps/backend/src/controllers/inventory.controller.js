@@ -28,7 +28,7 @@ exports.getInventory = async (
 
           pv.id,
 
-          pv.product_id,
+          p.id AS product_id,
 
           pv.color,
 
@@ -53,25 +53,32 @@ exports.getInventory = async (
 
           p.name AS product_name,
 
+          p.description,
+
           p.category,
 
           p.image,
 
+          p.featured,
+
+          p.item_type,
+
           p.has_variants,
+
+          p.track_inventory,
 
           (
             pv.stock * pv.cost
           ) AS inventory_value
 
-        FROM product_variants pv
+        FROM products p
 
-        JOIN products p
-        ON p.id = pv.product_id
+        LEFT JOIN product_variants pv
+        ON pv.product_id = p.id
 
         WHERE p.store_id = $1
-        AND p.track_inventory = TRUE
 
-        ORDER BY pv.id DESC
+        ORDER BY p.id DESC, pv.id DESC
         `,
         [store_id]
       );
@@ -85,11 +92,15 @@ exports.getInventory = async (
     ========================= */
 
     const totalVariants =
-      inventory.filter(item => item.has_variants === true).length;
+      inventory.filter(item =>
+        item.track_inventory === true &&
+        item.has_variants === true
+      ).length;
 
     const lowStock =
       inventory.filter(
         item =>
+          item.track_inventory === true &&
           Number(item.stock) <= 5
       ).length;
 

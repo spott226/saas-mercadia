@@ -22,9 +22,9 @@
   const page = location.pathname.split('/').pop()?.replace('.html','') || 'dashboard';
   const pageCopy = {
     dashboard:['Centro de control','Resumen de ventas, operación y rendimiento de tu tienda.'],
-    products:['Catálogo','Crea productos, variantes, precios e imágenes desde un solo flujo.'],
+    products:['Alta de oferta','Crea productos, servicios, citas, platillos, archivos digitales o proyectos para cotizar.'],
     orders:['Operación','Supervisa cada pedido y avanza su proceso sin perder el control del stock.'],
-    inventory:['Existencias','Consulta disponibilidad, reservas, valor y movimientos de inventario.'],
+    inventory:['Publicaciones e inventario','Busca y administra lo publicado; consulta existencias y movimientos cuando correspondan.'],
     customers:['Relaciones','Conoce a tus clientes confirmados y su historial de compra.'],
     store:['Experiencia digital','Diseña la página pública que verán los compradores de tu negocio.'],
     login:['Acceso seguro','']

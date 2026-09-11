@@ -58,6 +58,11 @@ body{
     linear-gradient(180deg,var(--os-sidebar) 0,var(--os-sidebar-2) 100%)!important;
   border-right:1px solid rgba(148,163,184,.12)!important;
   box-shadow:18px 0 50px rgba(8,17,31,.14)!important;
+  min-width:272px!important;
+  max-width:272px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
 }
 
 .logo{
@@ -100,7 +105,7 @@ body{
   letter-spacing:.16em!important;
 }
 
-.menu{display:grid!important;gap:7px!important}
+.menu{display:grid!important;gap:7px!important;width:100%!important}
 .menu a{
   display:flex!important;
   align-items:center!important;
@@ -113,6 +118,9 @@ body{
   font-size:14px!important;
   font-weight:700!important;
   transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease!important;
+  width:100%!important;
+  white-space:nowrap!important;
+  margin:0!important;
 }
 
 .menu a:hover{
@@ -276,12 +284,17 @@ input[type="file"]{background:var(--os-panel-2)!important}
 
 button,.action-btn,.export-btn,.secondary-action,.file-action{
   min-height:42px;
+  padding:10px 18px!important;
   border-radius:12px!important;
   font-size:13px!important;
   font-weight:800!important;
   letter-spacing:0!important;
   text-transform:none!important;
   transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
 }
 button[type="submit"],#save-btn,#save-experience-btn,#save-promotion-btn,.export-btn,.action-btn{
   border:1px solid transparent!important;
@@ -316,7 +329,7 @@ button[type="submit"]:hover,#save-btn:hover,#save-experience-btn:hover,#save-pro
 .action-btn.delete-btn:hover{border-color:#fda4af!important;background:#ffe4e6!important;box-shadow:0 8px 18px rgba(225,29,72,.10)!important}
 .actions,.promotion-actions,.product-actions{gap:8px!important}
 button:disabled{opacity:.55!important;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}
-.button-icon{margin-right:7px;vertical-align:-4px}
+.button-icon{margin-right:0;vertical-align:-4px}
 
 .info-dot{
   position:relative!important;
@@ -418,6 +431,10 @@ button:disabled{opacity:.55!important;cursor:not-allowed!important;transform:non
 .optional-label{color:var(--os-muted);font-size:10px;font-weight:600}
 .is-hidden{display:none!important}
 .variants-section{margin-top:18px!important}
+.products-create-only .page-heading,
+.products-create-only .form-card{max-width:980px;margin-left:auto!important;margin-right:auto!important}
+.products-create-only .form-actions{margin-top:20px!important;padding-top:18px!important;border-top:1px solid var(--os-line)!important}
+.products-create-only .form-actions button{min-width:190px!important}
 
 .table-card{padding:0!important;overflow:auto!important;border-radius:var(--os-radius)!important}
 .section-card:has(table){overflow-x:auto!important}
@@ -566,7 +583,7 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
      order placed the overlay over the drawer on iOS, blurring it and
      intercepting every tap. */
   .menu-toggle{display:grid!important;position:fixed!important;top:14px!important;left:14px!important;z-index:1600!important}
-  .sidebar{width:min(84vw,310px)!important;padding:78px 18px 20px!important;transform:translateX(-105%);transition:transform .24s ease!important;z-index:1500!important}
+  .sidebar{width:min(84vw,310px)!important;min-width:min(84vw,310px)!important;max-width:min(84vw,310px)!important;padding:78px 18px 20px!important;transform:translateX(-105%);transition:transform .24s ease!important;z-index:1500!important}
   .sidebar.open{transform:translateX(0)!important}
   .sidebar-overlay{z-index:1400!important}
   .sidebar-overlay.active{display:block!important;background:rgba(8,17,31,.55)!important;-webkit-backdrop-filter:blur(3px)!important;backdrop-filter:blur(3px)!important}

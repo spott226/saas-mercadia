@@ -468,12 +468,12 @@ align-items:flex-start;
 </style>
 
 <link rel="stylesheet" href="css/admin-polish.css?v=20260828-3">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260828-3">
-<script defer src="js/ui.js?v=20260828-2"></script>
+<link rel="stylesheet" href="css/commerce-os.css?v=20260910-2">
+<script defer src="js/ui.js?v=20260910-2"></script>
 
 </head>
 
-<body>
+<body class="products-create-only">
 
 <button class="menu-toggle" onclick="toggleMenu()">
 ☰
@@ -531,9 +531,9 @@ Cerrar sesión
 
 <div class="page-heading">
 <h2 class="page-title">
-Gestión de productos
+Agregar producto o servicio
 </h2>
-<button class="info-dot" type="button" aria-label="Información de productos" data-info="Aquí das de alta productos, agregas variantes por color y talla, subes imágenes y controlas precio, categoría, destacado e inventario inicial.">
+<button class="info-dot" type="button" aria-label="Información de productos" data-info="Elige qué ofreces y Mercadia mostrará solo los campos necesarios. Lo ya publicado se administra desde Inventario.">
 i
 </button>
 </div>
@@ -567,8 +567,11 @@ onsubmit="event.preventDefault(); createProduct();"
 <label for="item-type">¿Qué vas a publicar?</label>
 <select id="item-type">
 <option value="product">Producto físico</option>
-<option value="service">Servicio o cita</option>
+<option value="dish">Platillo o bebida</option>
+<option value="service">Servicio</option>
+<option value="appointment">Cita o reservación</option>
 <option value="digital">Producto digital</option>
+<option value="quote">Proyecto para cotizar</option>
 </select>
 <small id="item-type-help">Ideal para artículos que se entregan o recogen.</small>
 </div>
@@ -608,6 +611,8 @@ Precio público
 <input
 id="price"
 type="number"
+min="0"
+step="0.01"
 placeholder="0.00"
 required
 >
@@ -668,18 +673,6 @@ Destacado
 <div class="field-group"><label for="simple-cost">Costo para ti <span class="optional-label">Opcional</span></label><input id="simple-cost" type="number" min="0" step="0.01" placeholder="0.00"><small>Lo que te cuesta comprarlo o producirlo. Se usa para calcular inversión y ganancia.</small></div>
 </div>
 </div>
-
-<div class="form-actions">
-<button
-id="save-btn"
-type="submit"
->
-Agregar
-</button>
-</div>
-
-</form>
-
 
 <!-- VARIANTES ERP -->
 
@@ -795,12 +788,23 @@ Agregar variante
 
 </div>
 
+<div class="form-actions">
+<button
+id="save-btn"
+type="submit"
+>
+Agregar
+</button>
+</div>
+
+</form>
+
 </div>
 
 
 <!-- FILTERS ERP -->
 
-<div class="filters-card">
+<div class="filters-card product-catalog-management is-hidden" aria-hidden="true">
 
 <div class="section-heading compact">
 <div>
@@ -874,7 +878,7 @@ Página 1
 
 <!-- TABLE -->
 
-<div class="table-card">
+<div class="table-card product-catalog-management is-hidden" aria-hidden="true">
 
 <div class="table-title">
 Productos publicados
@@ -930,7 +934,7 @@ Acciones
 
 <!-- PAGINATION -->
 
-<div class="pagination">
+<div class="pagination product-catalog-management is-hidden" aria-hidden="true">
 
 <button
 id="prev-page"

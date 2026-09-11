@@ -149,9 +149,12 @@ function renderProduct(product){
     "product-detail-title"
   );
 
+  const isQuote = product.item_type === "quote";
   const price = createText(
     "p",
-    formatMoney(selectedVariant?.price || product.price),
+    isQuote
+      ? "Precio por cotizar"
+      : formatMoney(selectedVariant?.price || product.price),
     "product-detail-price"
   );
 
@@ -196,7 +199,9 @@ function renderProduct(product){
       button.addEventListener("click", () => {
         selectedVariant = variant;
         mainImage.src = getProductImage(product, selectedVariant);
-        price.textContent = formatMoney(variant.price || product.price);
+        price.textContent = isQuote
+          ? "Precio por cotizar"
+          : formatMoney(variant.price || product.price);
         selectedText.textContent = getVariantSize(variant, index);
 
         variantGrid
@@ -213,8 +218,12 @@ function renderProduct(product){
   const addButton = document.createElement("button");
   addButton.type = "button";
   addButton.className = "product-detail-add";
-  const actionLabel = product.item_type === "service"
-    ? "Solicitar servicio"
+  const actionLabel = product.item_type === "quote"
+    ? "Solicitar cotización"
+    : product.item_type === "appointment"
+      ? "Solicitar cita"
+      : product.item_type === "service"
+        ? "Solicitar servicio"
     : product.item_type === "digital"
       ? "Comprar"
       : "Añadir al carrito";
@@ -252,10 +261,13 @@ function renderProduct(product){
 
   const description = createText(
     "p",
-    product.description ||
-      product.item_type === "service"
-        ? "Servicio disponible para solicitud. Agrégalo y coordina fecha y horario con el negocio."
-        : "Disponible para pedido. Agrégalo y coordina los detalles con la tienda.",
+    product.description || (
+      product.item_type === "quote"
+        ? "Solicita una cotización y coordina los detalles del proyecto con el negocio."
+        : ["service","appointment"].includes(product.item_type)
+          ? "Disponible para solicitud. Agrégalo y coordina fecha y horario con el negocio."
+          : "Disponible para pedido. Agrégalo y coordina los detalles con la tienda."
+    ),
     "product-detail-description"
   );
 

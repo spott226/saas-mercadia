@@ -208,14 +208,14 @@ exports.createProduct = async (req, res) => {
       req.body.featured === true ||
       req.body.featured === "on";
 
-    const itemType = ["product","service","digital"].includes(req.body.item_type)
+    const itemType = ["product","dish","service","appointment","digital","quote"].includes(req.body.item_type)
       ? req.body.item_type
       : "product";
     const hasVariants = req.body.has_variants === "true" || req.body.has_variants === true;
     const trackInventory = !(
       req.body.track_inventory === "false" ||
       req.body.track_inventory === false ||
-      itemType === "service"
+      ["service","appointment","digital","quote"].includes(itemType)
     );
 
     const data = {
@@ -418,7 +418,7 @@ exports.updateProduct = async (
 
     }
 
-    const itemType = ["product","service","digital"].includes(req.body.item_type)
+    const itemType = ["product","dish","service","appointment","digital","quote"].includes(req.body.item_type)
       ? req.body.item_type
       : undefined;
     const hasVariants = req.body.has_variants === undefined
@@ -447,7 +447,9 @@ exports.updateProduct = async (
       featured,
       item_type:itemType,
       has_variants:hasVariants,
-      track_inventory:itemType === "service" ? false : trackInventory
+      track_inventory:["service","appointment","digital","quote"].includes(itemType)
+        ? false
+        : trackInventory
 
     };
 

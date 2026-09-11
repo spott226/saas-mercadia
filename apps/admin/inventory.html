@@ -406,8 +406,8 @@ font-size:24px;
 </style>
 
 <link rel="stylesheet" href="css/admin-polish.css?v=20260828-3">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260828-3">
-<script defer src="js/ui.js?v=20260828-2"></script>
+<link rel="stylesheet" href="css/commerce-os.css?v=20260910-2">
+<script defer src="js/ui.js?v=20260910-2"></script>
 
 </head>
 
@@ -468,10 +468,10 @@ Cerrar sesión
 <div class="content">
 
 <h1 class="page-title">
-Inventario ERP
+Inventario y publicaciones
 </h1>
 
-<button class="info-dot page-info-dot" type="button" aria-label="Información de inventario" data-info="Consulta cuánto tienes invertido, cuánto podrías vender y la ganancia potencial de tus existencias. Los cálculos usan cantidad disponible, precio público y costo para ti.">
+<button class="info-dot page-info-dot" type="button" aria-label="Información de inventario" data-info="Busca, edita o elimina lo publicado. Para productos físicos también puedes consultar existencias, inversión y ganancia potencial.">
 i
 </button>
 
@@ -562,7 +562,7 @@ id="total-stock"
 
 <div class="section-heading inline-info">
 <h3>
-Buscar inventario
+Buscar publicaciones e inventario
 </h3>
 <button class="info-dot" type="button" aria-label="Información de filtros de inventario" data-info="Busca por producto o SKU y filtra movimientos para revisar cambios de stock sin recorrer toda la tabla.">
 i
@@ -595,6 +595,16 @@ ADJUSTMENT
 
 </select>
 
+<select id="filter-offer-type">
+<option value="">Todos los tipos</option>
+<option value="product">Productos físicos</option>
+<option value="dish">Platillos y bebidas</option>
+<option value="service">Servicios</option>
+<option value="appointment">Citas y reservaciones</option>
+<option value="digital">Productos digitales</option>
+<option value="quote">Proyectos para cotizar</option>
+</select>
+
 </div>
 
 
@@ -603,7 +613,7 @@ ADJUSTMENT
 <div class="table-card">
 
 <div class="table-title">
-Inventario actual
+Productos, servicios e inventario
 <button class="info-dot" type="button" aria-label="Información de inventario actual" data-info="Valor al costo es cantidad por costo para ti. Ganancia potencial es cantidad por la diferencia entre precio público y costo.">
 i
 </button>
@@ -617,6 +627,10 @@ i
 
 <th>
 Producto
+</th>
+
+<th>
+Tipo
 </th>
 
 <th>
@@ -651,6 +665,10 @@ Stock
 Estado
 </th>
 
+<th>
+Acciones
+</th>
+
 </tr>
 
 </thead>
@@ -659,7 +677,7 @@ Estado
 
 <tr>
 
-<td colspan="11" class="empty">
+<td colspan="13" class="empty">
 Cargando inventario...
 </td>
 
