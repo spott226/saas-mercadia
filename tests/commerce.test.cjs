@@ -269,11 +269,19 @@ test('Every store template has its own immersive presentation and navigation mod
     assert.match(styles,new RegExp(`template-${template.replaceAll('_','-')}`),`Missing visual system for ${template}`);
   }
   assert.match(renderer,/dataset\.storeNavigation/);
+  assert.match(renderer,/applySitePalette/);
+  assert.match(renderer,/storefront-products-section/);
+  assert.match(renderer,/gym_active_1: \[\s*\{ type: "image_banner"/);
+  assert.match(styles,/storefront-products-section/);
+  assert.match(styles,/neoFloat/);
   for(const mode of ['rail','dock','floating','top']) assert.match(renderer,new RegExp(`"${mode}"`));
   assert.match(homepage,/id="hero-title"/);
   assert.match(homepage,/id="hero-text"/);
+  assert.match(settings,/site-background-color/);
+  assert.match(settings,/siteAccentColor/);
   assert.match(settings,/template-concept-stage/);
   assert.match(read('apps/admin/store.html'),/id="template-gallery"/);
+  assert.match(read('apps/admin/store.html'),/id="site-background-color"/);
   assert.match(settings,/data-template-choice/);
 });
 

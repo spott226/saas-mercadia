@@ -306,6 +306,9 @@ const livePreview =
   document.getElementById("live-store-preview");
 
 const siteTheme = document.getElementById("site-theme");
+const siteBackgroundColor = document.getElementById("site-background-color");
+const siteTextColor = document.getElementById("site-text-color");
+const siteAccentColor = document.getElementById("site-accent-color");
 const siteDisplayName = document.getElementById("site-display-name");
 const siteHeroTitle = document.getElementById("site-hero-title");
 const siteHeroText = document.getElementById("site-hero-text");
@@ -691,6 +694,11 @@ function buildHomepageSections(){
   workingSiteSettings = {
     type:"site_settings",
     theme:siteTheme.value,
+    styles:{
+      background_color:siteBackgroundColor.value,
+      text_color:siteTextColor.value,
+      accent_color:siteAccentColor.value
+    },
     display_name:siteDisplayName.value.trim(),
     hero_title:siteHeroTitle.value.trim(),
     hero_text:siteHeroText.value.trim()
@@ -709,6 +717,9 @@ function setSectionEditorFromSections(sections){
   workingSections = clonedSections.filter(section => section.type !== "site_settings");
 
   siteTheme.value = workingSiteSettings.theme || currentStore?.theme || "modern";
+  siteBackgroundColor.value = workingSiteSettings.styles?.background_color || getTemplateDefaultColors(templateKey.value).background;
+  siteTextColor.value = workingSiteSettings.styles?.text_color || getTemplateDefaultColors(templateKey.value).text;
+  siteAccentColor.value = workingSiteSettings.styles?.accent_color || getTemplateDefaultColors(templateKey.value).accent;
   siteDisplayName.value = workingSiteSettings.display_name || currentStore?.name || "";
   siteHeroTitle.value = workingSiteSettings.hero_title || currentStore?.hero_title || currentStore?.name || "";
   siteHeroText.value = workingSiteSettings.hero_text || currentStore?.hero_text || "";
@@ -725,6 +736,9 @@ function setSectionEditorFromSections(sections){
 function readSiteEditor(){
   return {
     theme:siteTheme.value,
+    background_color:siteBackgroundColor.value,
+    text_color:siteTextColor.value,
+    accent_color:siteAccentColor.value,
     display_name:siteDisplayName.value,
     hero_title:siteHeroTitle.value,
     hero_text:siteHeroText.value
@@ -734,6 +748,9 @@ function readSiteEditor(){
 
 function writeSiteEditor(settings){
   siteTheme.value = settings.theme || "modern";
+  siteBackgroundColor.value = settings.background_color || siteBackgroundColor.value;
+  siteTextColor.value = settings.text_color || siteTextColor.value;
+  siteAccentColor.value = settings.accent_color || siteAccentColor.value;
   siteDisplayName.value = settings.display_name || "";
   siteHeroTitle.value = settings.hero_title || "";
   siteHeroText.value = settings.hero_text || "";
@@ -749,6 +766,11 @@ function postLivePreview(){
       ...currentStore,
       name:siteDisplayName.value.trim() || currentStore.name,
       theme:siteTheme.value,
+      site_styles:{
+        background_color:siteBackgroundColor.value,
+        text_color:siteTextColor.value,
+        accent_color:siteAccentColor.value
+      },
       hero_title:siteHeroTitle.value.trim(),
       hero_text:siteHeroText.value.trim(),
       business_type:businessType.value,
@@ -774,6 +796,11 @@ function updateTemplatePreview(){
   const images = sectionImageList(section);
   const templateClass = `template-${String(selectedTemplate?.value || "ecommerce_default").replaceAll("_","-")}`;
   const navigationLabel = getTemplateNavigationLabel(selectedTemplate?.value);
+  const conceptStyle = [
+    `--concept-bg:${siteBackgroundColor.value}`,
+    `--concept-ink:${siteTextColor.value}`,
+    `--concept-accent:${siteAccentColor.value}`
+  ].join(";");
 
   templatePreview.innerHTML = `
     <div class="template-preview-header">
@@ -781,7 +808,7 @@ function updateTemplatePreview(){
       <span>${workingSections.length} secciones</span>
     </div>
     <p>${escapeHTML(selectedTemplate?.description || "Edita cada bloque de la página de forma independiente.")}</p>
-    <div class="template-concept ${templateClass}" aria-label="Vista conceptual de ${escapeHTML(selectedTemplate?.label || "la plantilla")}">
+    <div class="template-concept ${templateClass}" style="${escapeHTML(conceptStyle)}" aria-label="Vista conceptual de ${escapeHTML(selectedTemplate?.label || "la plantilla")}">
       <div class="template-concept-nav"><i></i><span></span><span></span><b>${escapeHTML(navigationLabel)}</b></div>
       <div class="template-concept-stage">
         <div class="template-concept-copy"><small>${escapeHTML(businessType.options[businessType.selectedIndex]?.text || "Tienda")}</small><strong>${escapeHTML(selectedTemplate?.label || "Diseño")}</strong><span></span><button type="button" tabindex="-1">Explorar</button></div>
@@ -806,6 +833,23 @@ function getTemplateNavigationLabel(templateValue){
   if(["appointments_3","mobile_first_1","streetwear_drop_1"].includes(templateValue)) return "Navegación inferior";
   if(["restaurant_3","appointments_2","professional_3","ecommerce_default"].includes(templateValue)) return "Navegación flotante";
   return "Navegación superior";
+}
+
+function getTemplateDefaultColors(templateValue){
+  const key = String(templateValue || "");
+  const defaults = {
+    ecommerce_default:{ background:"#eef2ff", text:"#101828", accent:"#5b5cf0" },
+    fashion_editorial_1:{ background:"#f4efe9", text:"#1b1816", accent:"#1b1816" },
+    fashion_editorial_2:{ background:"#f8f8f6", text:"#1b1816", accent:"#cf315c" },
+    streetwear_drop_1:{ background:"#dfff00", text:"#090909", accent:"#111111" },
+    gym_active_1:{ background:"#080c12", text:"#f5fbff", accent:"#55ff9a" },
+    luxury_minimal_1:{ background:"#f6f3ed", text:"#16130f", accent:"#a27b3c" },
+    restaurant_4:{ background:"#fff8e7", text:"#201109", accent:"#e54819" },
+    professional_2:{ background:"#0c1019", text:"#f6f7fb", accent:"#7c5cff" },
+    professional_3:{ background:"#ffffff", text:"#17211d", accent:"#087f5b" }
+  };
+
+  return defaults[key] || { background:"#f5f7fb", text:"#101828", accent:"#6d5dfc" };
 }
 
 
@@ -971,7 +1015,11 @@ businessType.addEventListener(
     setSectionEditorFromSections(
       getSelectedTemplate()?.sections
     );
+    const colors = getTemplateDefaultColors(templateKey.value);
     writeSiteEditor(siteDraft);
+    siteBackgroundColor.value = colors.background;
+    siteTextColor.value = colors.text;
+    siteAccentColor.value = colors.accent;
     updateTemplatePreview();
   }
 );
@@ -983,7 +1031,11 @@ templateKey.addEventListener(
     setSectionEditorFromSections(
       getSelectedTemplate()?.sections
     );
+    const colors = getTemplateDefaultColors(templateKey.value);
     writeSiteEditor(siteDraft);
+    siteBackgroundColor.value = colors.background;
+    siteTextColor.value = colors.text;
+    siteAccentColor.value = colors.accent;
     renderTemplateGallery();
     updateTemplatePreview();
   }
@@ -1015,7 +1067,7 @@ templateGallery?.addEventListener("click",event => {
 
 });
 
-[siteTheme,siteDisplayName,siteHeroTitle,siteHeroText].forEach(input => {
+[siteTheme,siteBackgroundColor,siteTextColor,siteAccentColor,siteDisplayName,siteHeroTitle,siteHeroText].forEach(input => {
   input.addEventListener("input",updateTemplatePreview);
   input.addEventListener("change",updateTemplatePreview);
 });

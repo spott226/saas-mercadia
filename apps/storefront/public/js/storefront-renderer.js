@@ -34,9 +34,9 @@ const DEFAULT_PRESETS = {
     { type: "image_banner", title: "Estilo urbano", text: "Prendas para moverse distinto." }
   ],
   gym_active_1: [
-    { type: "category_tiles", title: "Compra por entrenamiento" },
+    { type: "image_banner", eyebrow: "Performance", title: "Ropa lista para moverse contigo", cta: "Ver coleccion" },
     { type: "product_grid", title: "Favoritos para entrenar" },
-    { type: "editorial_banner", title: "Construido para moverte", text: "Ropa funcional para todos los dias." }
+    { type: "category_tiles", title: "Compra por categoria" }
   ],
   luxury_minimal_1: [
     { type: "editorial_banner", title: "Menos ruido. Mas presencia.", text: "Una seleccion sobria para vestir mejor." },
@@ -288,9 +288,36 @@ function applyExperienceIdentity(store,templateKey){
   const copy = defaults[businessType] || defaults.ecommerce;
 
   document.body.dataset.storeNavigation = getNavigationMode(templateKey);
+  applySitePalette(store);
   setText("hero-kicker",copy[0]);
   setText("hero-title",store?.hero_title || copy[1]);
   setText("hero-text",store?.hero_text || copy[2]);
+}
+
+function getSiteSettings(store){
+  return Array.isArray(store?.homepage_sections)
+    ? store.homepage_sections.find(section => section?.type === "site_settings")
+    : null;
+}
+
+function applySitePalette(store){
+  const settings = getSiteSettings(store);
+  const styles = store?.site_styles || settings?.styles || {};
+  const root = document.body;
+  const palette = [
+    ["background_color","--background"],
+    ["text_color","--text"],
+    ["accent_color","--primary"]
+  ];
+
+  palette.forEach(([key,variable]) => {
+    const color = safeColor(styles?.[key],"");
+    if(color){
+      root.style.setProperty(variable,color);
+    }else{
+      root.style.removeProperty(variable);
+    }
+  });
 }
 
 function escapeHTML(value){
@@ -318,6 +345,7 @@ function clearDynamicSections(){
   document
     .querySelectorAll(".storefront-dynamic-section")
     .forEach(section => section.remove());
+  clearProductSectionPresentation();
 }
 
 function getInsertionPoint(){
@@ -325,6 +353,21 @@ function getInsertionPoint(){
     document.getElementById("products");
 
   return products?.closest("section") || null;
+}
+
+function clearProductSectionPresentation(){
+  const productSection = getInsertionPoint();
+  if(!productSection) return;
+
+  productSection.classList.remove(
+    "storefront-products-section",
+    "section-layout-default",
+    "section-layout-image-left",
+    "section-layout-image-right",
+    "section-layout-gallery"
+  );
+  productSection.style.removeProperty("--section-background");
+  productSection.style.removeProperty("--section-text");
 }
 
 function getCategoryUrl(slug, category){
@@ -478,6 +521,14 @@ function renderSections({ store, slug, products, sections }){
 
   if(productSection?.title){
     setText("storefront-featured-title", productSection.title);
+  }
+
+  if(productSection){
+    const staticProductSection = getInsertionPoint();
+    if(staticProductSection){
+      staticProductSection.classList.add("storefront-products-section");
+      applySectionPresentation(staticProductSection,productSection);
+    }
   }
 }
 

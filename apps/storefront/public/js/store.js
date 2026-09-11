@@ -1,5 +1,5 @@
 import { getStore } from "./api.js";
-import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-3";
+import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-4";
 
 let editorDraftStore = null;
 let storeInitialized = false;
@@ -162,6 +162,7 @@ const siteSettings = Array.isArray(store.homepage_sections)
 if(siteSettings){
   if(siteSettings.display_name) store.name = siteSettings.display_name;
   if(siteSettings.theme) store.theme = siteSettings.theme;
+  if(siteSettings.styles) store.site_styles = siteSettings.styles;
   if(siteSettings.hero_title) store.hero_title = siteSettings.hero_title;
   if(siteSettings.hero_text) store.hero_text = siteSettings.hero_text;
 }

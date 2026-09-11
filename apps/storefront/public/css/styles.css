@@ -2681,7 +2681,7 @@ body.template-boutique-grid-1 .product-card:nth-child(3n+2){transform:translateZ
 
 body.template-lookbook-1{--background:#ece7df;--primary:#8d1f47}
 body.template-lookbook-1 .hero{height:90vh;background-attachment:fixed}
-body.template-lookbook-1 .hero-image{filter:saturate(.75) contrast(1.1)}
+body.template-lookbook-1 #hero-image{filter:saturate(.75) contrast(1.1)}
 body.template-lookbook-1 .storefront-image-banner{transform:rotate(-1deg);box-shadow:32px 38px 0 rgba(141,31,71,.15)}
 
 body.template-promo-stack-1{--background:#fff1e8;--primary:#ff4c25;--border:#ffb7a3}
@@ -2727,6 +2727,153 @@ body.template-professional-2 .product-card:hover{transform:translateY(-14px) rot
 body.template-professional-3 .hero{width:min(1300px,calc(100% - 40px));margin:20px auto;border-radius:24px;box-shadow:20px 22px 0 #d8eee6}
 body.template-professional-3 .storefront-split-showcase{transform:perspective(1200px) rotateX(2deg);box-shadow:24px 30px 0 #e0f2eb}
 
+.storefront-products-section{
+background:var(--section-background,var(--background));
+color:var(--section-text,var(--text));
+width:100%;
+max-width:none!important;
+margin:0!important;
+padding:46px max(18px,calc((100vw - 1280px) / 2 + 24px))!important;
+}
+
+.storefront-products-section h2,
+.storefront-products-section .product-title,
+.storefront-products-section .product-price{
+color:inherit;
+}
+
+.storefront-products-section #products{
+max-width:1280px;
+margin:0 auto;
+}
+
+body[class*="template-"] .storefront-image-banner,
+body[class*="template-"] .storefront-split-showcase,
+body[class*="template-"] .storefront-editorial-banner,
+body[class*="template-"] .storefront-promo-strip{
+animation:sectionRise .62s ease both;
+}
+
+body.template-gym-active-1{
+--card:#111a25;
+--card-elevated:#172332;
+--border:#263848;
+}
+
+body.template-gym-active-1 header{
+background:rgba(8,12,18,.78);
+border-color:rgba(85,255,154,.18);
+backdrop-filter:blur(18px);
+}
+
+body.template-gym-active-1 .hero{
+align-items:center;
+justify-content:flex-start;
+text-align:left;
+overflow:hidden;
+background:
+radial-gradient(circle at 82% 16%,color-mix(in srgb,var(--primary) 42%,transparent),transparent 30%),
+linear-gradient(110deg,#050910 0%,#0c1320 54%,color-mix(in srgb,var(--primary) 24%,#06100d) 100%);
+}
+
+body.template-gym-active-1 .hero-copy{
+justify-items:start;
+text-align:left;
+margin-left:clamp(24px,7rem,112px);
+}
+
+body.template-gym-active-1 .hero::before{
+width:min(44vw,520px);
+height:168px;
+aspect-ratio:auto;
+right:6%;
+top:26%;
+border-radius:28px;
+background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 92%,#fff),rgba(255,255,255,.28));
+box-shadow:0 0 80px color-mix(in srgb,var(--primary) 34%,transparent);
+transform:perspective(1000px) rotateX(8deg) rotateY(-18deg) translateZ(70px);
+animation:neoFloat 5s ease-in-out infinite;
+}
+
+body.template-gym-active-1 .hero::after{
+width:min(36vw,430px);
+height:76px;
+aspect-ratio:auto;
+left:auto;
+right:9%;
+bottom:28%;
+border-radius:18px;
+background:rgba(255,255,255,.74);
+transform:perspective(1000px) rotateX(5deg) rotateY(-18deg) translateZ(120px);
+animation:neoFloat 5s ease-in-out infinite reverse;
+}
+
+body.template-gym-active-1 .hero-title{
+max-width:620px;
+letter-spacing:0;
+}
+
+body.template-gym-active-1 .hero a,
+body.template-gym-active-1 .product-btn,
+body.template-gym-active-1 .promotion-button{
+background:var(--primary);
+color:#05100c;
+border:0;
+border-radius:14px;
+box-shadow:0 16px 40px color-mix(in srgb,var(--primary) 28%,transparent);
+}
+
+body.template-gym-active-1 .storefront-image-banner{
+min-height:520px;
+border:1px solid color-mix(in srgb,var(--primary) 28%,transparent);
+border-radius:34px;
+background:#0b111a;
+box-shadow:0 36px 90px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.04);
+transform:perspective(1200px) rotateX(1.5deg);
+}
+
+body.template-gym-active-1 .storefront-image-banner::after{
+background:linear-gradient(90deg,rgba(3,8,14,.92),rgba(3,8,14,.42),color-mix(in srgb,var(--primary) 16%,transparent));
+}
+
+body.template-gym-active-1 .storefront-category-grid{
+display:flex;
+gap:10px;
+overflow:auto;
+padding-bottom:6px;
+}
+
+body.template-gym-active-1 .storefront-category-grid a{
+min-width:210px;
+min-height:86px;
+align-items:center;
+border-color:color-mix(in srgb,var(--primary) 18%,transparent);
+border-radius:999px;
+background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 16%,transparent),rgba(255,255,255,.04));
+}
+
+body.template-gym-active-1 .product-card{
+padding:10px;
+border:1px solid color-mix(in srgb,var(--primary) 12%,transparent);
+border-radius:20px;
+background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+}
+
+body.template-gym-active-1 .product-card:hover{
+transform:translateY(-12px) rotateX(5deg) rotateY(-3deg);
+box-shadow:0 24px 70px color-mix(in srgb,var(--primary) 17%,transparent);
+}
+
+@keyframes neoFloat{
+0%,100%{transform:perspective(1000px) rotateX(8deg) rotateY(-18deg) translate3d(0,0,70px)}
+50%{transform:perspective(1000px) rotateX(6deg) rotateY(-14deg) translate3d(-10px,14px,90px)}
+}
+
+@keyframes sectionRise{
+from{opacity:.001;transform:translateY(18px)}
+to{opacity:1}
+}
+
 @media(max-width:768px){
 body[data-store-navigation="rail"]{padding-left:0}
 body[data-store-navigation="rail"] header{position:sticky!important;width:auto;height:auto;inset:auto!important}
@@ -2743,9 +2890,44 @@ body.template-streetwear-drop-1 .hero-title{font-size:clamp(52px,18vw,84px)}
 body.template-ecommerce-default .hero{width:calc(100% - 16px);height:590px;border-radius:28px}
 body.template-luxury-minimal-1 .hero{width:100%;height:650px}
 body.template-lookbook-1 .hero{height:680px}
+body.template-gym-active-1 .hero{
+height:590px;
+clip-path:none;
+}
+body.template-gym-active-1 .hero-copy{
+margin:0;
+padding:0 24px 72px!important;
+align-self:end;
+}
+body.template-gym-active-1 .hero::before{
+width:78vw;
+height:120px;
+right:-16vw;
+top:118px;
+}
+body.template-gym-active-1 .hero::after{
+width:74vw;
+height:58px;
+right:-8vw;
+bottom:170px;
+}
+body.template-gym-active-1 .storefront-image-banner{
+min-height:430px;
+border-radius:24px;
+transform:none;
+}
+.storefront-products-section{
+padding:34px 16px!important;
+}
 }
 
 @media(prefers-reduced-motion:reduce){
 .hero img,body[class*="template-"] .product-card{transition:none!important}
 body[class*="template-"] .product-card:hover{transform:none!important}
+body[class*="template-"] .storefront-image-banner,
+body[class*="template-"] .storefront-split-showcase,
+body[class*="template-"] .storefront-editorial-banner,
+body[class*="template-"] .storefront-promo-strip,
+body.template-gym-active-1 .hero::before,
+body.template-gym-active-1 .hero::after{animation:none!important}
 }
