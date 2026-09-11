@@ -43,14 +43,15 @@ exports.unsubscribe = async (req, res, next) => {
 
 exports.subscribeMerchant = async (req,res,next) => {
   try{
-    if(!req.user.merchant_id){
-      return res.status(403).json({ success:false, error:"merchant account required" });
+    if(!req.user.store_id || (!req.user.merchant_id && !req.user.user_id)){
+      return res.status(403).json({ success:false, error:"Cuenta de negocio requerida" });
     }
 
     await push.saveMerchantSubscription(
       req.user.store_id,
-      req.user.merchant_id,
-      req.body.subscription
+      req.user.merchant_id || null,
+      req.body.subscription,
+      req.user.user_id || null
     );
     res.status(201).json({ success:true });
   }catch(error){

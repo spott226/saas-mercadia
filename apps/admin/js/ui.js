@@ -32,6 +32,9 @@
 
   document.body.classList.toggle('os-login', page === 'login');
   document.body.dataset.adminPage = page;
+  if(page !== 'login' && !document.body.dataset.pwaContext){
+    document.body.dataset.pwaContext = 'platform';
+  }
 
   const menu = document.querySelector('.sidebar .menu');
   if(menu?.querySelector('a[href="store.html"]')){

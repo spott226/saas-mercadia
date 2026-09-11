@@ -141,21 +141,51 @@ async function enableMerchantNotifications(){
   actionButton("pwa-notifications","Alertas de pedidos activadas",enableMerchantNotifications).disabled = true;
 }
 
+async function syncMerchantSubscription(subscription){
+  const token = localStorage.getItem("mercadia_admin_token");
+  if(!token || !subscription) return false;
+
+  const response = await fetch(`${API_BASE}/admin/push/subscribe`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${token}`
+    },
+    body:JSON.stringify({ subscription })
+  });
+
+  return response.ok;
+}
+
 async function showMerchantNotifications(){
   if(
     document.body.dataset.pwaContext !== "platform" ||
     !("PushManager" in window) ||
-    !("Notification" in window) ||
-    !localStorage.getItem("mercadia_admin_token")
+    !("Notification" in window)
   ) return;
 
+  if(window.adminSessionReady){
+    await window.adminSessionReady.catch(() => false);
+  }
+
+  if(!localStorage.getItem("mercadia_admin_token")) return;
+
   const current = await registration?.pushManager?.getSubscription();
+  let synced = false;
+
+  if(current && Notification.permission === "granted"){
+    synced = await syncMerchantSubscription(current).catch(error => {
+      console.error("PWA MERCHANT SYNC ERROR:",error);
+      return false;
+    });
+  }
+
   const button = actionButton(
     "pwa-notifications",
-    current ? "Alertas de pedidos activadas" : "Activar alertas de pedidos",
+    synced ? "Alertas de pedidos activadas" : "Activar alertas de pedidos",
     () => enableMerchantNotifications().catch(error => window.alert(error.message))
   );
-  button.disabled = Boolean(current);
+  button.disabled = synced;
 }
 
 window.refreshMerchantNotifications = () => showMerchantNotifications().catch(error => console.error("PWA MERCHANT ERROR:",error));

@@ -217,7 +217,8 @@ async function ensureCustomerAccountSchema(){
         CREATE TABLE IF NOT EXISTS merchant_push_subscriptions (
           id BIGSERIAL PRIMARY KEY,
           store_id INTEGER NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-          merchant_account_id BIGINT NOT NULL REFERENCES merchant_accounts(id) ON DELETE CASCADE,
+          merchant_account_id BIGINT REFERENCES merchant_accounts(id) ON DELETE CASCADE,
+          admin_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
           endpoint TEXT NOT NULL UNIQUE,
           p256dh TEXT NOT NULL,
           auth TEXT NOT NULL,
@@ -225,6 +226,20 @@ async function ensureCustomerAccountSchema(){
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         `
+      );
+
+      await pool.query(
+        `
+        ALTER TABLE merchant_push_subscriptions
+          ALTER COLUMN merchant_account_id DROP NOT NULL,
+          ADD COLUMN IF NOT EXISTS admin_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE
+        `
+      );
+
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS merchant_push_admin_user_idx
+         ON merchant_push_subscriptions (admin_user_id)
+         WHERE admin_user_id IS NOT NULL`
       );
 
       await pool.query(

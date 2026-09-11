@@ -49,7 +49,7 @@ async function removeSubscription(endpoint, accountId){
   );
 }
 
-async function saveMerchantSubscription(storeId, merchantId, subscription){
+async function saveMerchantSubscription(storeId, merchantId, subscription, adminUserId = null){
   const endpoint = String(subscription?.endpoint || "");
   const p256dh = String(subscription?.keys?.p256dh || "");
   const auth = String(subscription?.keys?.auth || "");
@@ -62,16 +62,17 @@ async function saveMerchantSubscription(storeId, merchantId, subscription){
 
   await db.query(
     `INSERT INTO merchant_push_subscriptions
-       (store_id, merchant_account_id, endpoint, p256dh, auth, updated_at)
-     VALUES ($1,$2,$3,$4,$5,NOW())
+       (store_id, merchant_account_id, admin_user_id, endpoint, p256dh, auth, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,NOW())
      ON CONFLICT (endpoint)
      DO UPDATE SET
        store_id = EXCLUDED.store_id,
        merchant_account_id = EXCLUDED.merchant_account_id,
+       admin_user_id = EXCLUDED.admin_user_id,
        p256dh = EXCLUDED.p256dh,
        auth = EXCLUDED.auth,
        updated_at = NOW()`,
-    [storeId, merchantId, endpoint, p256dh, auth]
+    [storeId, merchantId || null, adminUserId || null, endpoint, p256dh, auth]
   );
 }
 

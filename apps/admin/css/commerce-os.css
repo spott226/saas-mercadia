@@ -493,7 +493,7 @@ tbody tr:last-child td{border-bottom:0!important}
 .meta-value{color:var(--os-ink)!important;font-weight:800!important}
 
 .menu-toggle{
-  display:none;
+  display:none!important;
   place-items:center;
   width:44px!important;
   height:44px!important;
@@ -690,3 +690,45 @@ input[type="color"]{height:46px;padding:5px!important;cursor:pointer}
 }
 
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+@media(max-width:700px){
+  body[data-admin-page="orders"] .table-card{overflow:visible!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+  body[data-admin-page="orders"] table{display:block!important;min-width:0!important;width:100%!important;background:transparent!important}
+  body[data-admin-page="orders"] thead{display:none!important}
+  body[data-admin-page="orders"] tbody{display:grid!important;gap:14px!important;width:100%!important}
+  body[data-admin-page="orders"] tbody tr{display:grid!important;gap:10px!important;width:100%!important;padding:16px!important;border:1px solid var(--os-line)!important;border-radius:18px!important;background:#fff!important;box-shadow:var(--os-shadow)!important}
+  body[data-admin-page="orders"] tbody td{display:grid!important;grid-template-columns:minmax(96px,36%) 1fr!important;gap:10px!important;padding:0!important;border:0!important;color:var(--os-ink)!important;white-space:normal!important;word-break:break-word!important}
+  body[data-admin-page="orders"] tbody td::before{content:attr(data-label);color:var(--os-muted)!important;font-size:12px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.04em!important}
+  body[data-admin-page="orders"] tbody td.empty{display:block!important;text-align:center!important;padding:22px!important}
+  body[data-admin-page="orders"] tbody td.empty::before{content:""}
+  body[data-admin-page="orders"] .actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;width:100%!important}
+  body[data-admin-page="orders"] .actions select,body[data-admin-page="orders"] .actions button{width:100%!important}
+}
+.pwa-actions{
+  position:fixed!important;
+  right:18px!important;
+  bottom:18px!important;
+  z-index:1200!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  pointer-events:none!important;
+}
+.pwa-actions:empty{display:none!important}
+.pwa-actions button{
+  pointer-events:auto!important;
+  min-height:44px!important;
+  padding:0 16px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:linear-gradient(135deg,var(--os-sidebar),var(--os-brand-2))!important;
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  box-shadow:0 14px 34px rgba(15,23,42,.25)!important;
+  cursor:pointer!important;
+}
+.pwa-actions button:disabled{opacity:.72!important;cursor:default!important}
+@media(max-width:700px){.pwa-actions{right:14px!important;left:14px!important;bottom:calc(14px + env(safe-area-inset-bottom))!important}.pwa-actions button{width:100%!important}}
+

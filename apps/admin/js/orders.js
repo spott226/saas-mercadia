@@ -286,23 +286,23 @@ function renderOrders(orders){
     return `
     <tr>
 
-      <td>
+      <td data-label="Pedido">
         #${order.id}
       </td>
 
-      <td>
+      <td data-label="Cliente">
         ${order.customer_name || "-"}
       </td>
 
-      <td>
+      <td data-label="Teléfono">
         ${order.customer_phone || "-"}
       </td>
 
-      <td>
+      <td data-label="Dirección">
         ${order.customer_address || "-"}
       </td>
 
-      <td>
+      <td data-label="Productos">
 
         <div class="order-products">
 
@@ -312,7 +312,7 @@ function renderOrders(orders){
 
       </td>
 
-      <td>
+      <td data-label="Total">
 
         $${Number(
           order.total || 0
@@ -320,7 +320,7 @@ function renderOrders(orders){
 
       </td>
 
-      <td>
+      <td data-label="Estado">
 
         <span class="status ${statusClass}">
 
@@ -330,11 +330,11 @@ function renderOrders(orders){
 
       </td>
 
-      <td>
+      <td data-label="Fecha">
         ${createdAt}
       </td>
 
-      <td>
+      <td data-label="Acciones">
 
         <div class="actions">
 
