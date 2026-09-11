@@ -24,6 +24,7 @@ const pushController = require("../controllers/push.controller");
 
 router.post("/login",adminController.login);
 router.post("/push/subscribe",auth.requireAdmin,pushController.subscribeMerchant);
+router.post("/push/test",auth.requireAdmin,pushController.testMerchant);
 
 router.get(
   "/store",

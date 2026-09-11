@@ -421,7 +421,7 @@ exports.createOrder = async (
       console.error("PUSH NEW ORDER ERROR:", error);
     });
 
-    pushNotifications.sendNewOrderToMerchant({
+    await pushNotifications.sendNewOrderToMerchant({
       storeId:store_id,
       orderId:order.id,
       customerName:normalizedCustomerName

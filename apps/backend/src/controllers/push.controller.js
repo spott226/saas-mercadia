@@ -61,3 +61,24 @@ exports.subscribeMerchant = async (req,res,next) => {
     next(error);
   }
 };
+exports.testMerchant = async (req,res,next) => {
+  try{
+    if(!req.user.store_id || (!req.user.merchant_id && !req.user.user_id)){
+      return res.status(403).json({ success:false, error:"Cuenta de negocio requerida" });
+    }
+
+    const result = await push.sendMerchantTest(req.user.store_id);
+    if(!result.sent){
+      return res.status(502).json({
+        success:false,
+        error:"No se pudo entregar la notificación de prueba a este dispositivo."
+      });
+    }
+    res.json({ success:true, ...result });
+  }catch(error){
+    if(error.status){
+      return res.status(error.status).json({ success:false, error:error.message });
+    }
+    next(error);
+  }
+};

@@ -15,6 +15,13 @@ function getPublicKey(){
   return configured ? publicKey : null;
 }
 
+function ensureConfigured(){
+  if(configured) return;
+  const error = new Error("notificaciones no configuradas");
+  error.status = 503;
+  throw error;
+}
+
 async function saveSubscription(storeId, accountId, subscription){
   const endpoint = String(subscription?.endpoint || "");
   const p256dh = String(subscription?.keys?.p256dh || "");
@@ -77,6 +84,8 @@ async function saveMerchantSubscription(storeId, merchantId, subscription, admin
 }
 
 async function deliver(rows,payload,tableName){
+  const stats = { sent:0, removed:0, failed:0 };
+
   await Promise.allSettled(
     rows.map(async row => {
       try{
@@ -87,20 +96,23 @@ async function deliver(rows,payload,tableName){
           },
           payload
         );
+        stats.sent += 1;
       }catch(error){
         if(error.statusCode === 404 || error.statusCode === 410){
           await db.query(`DELETE FROM ${tableName} WHERE id = $1`,[row.id]);
+          stats.removed += 1;
           return;
         }
+        stats.failed += 1;
         console.error("PUSH ERROR:",error.message);
       }
     })
   );
+
+  return stats;
 }
 
-async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
-  if(!configured) return;
-
+async function getMerchantSubscriptions(storeId){
   const result = await db.query(
     `SELECT mps.id,mps.endpoint,mps.p256dh,mps.auth,s.name AS store_name
      FROM merchant_push_subscriptions mps
@@ -108,10 +120,41 @@ async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
      WHERE mps.store_id = $1`,
     [storeId]
   );
+  return result.rows;
+}
+
+async function sendMerchantPayload(storeId,payload){
+  ensureConfigured();
+  const rows = await getMerchantSubscriptions(storeId);
+  if(!rows.length){
+    const error = new Error("No hay dispositivos del negocio suscritos para recibir alertas.");
+    error.status = 409;
+    throw error;
+  }
+  return deliver(rows,JSON.stringify(payload),"merchant_push_subscriptions");
+}
+
+async function sendMerchantTest(storeId){
+  return sendMerchantPayload(storeId,{
+    title:"Mercadia",
+    body:"Este dispositivo recibirá los pedidos nuevos de tu tienda.",
+    url:"/admin/orders.html",
+    tag:"merchant-push-test"
+  });
+}
+
+async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
+  if(!configured) return { sent:0, removed:0, failed:0, skipped:"not_configured" };
+
+  const rows = await getMerchantSubscriptions(storeId);
+  if(!rows.length){
+    console.warn("PUSH MERCHANT ORDER SKIPPED: no subscriptions",{ storeId, orderId });
+    return { sent:0, removed:0, failed:0, skipped:"no_subscriptions" };
+  }
 
   const cleanCustomerName = String(customerName || "").trim();
   const payload = JSON.stringify({
-    title:result.rows[0]?.store_name || "Mercadia",
+    title:rows[0]?.store_name || "Mercadia",
     body:cleanCustomerName
       ? `Nuevo pedido de ${cleanCustomerName} (#${orderId}).`
       : `Tienes un nuevo pedido #${orderId}.`,
@@ -119,7 +162,7 @@ async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
     tag:`merchant-order-${orderId}`
   });
 
-  await deliver(result.rows,payload,"merchant_push_subscriptions");
+  return deliver(rows,payload,"merchant_push_subscriptions");
 }
 
 const statusLabels = {
@@ -132,7 +175,7 @@ const statusLabels = {
 };
 
 async function sendOrderStatus({ storeId, phone, orderId, status }){
-  if(!configured || !phone) return;
+  if(!configured || !phone) return { sent:0, removed:0, failed:0, skipped:"not_configured" };
 
   const result = await db.query(
     `SELECT ps.id, ps.endpoint, ps.p256dh, ps.auth, s.name AS store_name
@@ -153,31 +196,7 @@ async function sendOrderStatus({ storeId, phone, orderId, status }){
     tag: `order-${orderId}`
   });
 
-  await Promise.allSettled(
-    result.rows.map(async row => {
-      try{
-        await webpush.sendNotification(
-          {
-            endpoint: row.endpoint,
-            keys: {
-              p256dh: row.p256dh,
-              auth: row.auth
-            }
-          },
-          payload
-        );
-      }catch(error){
-        if(error.statusCode === 404 || error.statusCode === 410){
-          await db.query(
-            "DELETE FROM push_subscriptions WHERE id = $1",
-            [row.id]
-          );
-          return;
-        }
-        console.error("PUSH ERROR:", error.message);
-      }
-    })
-  );
+  return deliver(result.rows,payload,"push_subscriptions");
 }
 
 module.exports = {
@@ -186,5 +205,6 @@ module.exports = {
   saveMerchantSubscription,
   removeSubscription,
   sendOrderStatus,
-  sendNewOrderToMerchant
+  sendNewOrderToMerchant,
+  sendMerchantTest
 };

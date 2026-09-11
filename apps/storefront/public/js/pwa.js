@@ -19,56 +19,6 @@ function getStoreId(){
   return session?.store_id || sessionStorage.getItem("store_id");
 }
 
-
-let merchantWatcherStarted = false;
-let merchantLastOrderId = null;
-
-async function fetchMerchantOrders(){
-  const token = localStorage.getItem("mercadia_admin_token");
-  if(!token) return [];
-
-  const response = await fetch(`${API_BASE}/orders`,{
-    cache:"no-store",
-    headers:{ Authorization:`Bearer ${token}` }
-  });
-  if(!response.ok) return [];
-  const data = await response.json().catch(() => null);
-  return Array.isArray(data?.orders) ? data.orders : [];
-}
-
-async function notifyLatestMerchantOrder(order){
-  if(!order || Notification.permission !== "granted" || !registration) return;
-  const customer = String(order.customer_name || "").trim();
-  await registration.showNotification("Nuevo pedido",{
-    body:customer ? `Nuevo pedido de ${customer} (#${order.id}).` : `Tienes un nuevo pedido #${order.id}.`,
-    icon:"/icons/mercadia-app.png",
-    badge:"/icons/mercadia-app.png",
-    tag:`merchant-order-${order.id}`,
-    renotify:true,
-    data:{ url:"/admin/orders.html" }
-  }).catch(() => {});
-}
-
-async function startMerchantOrderWatcher(){
-  if(merchantWatcherStarted || !isMerchantContext() || Notification.permission !== "granted") return;
-  merchantWatcherStarted = true;
-
-  const prime = await fetchMerchantOrders().catch(() => []);
-  merchantLastOrderId = Math.max(0,...prime.map(order => Number(order.id || 0)));
-
-  window.setInterval(async () => {
-    const orders = await fetchMerchantOrders().catch(() => []);
-    const latest = orders
-      .map(order => ({...order,id:Number(order.id || 0)}))
-      .filter(order => order.id > Number(merchantLastOrderId || 0))
-      .sort((a,b) => b.id - a.id)[0];
-
-    if(!latest) return;
-    merchantLastOrderId = latest.id;
-    await notifyLatestMerchantOrder(latest);
-  }, 25000);
-}
-
 function isMerchantContext(){
   return document.body.dataset.pwaContext === "platform";
 }
@@ -203,14 +153,16 @@ async function enableMerchantNotifications(){
     throw new Error(data?.error || "No se pudieron activar las alertas");
   }
 
+  const testResponse = await fetch(`${API_BASE}/admin/push/test`,{
+    method:"POST",
+    headers:{ Authorization:`Bearer ${token}` }
+  });
+  const testData = await testResponse.json().catch(() => null);
+  if(!testResponse.ok || testData?.success === false){
+    throw new Error(testData?.error || "La alerta quedó guardada, pero no se pudo mandar la prueba desde el servidor.");
+  }
+
   localStorage.setItem("mercadia_merchant_push_ready","1");
-  startMerchantOrderWatcher().catch(error => console.error("PWA MERCHANT WATCH ERROR:",error));
-  await registration.showNotification("Alertas de pedidos activadas",{
-    body:"Este dispositivo ya recibirá los pedidos nuevos de tu tienda.",
-    icon:"/icons/mercadia-app.png",
-    badge:"/icons/mercadia-app.png",
-    tag:"merchant-push-ready"
-  }).catch(() => {});
   actionButton("pwa-notifications","Alertas de pedidos activadas",enableMerchantNotifications).disabled = true;
 }
 
@@ -264,9 +216,6 @@ async function showMerchantNotifications(){
     () => enableMerchantNotifications().catch(error => window.alert(error.message))
   );
   button.disabled = synced;
-  if(synced){
-    startMerchantOrderWatcher().catch(error => console.error("PWA MERCHANT WATCH ERROR:",error));
-  }
 }
 
 window.refreshMerchantNotifications = () => showMerchantNotifications().catch(error => console.error("PWA MERCHANT ERROR:",error));
@@ -274,7 +223,7 @@ window.refreshMerchantNotifications = () => showMerchantNotifications().catch(er
 async function init(){
   if(!("serviceWorker" in navigator)) return;
 
-  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-11");
+  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-12");
   registration.update?.();
 
   window.addEventListener("beforeinstallprompt", event => {

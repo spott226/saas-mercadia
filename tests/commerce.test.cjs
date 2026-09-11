@@ -125,7 +125,7 @@ test('Owner middleware rejects foreign ownership and customer roles before promo
   const noop=()=>{};
   const controller=new Proxy({},{get:()=>noop});
   const module={exports:{}};
-  vm.runInNewContext(read('apps/backend/src/routes/admin.js'),{module,require:name=>({express:{Router:()=>router},'../controllers/adminController':controller,'../middleware/auth':{requireAdmin:noop},'../db/db':{query:async()=>({rows:ownerRows})},'../config/multer':{single:()=>noop},'../controllers/push.controller':{subscribeMerchant:noop}})[name]});
+  vm.runInNewContext(read('apps/backend/src/routes/admin.js'),{module,require:name=>({express:{Router:()=>router},'../controllers/adminController':controller,'../middleware/auth':{requireAdmin:noop},'../db/db':{query:async()=>({rows:ownerRows})},'../config/multer':{single:()=>noop},'../controllers/push.controller':{subscribeMerchant:noop,testMerchant:noop}})[name]});
   const route=routes.find(r=>r.method==='patch' && r.url==='/promotions/:id');
   const guard=route.handlers[1];let nextCount=0;
   let res=response();await guard({user:{role:'customer',store_id:7}},res,()=>nextCount++);assert.equal(res.code,403);
@@ -372,5 +372,14 @@ test('Storefront product and category links preserve the active store slug',() =
   assert.match(productsPage,/products\.js\?v=20260911-11/);
   assert.match(productPage,/product-detail\.js\?v=20260911-11/);
 });
-
-
+test('Merchant PWA uses backend push instead of foreground order polling',() => {
+  const pwa=read('apps/storefront/public/js/pwa.js');
+  const serviceWorker=read('apps/storefront/public/service-worker.js');
+  for(const file of ['index.html','products.html','product.html','categorias.html','mi-cuenta.html','landing.html']){
+    assert.match(read(`apps/storefront/public/${file}`),/pwa\.js\?v=20260911-12/);
+  }
+  assert.doesNotMatch(pwa,/fetchMerchantOrders|startMerchantOrderWatcher|setInterval\(/);
+  assert.match(pwa,/\/admin\/push\/test/);
+  assert.match(pwa,/service-worker\.js\?v=20260911-12/);
+  assert.match(serviceWorker,/mercadia-shell-v16/);
+});
