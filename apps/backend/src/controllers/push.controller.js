@@ -67,7 +67,7 @@ exports.testMerchant = async (req,res,next) => {
       return res.status(403).json({ success:false, error:"Cuenta de negocio requerida" });
     }
 
-    const result = await push.sendMerchantTest(req.user.store_id);
+    const result = await push.sendMerchantTest(req.user.store_id,req.body?.endpoint);
     if(!result.sent){
       return res.status(502).json({
         success:false,

@@ -6,13 +6,14 @@ const vm = require('node:vm');
 const validation = require('../apps/backend/src/services/commerceValidation');
 const root = path.resolve(__dirname,'..');
 const read = file => fs.readFileSync(path.join(root,file),'utf8');
-function loadController(file, dependencies){
+function loadController(file, dependencies, env = {}){
   const exports = {};
-  vm.runInNewContext(read(file),{exports,require:name => {
+  const module = { exports };
+  vm.runInNewContext(read(file),{exports,module,require:name => {
     if(Object.hasOwn(dependencies,name)) return dependencies[name];
     throw new Error(`Unexpected dependency: ${name}`);
-  },console:{error(){}},URL,Set,Map,Date});
-  return exports;
+  },console:{error(){},warn(){}},process:{env},URL,Set,Map,Date});
+  return module.exports === exports ? exports : module.exports;
 }
 function response(){ return {code:200,status(code){this.code=code;return this;},json(data){this.data=data;return this;}}; }
 
@@ -394,14 +395,26 @@ test('Storefront product and category links preserve the active store slug',() =
   assert.match(productsPage,/products\.js\?v=20260911-13/);
   assert.match(productPage,/product-detail\.js\?v=20260911-13/);
 });
+test('Merchant push test can target the current subscription',async () => {
+  const rows=[{id:1,endpoint:'current',p256dh:'p',auth:'a',store_name:'Demo'},{id:2,endpoint:'old',p256dh:'p',auth:'a',store_name:'Demo'}];
+  const calls=[];
+  const service=loadController('apps/backend/src/services/pushNotifications.js',{
+    '../db/db':{query:async(sql,args)=>{calls.push({sql,args});return {rows:args?.[1] ? rows.filter(row=>row.endpoint===args[1]) : rows};}},
+    'web-push':{setVapidDetails(){},sendNotification:async()=>{}}
+  },{VAPID_PUBLIC_KEY:'public',VAPID_PRIVATE_KEY:'private'});
+  const result=await service.sendMerchantTest(7,'current');
+  assert.equal(result.sent,1);
+  assert.match(calls[0].sql,/mps\.endpoint = \$2/);
+  assert.deepEqual(Array.from(calls[0].args),[7,'current']);
+});
 test('Merchant PWA uses backend push instead of foreground order polling',() => {
   const pwa=read('apps/storefront/public/js/pwa.js');
   const serviceWorker=read('apps/storefront/public/service-worker.js');
   for(const file of ['index.html','products.html','product.html','categorias.html','mi-cuenta.html','landing.html']){
-    assert.match(read(`apps/storefront/public/${file}`),/pwa\.js\?v=20260911-12/);
+    assert.match(read(`apps/storefront/public/${file}`),/pwa\.js\?v=20260911-14/);
   }
   assert.doesNotMatch(pwa,/fetchMerchantOrders|startMerchantOrderWatcher|setInterval\(/);
   assert.match(pwa,/\/admin\/push\/test/);
-  assert.match(pwa,/service-worker\.js\?v=20260911-12/);
-  assert.match(serviceWorker,/mercadia-shell-v16/);
+  assert.match(pwa,/service-worker\.js\?v=20260911-14/);
+  assert.match(serviceWorker,/mercadia-shell-v17/);
 });

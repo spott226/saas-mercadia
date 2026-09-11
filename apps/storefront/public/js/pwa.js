@@ -132,12 +132,15 @@ async function enableMerchantNotifications(){
     throw new Error(keyData.error || "Notificaciones no disponibles");
   }
 
-  const subscription =
-    await registration.pushManager.getSubscription() ||
-    await registration.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:base64ToBytes(keyData.public_key)
-    });
+  const current = await registration.pushManager.getSubscription();
+  if(current){
+    await current.unsubscribe().catch(() => false);
+  }
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly:true,
+    applicationServerKey:base64ToBytes(keyData.public_key)
+  });
 
   const response = await fetch(`${API_BASE}/admin/push/subscribe`,{
     method:"POST",
@@ -155,7 +158,11 @@ async function enableMerchantNotifications(){
 
   const testResponse = await fetch(`${API_BASE}/admin/push/test`,{
     method:"POST",
-    headers:{ Authorization:`Bearer ${token}` }
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${token}`
+    },
+    body:JSON.stringify({ endpoint:subscription.endpoint })
   });
   const testData = await testResponse.json().catch(() => null);
   if(!testResponse.ok || testData?.success === false){
@@ -163,7 +170,7 @@ async function enableMerchantNotifications(){
   }
 
   localStorage.setItem("mercadia_merchant_push_ready","1");
-  actionButton("pwa-notifications","Alertas de pedidos activadas",enableMerchantNotifications).disabled = true;
+  actionButton("pwa-notifications","Probar alertas de pedidos",enableMerchantNotifications).disabled = false;
 }
 
 async function syncMerchantSubscription(subscription){
@@ -212,10 +219,10 @@ async function showMerchantNotifications(){
 
   const button = actionButton(
     "pwa-notifications",
-    synced ? "Alertas de pedidos activadas" : "Activar alertas de pedidos",
+    synced ? "Probar alertas de pedidos" : "Activar alertas de pedidos",
     () => enableMerchantNotifications().catch(error => window.alert(error.message))
   );
-  button.disabled = synced;
+  button.disabled = false;
 }
 
 window.refreshMerchantNotifications = () => showMerchantNotifications().catch(error => console.error("PWA MERCHANT ERROR:",error));
@@ -223,7 +230,7 @@ window.refreshMerchantNotifications = () => showMerchantNotifications().catch(er
 async function init(){
   if(!("serviceWorker" in navigator)) return;
 
-  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-12");
+  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-14");
   registration.update?.();
 
   window.addEventListener("beforeinstallprompt", event => {

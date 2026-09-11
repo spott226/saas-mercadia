@@ -112,20 +112,27 @@ async function deliver(rows,payload,tableName){
   return stats;
 }
 
-async function getMerchantSubscriptions(storeId){
+async function getMerchantSubscriptions(storeId, endpoint = null){
+  const params = [storeId];
+  let endpointFilter = "";
+  if(endpoint){
+    params.push(String(endpoint));
+    endpointFilter = " AND mps.endpoint = $2";
+  }
+
   const result = await db.query(
     `SELECT mps.id,mps.endpoint,mps.p256dh,mps.auth,s.name AS store_name
      FROM merchant_push_subscriptions mps
      JOIN stores s ON s.id = mps.store_id
-     WHERE mps.store_id = $1`,
-    [storeId]
+     WHERE mps.store_id = $1${endpointFilter}`,
+    params
   );
   return result.rows;
 }
 
-async function sendMerchantPayload(storeId,payload){
+async function sendMerchantPayload(storeId,payload,endpoint = null){
   ensureConfigured();
-  const rows = await getMerchantSubscriptions(storeId);
+  const rows = await getMerchantSubscriptions(storeId,endpoint);
   if(!rows.length){
     const error = new Error("No hay dispositivos del negocio suscritos para recibir alertas.");
     error.status = 409;
@@ -134,13 +141,13 @@ async function sendMerchantPayload(storeId,payload){
   return deliver(rows,JSON.stringify(payload),"merchant_push_subscriptions");
 }
 
-async function sendMerchantTest(storeId){
+async function sendMerchantTest(storeId,endpoint = null){
   return sendMerchantPayload(storeId,{
     title:"Mercadia",
     body:"Este dispositivo recibirá los pedidos nuevos de tu tienda.",
     url:"/admin/orders.html",
     tag:"merchant-push-test"
-  });
+  },endpoint);
 }
 
 async function sendNewOrderToMerchant({ storeId, orderId, customerName }){
