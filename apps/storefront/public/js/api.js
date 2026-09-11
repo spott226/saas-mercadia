@@ -22,17 +22,19 @@ async function apiRequest(endpoint, options = {}) {
 
   try {
 
+    const { headers: optionHeaders = {}, ...fetchOptions } = options;
+
     const url = API_BASE + endpoint;
 
     console.log("API CALL:", url);
 
     const response = await fetch(url, {
       cache: "no-store",
+      ...fetchOptions,
       headers: {
         "Content-Type": "application/json",
-        ...(options.headers || {})
-      },
-      ...options
+        ...optionHeaders
+      }
     });
 
     if (!response.ok) {
@@ -225,7 +227,7 @@ export async function getActivePromotion(slug){
 // CREATE ORDER ERP
 // ================================
 
-export async function createOrder(orderData){
+export async function createOrder(orderData, session){
 
   if(!orderData){
     console.error("ORDER ERROR: datos vacios");
@@ -235,6 +237,13 @@ export async function createOrder(orderData){
   return await apiRequest("/orders", {
 
     method: "POST",
+
+    headers: session?.token
+      ? {
+        Authorization: `Bearer ${session.token}`,
+        "X-Store-Id": String(orderData.store_id || session.store_id || "")
+      }
+      : {},
 
     body: JSON.stringify(orderData)
 

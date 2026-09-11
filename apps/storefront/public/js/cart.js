@@ -2,6 +2,7 @@ import {normalizeBusinessWhatsapp} from './whatsapp.js';
 import { createOrder } from "./api.js";
 import {
   getCustomerProfile,
+  getCustomerSession,
   saveCustomerProfile
 } from "./customer-session.js";
 
@@ -47,6 +48,23 @@ function setInputValue(id, value){
   if(!input.value.trim()){
     input.value = value;
   }
+}
+
+function getLoginUrl(){
+  const url = new URL("/mi-cuenta.html", window.location.origin);
+  const current = new URLSearchParams(window.location.search);
+  const slug = current.get("slug") || window.store?.slug || "";
+  if(slug) url.searchParams.set("slug", slug);
+  url.searchParams.set("next", window.location.pathname + window.location.search);
+  return url.pathname + url.search;
+}
+
+function requireCustomerSession(){
+  const session = getCustomerSession(window.store?.id);
+  if(session?.token) return session;
+  alert("Inicia sesión o crea tu cuenta para comprar en esta tienda.");
+  window.location.href = getLoginUrl();
+  return null;
 }
 
 function prefillCheckoutForm(){
@@ -269,6 +287,8 @@ export function checkout(){
     return;
   }
 
+  if(!requireCustomerSession()) return;
+
   const modal = document.getElementById("checkout-modal");
 
   if(!modal){
@@ -345,6 +365,9 @@ export async function sendCheckout(){
   );
 
   try{
+    const session = requireCustomerSession();
+    if(!session) return;
+
     const cart = getCart();
 
     if(cart.length === 0){
@@ -405,7 +428,7 @@ export async function sendCheckout(){
         customer.postal
       ].filter(Boolean).join(", "),
       items
-    });
+    }, session);
 
     if(!data || !data.success){
       alert("Error creando pedido");

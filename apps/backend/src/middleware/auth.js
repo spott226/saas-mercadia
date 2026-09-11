@@ -118,7 +118,8 @@ async function requireCustomer(req, res, next){
 
   const storeId = Number(
     req.headers["x-store-id"] ||
-    req.query.store_id
+    req.query.store_id ||
+    req.body?.store_id
   );
 
   if(!Number.isInteger(storeId)){

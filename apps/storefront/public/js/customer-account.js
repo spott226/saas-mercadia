@@ -91,6 +91,26 @@ function resolveAssetUrl(asset, fallback){
 
 }
 
+function getCheckoutReturnUrl(){
+  const next = new URLSearchParams(window.location.search).get("next");
+  if(!next || !next.startsWith("/")) return "";
+  try{
+    const url = new URL(next, window.location.origin);
+    if(url.origin !== window.location.origin) return "";
+    return url.pathname + url.search;
+  }catch(error){
+    return "";
+  }
+}
+
+function returnToCheckoutIfNeeded(){
+  const url = getCheckoutReturnUrl();
+  if(url){
+    window.location.href = url;
+    return true;
+  }
+  return false;
+}
 function getSlugFromDomain(){
 
   const configuredSlug = window.MERCADIA_CONFIG?.STORE_SLUG;
@@ -682,6 +702,7 @@ async function handleRegister(event){
 
   form.reset();
   await loadCustomerData();
+  returnToCheckoutIfNeeded();
 }
 
 async function handleLogin(event){
@@ -743,6 +764,7 @@ async function handleLogin(event){
 
   form.reset();
   await loadCustomerData();
+  returnToCheckoutIfNeeded();
 }
 
 async function handleLogout(){

@@ -66,12 +66,20 @@ test('Order endpoint rejects missing/invalid business WhatsApp before writing or
     const client={query:async(sql,args) => {calls.push({sql,args});return {rows:[{id:7,whatsapp}]};},release(){released=true;}};
     const controller=loadController('apps/backend/src/controllers/orders.controller.js',{'../db/db':{connect:async()=>client},'../services/pushNotifications':{},'../services/commerceValidation':validation});
     const res=response();
-    await controller.createOrder({body:{store_id:7,customer_name:'Ana',customer_phone:'5512345678',customer_address:'Calle 1',items:[{variant_id:1,quantity:1}]}},res,error=>{throw error;});
+    await controller.createOrder({user:{role:'customer',store_id:7,customer_account_id:3},body:{store_id:7,customer_name:'Ana',customer_phone:'5512345678',customer_address:'Calle 1',items:[{variant_id:1,quantity:1}]}},res,error=>{throw error;});
     assert.equal(res.code,409);
     assert.match(res.data.error,/configurado/);
     assert.equal(calls.length,1);
     assert.ok(released);
   }
+});
+test('Order endpoint rejects users that are not customers of the store',async () => {
+  const client={query:async()=>{throw new Error('no debe consultar antes de validar sesion');},release(){}};
+  const controller=loadController('apps/backend/src/controllers/orders.controller.js',{'../db/db':{connect:async()=>client},'../services/pushNotifications':{},'../services/commerceValidation':validation});
+  const res=response();
+  await controller.createOrder({user:{role:'customer',store_id:8,customer_account_id:3},body:{store_id:7,customer_name:'Ana',customer_phone:'5512345678',customer_address:'Calle 1',items:[{variant_id:1,quantity:1}]}},res,error=>{throw error;});
+  assert.equal(res.code,403);
+  assert.match(res.data.error,/cliente de esta tienda/);
 });
 test('Business endpoint ignores a forged store id and validates input on the server',async () => {
   const calls=[];
@@ -88,16 +96,30 @@ test('Business endpoint ignores a forged store id and validates input on the ser
   assert.equal(res.code,400);
   assert.equal(calls.length,1);
 });
-function checkoutHarness(whatsapp,{accept=true,serverPhone='525500001111'}={}){
-  const calls={orders:0,confirmations:0,alerts:[],navigations:[],removed:[]};
+function checkoutHarness(whatsapp,{accept=true,serverPhone='525500001111',session={token:'customer-token',store_id:7}}={}){
+  const calls={orders:0,confirmations:0,alerts:[],navigations:[],removed:[],href:''};
   const storage={mercadia_cart:JSON.stringify([{id:1,variant_id:2,name:'Producto',qty:2,price:10}])};
   const inputs={'c-name':'Ana','c-phone':'5512345678','c-address':'Calle 1'};
   const document={querySelector:()=>null,querySelectorAll:()=>[],addEventListener(){},getElementById:id=>inputs[id] ? {value:inputs[id]} : null};
-  const context={document,console,URL,localStorage:{getItem:key=>storage[key],removeItem:key=>{delete storage[key];calls.removed.push(key);}},window:{store:{id:7,name:'Negocio',whatsapp},location:{assign:url=>calls.navigations.push(url)}},alert:message=>calls.alerts.push(message),confirm:()=>{calls.confirmations++;return accept;},saveCustomerProfile(){},getCustomerProfile(){return {};},createOrder:async()=>{calls.orders++;return {success:true,order_id:12,whatsapp:serverPhone};}};
+  const context={document,console,URL,URLSearchParams,localStorage:{getItem:key=>storage[key],removeItem:key=>{delete storage[key];calls.removed.push(key);}},window:{store:{id:7,name:'Negocio',whatsapp,slug:'demo'},location:{origin:'https://demo.mercadia.test',pathname:'/products.html',search:'?slug=demo',assign:url=>calls.navigations.push(url),set href(value){calls.href=value;},get href(){return calls.href;}}},alert:message=>calls.alerts.push(message),confirm:()=>{calls.confirmations++;return accept;},saveCustomerProfile(){},getCustomerProfile(){return {};},getCustomerSession(){return session;},createOrder:async(orderData,usedSession)=>{calls.orders++;calls.session=usedSession;return {success:true,order_id:12,whatsapp:serverPhone};}};
   const source=read('apps/storefront/public/js/whatsapp.js').replace('export ','')+'\n'+read('apps/storefront/public/js/cart.js').replace(/^import[\s\S]*?from ["'][^"']+["'];\s*/gm,'').replaceAll('export ','');
   vm.runInNewContext(source,context);
   return {calls,send:context.window.sendCheckout};
 }
+test('Customer account returns to the store after checkout login',() => {
+  const account=read('apps/storefront/public/js/customer-account.js');
+  assert.match(account,/function getCheckoutReturnUrl/);
+  assert.match(account,/returnToCheckoutIfNeeded\(\)/);
+  assert.match(read('apps/storefront/public/mi-cuenta.html'),/customer-account\.js\?v=20260911-13/);
+});
+test('Checkout requires a customer session before creating an order',async () => {
+  const {send,calls}=checkoutHarness('525512345678',{session:null});
+  await send();
+  assert.equal(calls.orders,0);
+  assert.equal(calls.confirmations,0);
+  assert.match(calls.alerts[0],/Inicia sesión/);
+  assert.match(calls.href,/\/mi-cuenta\.html\?slug=demo/);
+});
 test('Checkout blocks missing WhatsApp without creating an order',async () => {
   for(const number of [undefined,'abc','123']){
     const {calls,send}=checkoutHarness(number);await send();
@@ -107,7 +129,7 @@ test('Checkout blocks missing WhatsApp without creating an order',async () => {
 test('Checkout shows summary first, allows cancellation, and uses the authoritative store phone',async () => {
   let harness=checkoutHarness('+52 55 1234 5678',{accept:false});await harness.send();assert.equal(harness.calls.confirmations,1);assert.equal(harness.calls.orders,0);
   harness=checkoutHarness('+52 55 1234 5678');await harness.send();
-  assert.equal(harness.calls.orders,1);assert.equal(harness.calls.confirmations,1);assert.equal(harness.calls.navigations.length,1);
+  assert.equal(harness.calls.orders,1);assert.equal(harness.calls.session?.token,'customer-token');assert.equal(harness.calls.confirmations,1);assert.equal(harness.calls.navigations.length,1);
   assert.ok(harness.calls.navigations[0].startsWith('https://wa.me/525500001111?text='));
   assert.ok(decodeURIComponent(harness.calls.navigations[0]).includes('TOTAL: $20.00'));
   assert.deepEqual(harness.calls.alerts,[]);
@@ -147,7 +169,7 @@ test('Promotion renderer escapes content and popup queue never mounts overlappin
   const body=new Element('body'),head=new Element('head'),main=new Element('main');body.append(main);
   const document={head,body,activeElement:null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='main'?main:null,querySelectorAll:()=>[]};
   const promotions=[{id:1,type:'popup',title:'<script>alert(1)</script>',button_url:'javascript:alert(1)',button_text:'Go'},{id:2,type:'popup',title:'Second'},...['banner','banner','top_notice','featured'].map((type,i)=>({id:i+3,type,title:type}))];
-  const context={document,console,URL,sessionStorage:{getItem(){},setItem(){}},getActivePromotions:async()=>promotions};
+  const context={document,console,URL,URLSearchParams,sessionStorage:{getItem(){},setItem(){}},getActivePromotions:async()=>promotions};
   let source=read('apps/storefront/public/js/promotion-card.js').replaceAll('export ','')+'\n'+read('apps/storefront/public/js/promotion-popup.js').replace(/^import .*;\s*$/gm,'').replace('export ','').replace('import.meta.url',"'http://localhost/js/promotion-popup.js'");
   vm.runInNewContext(source,context);await context.initPromotionPopup('demo');
   const overlays=()=>body.children.filter(c=>c.className==='commerce-popup-overlay');
@@ -368,9 +390,9 @@ test('Storefront product and category links preserve the active store slug',() =
   assert.match(renderer,/function getProductsUrl/);
   assert.match(renderer,/params\.set\("slug", slug\)/);
   assert.match(renderer,/getProductsUrl\(store\?\.slug/);
-  assert.match(homepage,/products\.js\?v=20260911-11/);
-  assert.match(productsPage,/products\.js\?v=20260911-11/);
-  assert.match(productPage,/product-detail\.js\?v=20260911-11/);
+  assert.match(homepage,/products\.js\?v=20260911-13/);
+  assert.match(productsPage,/products\.js\?v=20260911-13/);
+  assert.match(productPage,/product-detail\.js\?v=20260911-13/);
 });
 test('Merchant PWA uses backend push instead of foreground order polling',() => {
   const pwa=read('apps/storefront/public/js/pwa.js');
