@@ -20,6 +20,27 @@ function url(value){
   try { const parsed = new URL(result); if(['https:', 'http:'].includes(parsed.protocol) && !parsed.username && !parsed.password) return parsed.href; } catch {}
   fail('Usa una URL http/https o una ruta que empiece por /');
 }
+function domain(value){
+  if(value == null || value === '') return '';
+  if(typeof value !== 'string') fail('Dominio inválido');
+  const raw = value.trim().toLowerCase();
+  let hostname;
+  let parsed;
+  try {
+    parsed = new URL(raw.includes('://') ? raw : `https://${raw}`);
+    hostname = parsed.hostname.replace(/\.$/,'');
+  } catch { fail('Dominio inválido'); }
+  if(
+    parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.port ||
+    !['','/'].includes(parsed.pathname) || parsed.search || parsed.hash ||
+    !hostname || hostname.length > 253 || hostname === 'localhost' ||
+    /^\d+(\.\d+){3}$/.test(hostname) || !hostname.includes('.') ||
+    hostname.split('.').some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)) ||
+    hostname === 'mercadiamx.com' || hostname.endsWith('.mercadiamx.com') ||
+    hostname === 'railway.app' || hostname.endsWith('.railway.app')
+  ) fail('Usa un dominio propio válido, por ejemplo www.tunegocio.com');
+  return hostname;
+}
 function promotion(body){
   const data = {};
   for(const [key, max] of Object.entries({internal_name:160,title:160,description:4000,discount_text:120,button_text:80})){
@@ -56,4 +77,4 @@ function business(body){
   if(!Object.keys(data).length) fail('No hay datos para guardar');
   return data;
 }
-module.exports = {phone,url,promotion,business};
+module.exports = {phone,url,domain,promotion,business};

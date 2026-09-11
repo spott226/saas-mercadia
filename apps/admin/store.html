@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/admin-polish.css?v=20260828-2">
-<link rel="stylesheet" href="css/commerce-os.css?v=20260910-2">
+<link rel="stylesheet" href="css/commerce-os.css?v=20260911-3">
 <script defer src="js/ui.js?v=20260910-2"></script>
 
 </head>
@@ -206,6 +206,8 @@ i
 
 </div>
 
+<div id="template-gallery" class="template-gallery" role="listbox" aria-label="Diseños disponibles"></div>
+
 <div id="template-preview" class="template-preview"></div>
 
 <div class="template-editor site-editor">
@@ -331,6 +333,18 @@ Elegir imágenes
 </div>
 </details>
 
+<div class="template-editor custom-domain-editor">
+<div class="editor-step-heading"><span>4</span><div><strong>Conecta un dominio propio</strong><small>Opcional: muestra la tienda como www.tunegocio.com.</small></div></div>
+<div class="form-grid template-editor-grid">
+<div class="field-group field-wide">
+<label for="custom-domain">Dominio</label>
+<input id="custom-domain" maxlength="253" inputmode="url" placeholder="www.tunegocio.com">
+<small>Escribe solamente el dominio, sin rutas. Para quitarlo, deja el campo vacío y guarda.</small>
+</div>
+</div>
+<div id="custom-domain-guide" class="custom-domain-guide"></div>
+</div>
+
 <div class="form-actions">
 <button type="submit" id="save-experience-btn">
 Guardar experiencia
@@ -364,7 +378,7 @@ overlay.classList.toggle("active");
 
 </script>
 
-<script type="module" src="js/store-settings.js"></script>
+<script type="module" src="js/store-settings.js?v=20260911-3"></script>
 
 </body>
 </html>

@@ -23,6 +23,11 @@ test('Business phones normalize formatting and reject malformed input',() => {
   const data = validation.business({name:' Mi negocio ',whatsapp:'+52 55 1234 5678',store_id:99,owner_name:'<Ana>'});
   assert.deepEqual(data,{name:'Mi negocio',owner_name:'Ana',whatsapp:'525512345678'});
 });
+test('Custom domains normalize safely and reject platform or malformed hosts',() => {
+  assert.equal(validation.domain('HTTPS://WWW.Mi-Negocio.com'),'www.mi-negocio.com');
+  assert.equal(validation.domain(''),'');
+  for(const value of ['localhost','127.0.0.1','mercadiamx.com','tienda.mercadiamx.com','bad_domain','https://','https://negocio.com/tienda']) assert.throws(()=>validation.domain(value));
+});
 test('Promotion validation rejects unsafe URLs, types, states and date ranges',() => {
   for(const url of ['javascript:alert(1)','data:text/html,test','//evil.test','/\\evil.test','https://user:pass@example.com']) assert.throws(() => validation.url(url));
   assert.equal(validation.url('/products.html'),'/products.html');
@@ -252,4 +257,40 @@ test('Password recovery keeps its token isolated and never exposes raw JWT error
   assert.match(platform,/RECOVERY_TOKEN_KEY/);
   assert.match(platform,/if\(isRecoveryFlow\)[\s\S]*setAuthenticatedHeader\(false\)/);
   assert.doesNotMatch(platform,/Authorization: `Bearer \$\{localStorage\.getItem\(TOKEN_KEY\)\}`[^\n]*update-password/);
+});
+
+test('Every store template has its own immersive presentation and navigation mode',() => {
+  const settings=read('apps/admin/js/store-settings.js');
+  const renderer=read('apps/storefront/public/js/storefront-renderer.js');
+  const styles=read('apps/storefront/public/css/styles.css');
+  const homepage=read('apps/storefront/public/index.html');
+  const templateValues=[...settings.matchAll(/value:"([a-z0-9_]+)"/g)].map(match=>match[1]);
+  for(const template of templateValues){
+    assert.match(styles,new RegExp(`template-${template.replaceAll('_','-')}`),`Missing visual system for ${template}`);
+  }
+  assert.match(renderer,/dataset\.storeNavigation/);
+  for(const mode of ['rail','dock','floating','top']) assert.match(renderer,new RegExp(`"${mode}"`));
+  assert.match(homepage,/id="hero-title"/);
+  assert.match(homepage,/id="hero-text"/);
+  assert.match(settings,/template-concept-stage/);
+  assert.match(read('apps/admin/store.html'),/id="template-gallery"/);
+  assert.match(settings,/data-template-choice/);
+});
+
+test('Custom-domain routing remains scoped to one store and works on every storefront page',async () => {
+  const calls=[];
+  const db={query:async(sql,args)=>{calls.push({sql,args});return {rows:[{id:7,slug:'tienda-real'}]};}};
+  const model=loadController('apps/backend/src/models/storeModel.js',{'../db/db':db});
+  const found=await model.getStoreByCustomDomain('www.negocio.com');
+  assert.equal(found.slug,'tienda-real');
+  assert.match(calls[0].sql,/LOWER\(s\.custom_domain\) = LOWER\(\$1\)/);
+  assert.deepEqual(Array.from(calls[0].args),['www.negocio.com']);
+  await model.updateStoreSettings(7,{custom_domain:'www.negocio.com'});
+  assert.match(calls[1].sql,/WHERE id = \$5/);
+  assert.equal(calls[1].args.at(-1),7);
+  assert.equal(calls[1].args[3],'www.negocio.com');
+  for(const file of ['store.js','customer-account.js','product-detail.js']){
+    assert.match(read(`apps/storefront/public/js/${file}`),/MERCADIA_CONFIG\?\.STORE_SLUG/);
+  }
+  assert.match(read('apps/backend/src/server.js'),/getStoreByCustomDomain/);
 });

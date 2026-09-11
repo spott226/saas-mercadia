@@ -519,6 +519,53 @@ body.os-login .logo{position:relative;margin:0 0 28px!important;font-size:25px!i
 body.os-login .logo::after{top:38px;left:55px}
 body.os-login .login-box{width:100%!important;padding:34px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:24px!important;box-shadow:0 35px 90px rgba(0,0,0,.35)!important}
 body.os-login .login-box h2{font-size:24px!important;font-weight:850!important;letter-spacing:-.03em!important}
+
+/* Vista visual de cada plantilla de tienda */
+.template-concept{
+--concept-bg:#eef2ff;--concept-surface:#fff;--concept-ink:#172033;--concept-accent:#6d5dfc;
+position:relative;min-height:280px;margin:18px 0;padding:14px;border:1px solid rgba(255,255,255,.65);border-radius:24px;
+overflow:hidden;background:var(--concept-bg);color:var(--concept-ink);box-shadow:0 28px 65px rgba(24,34,67,.18);perspective:900px;
+}
+.template-concept::before{content:"";position:absolute;width:180px;height:180px;right:-50px;top:-70px;border-radius:50%;background:color-mix(in srgb,var(--concept-accent) 35%,transparent);filter:blur(4px)}
+.template-concept-nav{position:relative;z-index:2;display:flex;align-items:center;gap:7px;min-height:34px;padding:7px 10px;border-radius:12px;background:color-mix(in srgb,var(--concept-surface) 78%,transparent);backdrop-filter:blur(12px);box-shadow:0 8px 22px rgba(24,34,67,.1)}
+.template-concept-nav i{width:20px;height:20px;border-radius:7px;background:var(--concept-accent)}
+.template-concept-nav span{width:34px;height:4px;border-radius:10px;background:currentColor;opacity:.2}
+.template-concept-nav b{margin-left:auto;font-size:9px;opacity:.62}
+.template-concept-stage{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;min-height:160px;padding:24px 18px}
+.template-concept-copy{display:grid;justify-items:start;gap:8px}.template-concept-copy small{font-size:8px;font-weight:850;letter-spacing:.14em;text-transform:uppercase;color:var(--concept-accent)}
+.template-concept-copy strong{max-width:150px;font-size:24px;line-height:.9;letter-spacing:-.05em}.template-concept-copy span{width:82%;height:5px;border-radius:9px;background:currentColor;opacity:.15}
+.template-concept-copy button{min-height:26px!important;padding:5px 10px!important;border:0!important;border-radius:9px!important;background:var(--concept-accent)!important;color:#fff!important;font-size:8px!important;pointer-events:none}
+.template-concept-object{position:relative;height:122px;transform-style:preserve-3d;transform:rotateX(7deg) rotateY(-12deg)}
+.template-concept-object i{position:absolute;inset:8px;border-radius:22px;background:linear-gradient(145deg,var(--concept-accent),color-mix(in srgb,var(--concept-accent) 32%,#fff));box-shadow:18px 22px 35px color-mix(in srgb,var(--concept-accent) 24%,transparent)}
+.template-concept-object i:nth-child(2){inset:27px -2px -5px 34px;transform:translateZ(35px);background:color-mix(in srgb,var(--concept-surface) 84%,transparent);backdrop-filter:blur(8px)}
+.template-concept-object i:nth-child(3){inset:70px 45px -12px -8px;transform:translateZ(65px);border-radius:14px;background:var(--concept-ink);opacity:.84}
+.template-concept-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.template-concept-grid i{height:38px;border-radius:12px;background:var(--concept-surface);box-shadow:0 8px 18px rgba(24,34,67,.1)}
+.template-concept.template-streetwear-drop-1{--concept-bg:#dfff00;--concept-accent:#111;transform:rotate(-.5deg)}
+.template-concept.template-gym-active-1,.template-concept.template-professional-2{--concept-bg:#0c111b;--concept-surface:#171e2a;--concept-ink:#f7f8fb;--concept-accent:#7c5cff}
+.template-concept.template-gym-active-1{--concept-accent:#55ff9a}
+.template-concept.template-luxury-minimal-1,.template-concept.template-restaurant-5{--concept-bg:#eee9df;--concept-surface:#f8f4ec;--concept-ink:#241d16;--concept-accent:#a27b3c;border-radius:2px}
+.template-concept.template-restaurant-1,.template-concept.template-restaurant-3{--concept-bg:#f6e8d3;--concept-accent:#9a542e}.template-concept.template-restaurant-4{--concept-bg:#ffbd2e;--concept-accent:#e54819;--concept-ink:#211108}
+.template-concept.template-appointments-1,.template-concept.template-appointments-2{--concept-bg:#e5f2ed;--concept-accent:#277267}.template-concept.template-appointments-3{--concept-bg:#ebe9ff;--concept-accent:#5b4de8}.template-concept.template-appointments-4{--concept-bg:#e8f2fa;--concept-accent:#1769aa}
+.template-concept.template-professional-1{--concept-bg:#e8eef9;--concept-accent:#2959c7}.template-concept.template-professional-3{--concept-bg:#e5f5ef;--concept-accent:#087f5b}
+.template-concept.template-fashion-editorial-1 .template-concept-copy strong,.template-concept.template-luxury-minimal-1 .template-concept-copy strong,.template-concept.template-restaurant-5 .template-concept-copy strong{font-family:Georgia,serif;font-weight:500}
+.template-concept.template-fashion-editorial-2 .template-concept-object{transform:translateX(18px) rotateY(-18deg)}
+.template-concept.template-restaurant-2 .template-concept-nav,.template-concept.template-professional-2 .template-concept-nav,.template-concept.template-boutique-grid-1 .template-concept-nav{position:absolute;left:12px;top:12px;bottom:12px;width:54px;flex-direction:column}.template-concept.template-restaurant-2 .template-concept-stage,.template-concept.template-professional-2 .template-concept-stage,.template-concept.template-boutique-grid-1 .template-concept-stage{margin-left:58px}
+.template-concept.template-appointments-3 .template-concept-nav,.template-concept.template-mobile-first-1 .template-concept-nav,.template-concept.template-streetwear-drop-1 .template-concept-nav{position:absolute;left:25%;right:25%;top:auto;bottom:10px;z-index:5}.template-concept.template-appointments-3 .template-concept-grid,.template-concept.template-mobile-first-1 .template-concept-grid,.template-concept.template-streetwear-drop-1 .template-concept-grid{margin-bottom:42px}
+.template-concept.template-restaurant-4 .template-concept-grid i{border:2px solid #211108;box-shadow:4px 4px 0 #211108}.template-concept.template-lookbook-1 .template-concept-object{transform:rotate(-7deg) translateZ(30px)}
+
+.template-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:18px 0}
+.template-choice-card{--choice-bg:#eef2ff;--choice-accent:#6d5dfc;display:grid!important;justify-items:start!important;gap:7px!important;min-height:150px!important;padding:10px!important;border:1px solid var(--os-line)!important;border-radius:17px!important;background:#fff!important;color:var(--os-ink)!important;text-align:left!important;box-shadow:none!important;transform:none!important}
+.template-choice-card:hover{border-color:#a89eff!important;transform:translateY(-3px)!important;box-shadow:0 16px 32px rgba(43,35,105,.12)!important}.template-choice-card.selected{border-color:#6d5dfc!important;box-shadow:0 0 0 3px rgba(109,93,252,.13)!important}
+.template-choice-scene{position:relative;display:block;width:100%;height:78px;border-radius:12px;overflow:hidden;background:var(--choice-bg);perspective:400px}
+.template-choice-scene i{position:absolute;width:48%;height:58%;right:10%;top:15%;border-radius:12px;background:var(--choice-accent);box-shadow:8px 10px 18px color-mix(in srgb,var(--choice-accent) 25%,transparent);transform:rotateY(-14deg)}
+.template-choice-scene i:nth-child(2){width:38%;height:35%;left:9%;top:45%;background:#fff;transform:translateZ(20px)}.template-choice-scene i:nth-child(3){width:28%;height:11%;left:9%;top:20%;border-radius:99px;background:var(--choice-accent);box-shadow:none;transform:none}.template-choice-scene b{position:absolute;right:8px;bottom:5px;font-size:9px;opacity:.45}
+.template-choice-card strong{font-size:12px;line-height:1.2}.template-choice-card small{font-size:9px;color:var(--os-muted)}
+.template-choice-card:nth-child(4n+2){--choice-bg:#fff0e5;--choice-accent:#f15a36}.template-choice-card:nth-child(4n+3){--choice-bg:#e6f4ee;--choice-accent:#23846e}.template-choice-card:nth-child(4n){--choice-bg:#151a25;--choice-accent:#8b75ff}.template-choice-card:nth-child(4n) .template-choice-scene i:nth-child(2){background:#262d3b}
+.template-choice-card.template-restaurant-4{--choice-bg:#ffbd2e;--choice-accent:#e54819}.template-choice-card.template-professional-2,.template-choice-card.template-gym-active-1{--choice-bg:#0c111b;--choice-accent:#7c5cff}.template-choice-card.template-gym-active-1{--choice-accent:#55ff9a}.template-choice-card.template-appointments-2{--choice-bg:#dff0ea;--choice-accent:#277267}.template-choice-card.template-streetwear-drop-1{--choice-bg:#dfff00;--choice-accent:#111}
+.template-choice-card.template-restaurant-2 .template-choice-scene i:first-child,.template-choice-card.template-professional-2 .template-choice-scene i:first-child,.template-choice-card.template-boutique-grid-1 .template-choice-scene i:first-child{left:7%;right:auto;width:20%;height:78%;transform:none}.template-choice-card.template-appointments-3 .template-choice-scene i:nth-child(3),.template-choice-card.template-mobile-first-1 .template-choice-scene i:nth-child(3),.template-choice-card.template-streetwear-drop-1 .template-choice-scene i:nth-child(3){top:auto;bottom:7px;left:27%;width:46%;height:13px}
+.custom-domain-editor{margin-top:20px!important}.custom-domain-guide{display:grid;gap:6px;margin-top:14px;padding:14px 16px;border:1px solid #c7d7fe;border-radius:13px;background:#eef4ff;color:#344054}.custom-domain-guide strong{font-size:13px;color:#1d2939}.custom-domain-guide span{font-size:12px;line-height:1.55}.custom-domain-guide b{color:#3548b5}
+
+@media(max-width:640px){.template-concept-stage{grid-template-columns:1fr .8fr;padding-inline:8px}.template-concept-copy strong{font-size:19px}.template-concept-nav b{display:none}}
 body.os-login .login-box h2::after{content:"Un solo acceso para tu tienda o el panel maestro.";display:block;margin-top:9px;color:var(--os-muted);font-size:13px;font-weight:500;line-height:1.5;letter-spacing:0}
 body.os-login .login-copy{margin:-8px 0 20px;color:var(--os-muted);font-size:13px;line-height:1.55}
 body.os-login .login-box button{background:linear-gradient(135deg,var(--os-brand),var(--os-brand-2))!important;border-radius:13px!important;box-shadow:0 12px 25px rgba(79,70,229,.28)!important}

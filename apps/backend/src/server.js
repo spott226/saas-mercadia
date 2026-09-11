@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const Store = require("./models/storeModel");
 
 
 /* =========================
@@ -163,8 +164,20 @@ app.use(
 APLICACIONES WEB
 ========================= */
 
-function sendRuntimeConfig(req, res){
+async function resolveCustomStore(req){
+  const hostname = String(req.hostname || "").toLowerCase().replace(/\.$/,"");
+  if(!hostname || hostname === "localhost" || hostname === "127.0.0.1") return null;
+  return Store.getStoreByCustomDomain(hostname);
+}
+
+async function sendRuntimeConfig(req, res){
   const origin = `${req.protocol}://${req.get("host")}`;
+  let customStore = null;
+  try{
+    customStore = await resolveCustomStore(req);
+  }catch(error){
+    console.error("CUSTOM DOMAIN CONFIG ERROR:",error.message);
+  }
 
   res
     .type("application/javascript")
@@ -172,7 +185,9 @@ function sendRuntimeConfig(req, res){
     .send(
       `window.MERCADIA_CONFIG=${JSON.stringify({
         API_URL: `${origin}/api`,
-        BACKEND_ORIGIN: origin
+        BACKEND_ORIGIN: origin,
+        STORE_SLUG: customStore?.slug || null,
+        CUSTOM_DOMAIN_TARGET: process.env.CUSTOM_DOMAIN_CNAME_TARGET || "mercadia-back-production.up.railway.app"
       })};`
     );
 }
@@ -180,8 +195,13 @@ function sendRuntimeConfig(req, res){
 app.get("/config.js", sendRuntimeConfig);
 app.get("/admin/config.js", sendRuntimeConfig);
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(storefrontDirectory, "landing.html"));
+app.get("/", async (req, res, next) => {
+  try{
+    const customStore = await resolveCustomStore(req);
+    res.sendFile(path.join(storefrontDirectory, customStore ? "index.html" : "landing.html"));
+  }catch(error){
+    next(error);
+  }
 });
 
 app.get("/tienda/:slug", (req, res) => {

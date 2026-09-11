@@ -25,7 +25,7 @@ const templatesByType = {
   ecommerce:[
     {
       value:"ecommerce_default",
-      label:"Ecommerce default",
+      label:"Glass 3D",
       description:"Catalogo limpio con hero, categorias y productos destacados.",
       sections:[
         { type:"category_tiles", title:"Comprar por categoria" },
@@ -34,7 +34,7 @@ const templatesByType = {
     },
     {
       value:"fashion_editorial_1",
-      label:"Fashion editorial 1",
+      label:"Editorial inclinada",
       description:"Portada editorial, categorias visibles y catalogo con sensacion de marca premium.",
       sections:[
         { type:"split_showcase", eyebrow:"Nueva temporada", title:"Piezas listas para elevar el look diario", text:"Una experiencia visual para tiendas de moda con enfoque elegante." },
@@ -45,7 +45,7 @@ const templatesByType = {
     },
     {
       value:"fashion_editorial_2",
-      label:"Fashion editorial 2",
+      label:"Galería asimétrica",
       description:"Mas enfoque en colecciones: imagen fuerte, texto corto y productos al cierre.",
       sections:[
         { type:"image_banner", eyebrow:"Coleccion", title:"Moda con presencia", cta:"Ver productos" },
@@ -56,7 +56,7 @@ const templatesByType = {
     },
     {
       value:"streetwear_drop_1",
-      label:"Streetwear drop",
+      label:"Drop brutalista",
       description:"Formato de lanzamientos: directo, visual y con productos como drop principal.",
       sections:[
         { type:"promo_strip", title:"Drop activo", text:"Piezas limitadas disponibles por tiempo corto." },
@@ -66,7 +66,7 @@ const templatesByType = {
     },
     {
       value:"gym_active_1",
-      label:"Gym active",
+      label:"Performance neón",
       description:"Pensado para activewear: dinamico, claro y facil de comprar desde mobile.",
       sections:[
         { type:"image_banner", eyebrow:"Performance", title:"Ropa lista para moverse contigo", cta:"Ver coleccion" },
@@ -76,7 +76,7 @@ const templatesByType = {
     },
     {
       value:"luxury_minimal_1",
-      label:"Luxury minimal",
+      label:"Atelier minimal",
       description:"Minimalista y sobria, con aire europeo para boutiques premium.",
       sections:[
         { type:"editorial_banner", eyebrow:"Atelier", title:"Seleccion curada con detalle", text:"Menos ruido, mas producto." },
@@ -86,7 +86,7 @@ const templatesByType = {
     },
     {
       value:"boutique_grid_1",
-      label:"Boutique grid",
+      label:"Catálogo lateral",
       description:"Mas grid, mas escaneo: ideal para tiendas con muchas categorias.",
       sections:[
         { type:"category_tiles", title:"Categorias" },
@@ -96,7 +96,7 @@ const templatesByType = {
     },
     {
       value:"lookbook_1",
-      label:"Lookbook",
+      label:"Lookbook inmersivo",
       description:"Primero inspiracion, luego productos. Bueno para ropa, outfits y colecciones.",
       sections:[
         { type:"image_banner", eyebrow:"Lookbook", title:"Ideas para combinar esta temporada", cta:"Ver looks" },
@@ -106,7 +106,7 @@ const templatesByType = {
     },
     {
       value:"promo_stack_1",
-      label:"Promo stack",
+      label:"Promos apiladas",
       description:"Ideal para tiendas que empujan ofertas, novedades y comunicados.",
       sections:[
         { type:"promo_strip", title:"Promocion activa", text:"Revisa disponibilidad antes de que se agote." },
@@ -116,7 +116,7 @@ const templatesByType = {
     },
     {
       value:"mobile_first_1",
-      label:"Mobile first",
+      label:"App móvil",
       description:"Experiencia ligera y directa para clientes que compran desde celular.",
       sections:[
         { type:"product_grid", title:"Compra rapido" },
@@ -128,7 +128,7 @@ const templatesByType = {
   restaurant:[
     {
       value:"restaurant_1",
-      label:"Restaurante 1",
+      label:"Bistró flotante",
       description:"Menu visual para restaurante con productos como platillos.",
       sections:[
         { type:"category_tiles", title:"Categorias del menu" },
@@ -137,7 +137,7 @@ const templatesByType = {
     },
     {
       value:"restaurant_2",
-      label:"Restaurante 2",
+      label:"Carta nocturna lateral",
       description:"Restaurante con foco en recomendaciones y orden rapido.",
       sections:[
         { type:"promo_strip", title:"Ordena directo", text:"Disponibilidad y entrega se confirman con la tienda." },
@@ -146,7 +146,7 @@ const templatesByType = {
     },
     {
       value:"restaurant_3",
-      label:"Restaurante visual",
+      label:"Mesa 3D",
       description:"Portada con imagen grande para comida, menu por categorias y favoritos.",
       sections:[
         { type:"split_showcase", eyebrow:"Mesa lista", title:"Sabores para pedir hoy", text:"Una portada visual para restaurantes con menu directo y facil de explorar." },
@@ -156,7 +156,7 @@ const templatesByType = {
     },
     {
       value:"restaurant_4",
-      label:"Restaurante promo",
+      label:"Pop food",
       description:"Ideal para comida rapida, cafes y negocios que empujan especiales del dia.",
       sections:[
         { type:"image_banner", eyebrow:"Especial del dia", title:"Antojos que se ven y se piden rapido", text:"Ideal para comida rapida, cafes y restaurantes con promos activas." },
@@ -166,7 +166,7 @@ const templatesByType = {
     },
     {
       value:"restaurant_5",
-      label:"Restaurante boutique",
+      label:"Cocina editorial",
       description:"Mas sobrio y elegante para carta corta, cocina de autor, postres o cafe.",
       sections:[
         { type:"editorial_banner", eyebrow:"Carta curada", title:"Menu corto, claro y elegante", text:"Pensado para restaurantes boutique, postres, cafes o cocina de autor." },
@@ -178,7 +178,7 @@ const templatesByType = {
   appointments:[
     {
       value:"appointments_1",
-      label:"Citas 1",
+      label:"Wellness orgánico",
       description:"Servicios y citas con enfoque claro en agendar.",
       sections:[
         { type:"category_tiles", title:"Servicios" },
@@ -187,7 +187,7 @@ const templatesByType = {
     },
     {
       value:"appointments_2",
-      label:"Citas visual",
+      label:"Agenda glass",
       description:"Portada con imagen principal para servicios, consultorios, belleza y wellness.",
       sections:[
         { type:"split_showcase", eyebrow:"Agenda abierta", title:"Servicios listos para reservar", text:"Una experiencia clara para consultorios, belleza, wellness y servicios profesionales." },
@@ -197,7 +197,7 @@ const templatesByType = {
     },
     {
       value:"appointments_3",
-      label:"Citas directa",
+      label:"Reserva digital",
       description:"Pensada para que el cliente elija servicio y coordine horario por WhatsApp.",
       sections:[
         { type:"image_banner", eyebrow:"Citas", title:"Elige servicio y coordina horario", text:"Ideal para negocios donde la confianza y el primer contacto importan." },
@@ -207,7 +207,7 @@ const templatesByType = {
     },
     {
       value:"appointments_4",
-      label:"Citas profesional",
+      label:"Clínica editorial",
       description:"Mas limpio y serio para dentistas, clinicas, spas, barbers y asesores.",
       sections:[
         { type:"editorial_banner", eyebrow:"Atencion personalizada", title:"Una agenda limpia para vender servicios", text:"Pensada para dentistas, clinicas, spas, barbers y asesores." },
@@ -219,7 +219,7 @@ const templatesByType = {
   professional:[
     {
       value:"professional_1",
-      label:"Perfil profesional",
+      label:"Corporativo dimensional",
       description:"Presenta confianza, especialidades y servicios con una portada corporativa.",
       sections:[
         { type:"split_showcase", eyebrow:"Experiencia comprobada", title:"Una solución profesional para tus clientes", text:"Explica con claridad qué haces, para quién y por qué deben elegirte." },
@@ -229,7 +229,7 @@ const templatesByType = {
     },
     {
       value:"professional_2",
-      label:"Agencia y portafolio",
+      label:"Estudio inmersivo",
       description:"Una estructura visual y creativa para agencias, estudios, freelancers y proyectos.",
       sections:[
         { type:"editorial_banner", eyebrow:"Ideas que avanzan", title:"Trabajo creativo con resultados", text:"Una portada editorial que pone el mensaje y los proyectos al frente." },
@@ -239,7 +239,7 @@ const templatesByType = {
     },
     {
       value:"professional_3",
-      label:"Cotización directa",
+      label:"Cotización modular",
       description:"Página enfocada en convertir visitas en solicitudes y conversaciones por WhatsApp.",
       sections:[
         { type:"promo_strip", title:"Respuesta rápida", text:"Cuéntanos qué necesitas y recibe una propuesta personalizada." },
@@ -268,6 +268,9 @@ const templateKey =
 
 const templatePreview =
   document.getElementById("template-preview");
+
+const templateGallery =
+  document.getElementById("template-gallery");
 
 const sectionTitle =
   document.getElementById("section-title");
@@ -306,6 +309,8 @@ const siteTheme = document.getElementById("site-theme");
 const siteDisplayName = document.getElementById("site-display-name");
 const siteHeroTitle = document.getElementById("site-hero-title");
 const siteHeroText = document.getElementById("site-hero-text");
+const customDomain = document.getElementById("custom-domain");
+const customDomainGuide = document.getElementById("custom-domain-guide");
 
 const sectionImageUrl =
   document.getElementById("section-image-url");
@@ -481,6 +486,12 @@ function setImagePreview(img,empty,url){
 function renderStore(store){
 
   currentStore = store;
+
+  customDomain.value = store.custom_domain || "";
+  const domainTarget = window.MERCADIA_CONFIG?.CUSTOM_DOMAIN_TARGET || "mercadia-back-production.up.railway.app";
+  customDomainGuide.innerHTML = store.custom_domain
+    ? `<strong>Dominio registrado: ${escapeHTML(store.custom_domain)}</strong><span>En tu proveedor de dominio crea un registro CNAME para <b>${escapeHTML(store.custom_domain)}</b> apuntando a <b>${escapeHTML(domainTarget)}</b>. Después debe agregarse este dominio al hosting de Mercadia para emitir su certificado HTTPS.</span>`
+    : `<strong>Cómo funciona</strong><span>Registra aquí el dominio. Después apunta su CNAME a <b>${escapeHTML(domainTarget)}</b> y solicita la activación del certificado HTTPS.</span>`;
 
   document.getElementById("store-name").textContent =
     store.name || "-";
@@ -761,6 +772,8 @@ function updateTemplatePreview(){
   const selectedTemplate = getSelectedTemplate();
   const section = workingSections[activeSectionIndex] || {};
   const images = sectionImageList(section);
+  const templateClass = `template-${String(selectedTemplate?.value || "ecommerce_default").replaceAll("_","-")}`;
+  const navigationLabel = getTemplateNavigationLabel(selectedTemplate?.value);
 
   templatePreview.innerHTML = `
     <div class="template-preview-header">
@@ -768,6 +781,14 @@ function updateTemplatePreview(){
       <span>${workingSections.length} secciones</span>
     </div>
     <p>${escapeHTML(selectedTemplate?.description || "Edita cada bloque de la página de forma independiente.")}</p>
+    <div class="template-concept ${templateClass}" aria-label="Vista conceptual de ${escapeHTML(selectedTemplate?.label || "la plantilla")}">
+      <div class="template-concept-nav"><i></i><span></span><span></span><b>${escapeHTML(navigationLabel)}</b></div>
+      <div class="template-concept-stage">
+        <div class="template-concept-copy"><small>${escapeHTML(businessType.options[businessType.selectedIndex]?.text || "Tienda")}</small><strong>${escapeHTML(selectedTemplate?.label || "Diseño")}</strong><span></span><button type="button" tabindex="-1">Explorar</button></div>
+        <div class="template-concept-object"><i></i><i></i><i></i></div>
+      </div>
+      <div class="template-concept-grid"><i></i><i></i><i></i></div>
+    </div>
     ${images[0] ? `<div class="template-preview-image"><img src="${escapeHTML(resolveAssetUrl(images[0]))}" alt=""></div>` : ""}
     <div class="template-section-list">
       ${workingSections.map(item => `<span>${escapeHTML(item.title || item.type)}</span>`).join("")}
@@ -777,6 +798,31 @@ function updateTemplatePreview(){
   renderSectionList();
   renderSectionImages();
   scheduleLivePreview();
+}
+
+
+function getTemplateNavigationLabel(templateValue){
+  if(["restaurant_2","professional_2","boutique_grid_1"].includes(templateValue)) return "Navegación lateral";
+  if(["appointments_3","mobile_first_1","streetwear_drop_1"].includes(templateValue)) return "Navegación inferior";
+  if(["restaurant_3","appointments_2","professional_3","ecommerce_default"].includes(templateValue)) return "Navegación flotante";
+  return "Navegación superior";
+}
+
+
+function renderTemplateGallery(){
+  if(!templateGallery) return;
+
+  templateGallery.innerHTML = getTemplateOptions().map((option,index) => {
+    const templateClass = `template-${option.value.replaceAll("_","-")}`;
+    const selected = option.value === templateKey.value;
+    return `
+      <button type="button" class="template-choice-card ${templateClass} ${selected ? "selected" : ""}" data-template-choice="${option.value}" role="option" aria-selected="${selected}">
+        <span class="template-choice-scene"><i></i><i></i><i></i><b>${index + 1}</b></span>
+        <strong>${escapeHTML(option.label)}</strong>
+        <small>${escapeHTML(getTemplateNavigationLabel(option.value))}</small>
+      </button>
+    `;
+  }).join("");
 }
 
 
@@ -804,6 +850,7 @@ function renderTemplateOptions(selectedValue){
   templateKey.value =
     nextValue;
 
+  renderTemplateGallery();
   updateTemplatePreview();
 
 }
@@ -837,7 +884,8 @@ async function saveExperience(event){
       body:JSON.stringify({
         business_type:businessType.value,
         template_key:templateKey.value,
-        homepage_sections:buildHomepageSections()
+        homepage_sections:buildHomepageSections(),
+        custom_domain:customDomain.value.trim()
       })
     }
   );
@@ -936,9 +984,17 @@ templateKey.addEventListener(
       getSelectedTemplate()?.sections
     );
     writeSiteEditor(siteDraft);
+    renderTemplateGallery();
     updateTemplatePreview();
   }
 );
+
+templateGallery?.addEventListener("click",event => {
+  const choice = event.target.closest("[data-template-choice]");
+  if(!choice) return;
+  templateKey.value = choice.dataset.templateChoice;
+  templateKey.dispatchEvent(new Event("change"));
+});
 
 [
   sectionType,

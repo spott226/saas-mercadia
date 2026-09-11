@@ -8,6 +8,8 @@ function getParam(name){
 }
 
 function getSlug(){
+  const configuredSlug = window.MERCADIA_CONFIG?.STORE_SLUG;
+  if(configuredSlug) return configuredSlug;
   const slugParam = getParam("slug") || getParam("store");
 
   if(slugParam){

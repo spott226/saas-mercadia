@@ -15,7 +15,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/styles.css?v=20260911-3">
 
 </head>
 
@@ -107,12 +107,20 @@ HERO
   <img
     id="hero-image"
     src="/assets/images/hero2.png"
+    onload="this.style.opacity=1"
+    onerror="this.style.opacity=0"
     class="absolute inset-0 w-full h-full object-cover"
   >
 
   <div class="hero-overlay absolute inset-0"></div>
 
-  <div class="relative z-10 max-w-xl px-6 mb-16">
+  <div class="hero-copy relative z-10 max-w-3xl px-6 mb-16">
+
+    <p id="hero-kicker" class="hero-kicker">Una experiencia hecha para ti</p>
+
+    <h2 id="hero-title" class="hero-title">Descubre algo diferente</h2>
+
+    <p id="hero-text" class="hero-text">Explora lo mejor de esta tienda y pide directamente.</p>
 
     <a id="storefront-hero-cta" href="/products.html" class="px-6 py-3 rounded hover:opacity-90 transition">
       Ver catálogo
@@ -260,7 +268,7 @@ SCRIPTS
 <script src="/config.js"></script>
 <script type="module" src="/js/pwa.js"></script>
 <script type="module" src="/js/chatbot.js"></script>
-<script type="module" src="/js/store.js"></script>
+<script type="module" src="/js/store.js?v=20260911-3"></script>
 <script type="module" src="/js/products.js"></script>
 <script type="module" src="/js/cart.js"></script>
 

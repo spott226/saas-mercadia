@@ -306,8 +306,18 @@ exports.updateStore = async (
 
     const {
       business_type,
-      template_key
+      template_key,
+      custom_domain
     } = req.body;
+
+    let normalizedDomain;
+    try{
+      normalizedDomain = custom_domain === undefined
+        ? undefined
+        : commerceValidation.domain(custom_domain);
+    }catch(error){
+      return res.status(400).json({ error:error.message });
+    }
 
     let homepage_sections;
 
@@ -369,7 +379,8 @@ exports.updateStore = async (
         {
           business_type,
           template_key,
-          homepage_sections
+          homepage_sections,
+          custom_domain:normalizedDomain
         }
       );
 
@@ -389,6 +400,10 @@ exports.updateStore = async (
   } catch(err) {
 
     console.error("UPDATE ADMIN STORE ERROR:", err);
+
+    if(err?.code === "23505"){
+      return res.status(409).json({ error:"Ese dominio ya está conectado a otra tienda." });
+    }
 
     res.status(500).json({
       error:"server error"

@@ -16,6 +16,19 @@ exports.getStoreBySlug = async (slug) => {
 
 };
 
+exports.getStoreByCustomDomain = async (domain) => {
+  const result = await db.query(
+    `SELECT s.*
+     FROM stores s
+     LEFT JOIN merchant_accounts ma ON ma.store_id = s.id
+     WHERE LOWER(s.custom_domain) = LOWER($1)
+       AND (ma.id IS NULL OR ma.status = 'active')
+     LIMIT 1`,
+    [domain]
+  );
+  return result.rows[0];
+};
+
 exports.getStoreById = async (store_id) => {
 
   const result = await db.query(
@@ -93,8 +106,10 @@ exports.updateStoreSettings = async (
     SET
       business_type = COALESCE($1,business_type),
       template_key = COALESCE($2,template_key),
-      homepage_sections = COALESCE($3::jsonb,homepage_sections)
-    WHERE id = $4
+      homepage_sections = COALESCE($3::jsonb,homepage_sections),
+      custom_domain = CASE WHEN $4::text IS NULL THEN custom_domain ELSE NULLIF($4,'') END,
+      custom_domain_status = CASE WHEN $4::text IS NULL THEN custom_domain_status WHEN $4 = '' THEN 'none' ELSE 'pending' END
+    WHERE id = $5
     RETURNING *
     `,
     [
@@ -103,6 +118,7 @@ exports.updateStoreSettings = async (
       data.homepage_sections
         ? JSON.stringify(data.homepage_sections)
         : null,
+      data.custom_domain === undefined ? null : data.custom_domain,
       store_id
     ]
   );

@@ -1,5 +1,5 @@
 import { getStore } from "./api.js";
-import { renderStorefrontExperience } from "./storefront-renderer.js";
+import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-3";
 
 let editorDraftStore = null;
 let storeInitialized = false;
@@ -54,6 +54,9 @@ return BACKEND_UPLOADS_URL + value;
 // =================================
 
 function getSlugFromDomain(){
+
+const configuredSlug = window.MERCADIA_CONFIG?.STORE_SLUG;
+if(configuredSlug) return configuredSlug;
 
 const pathMatch = window.location.pathname.match(/^\/tienda\/([^/]+)/i);
 if(pathMatch?.[1]){

@@ -160,6 +160,7 @@ class EcommerceTemplate{
 
   async render(){
     this.applyShell();
+    applyExperienceIdentity(this.store,this.getTemplateKey());
     clearDynamicSections();
 
     this.products =
@@ -269,6 +270,29 @@ function setText(id,text){
   }
 }
 
+function getNavigationMode(templateKey){
+  if(["restaurant_2","professional_2","boutique_grid_1"].includes(templateKey)) return "rail";
+  if(["appointments_3","mobile_first_1","streetwear_drop_1"].includes(templateKey)) return "dock";
+  if(["restaurant_3","appointments_2","professional_3","ecommerce_default"].includes(templateKey)) return "floating";
+  return "top";
+}
+
+function applyExperienceIdentity(store,templateKey){
+  const businessType = store?.business_type || "ecommerce";
+  const defaults = {
+    ecommerce:["Colección seleccionada","Encuentra algo que se sienta hecho para ti","Explora productos, colecciones y novedades de la tienda."],
+    restaurant:["Preparado para hoy","Sabores que merecen el primer bocado","Explora el menú, elige tus favoritos y pide directamente al restaurante."],
+    appointments:["Tu tiempo, bien reservado","Elige el servicio. Nosotros coordinamos el momento.","Conoce las opciones disponibles y solicita tu cita en pocos pasos."],
+    professional:["Ideas convertidas en resultados","Una solución profesional con otra perspectiva","Conoce servicios, proyectos y opciones preparadas para tus necesidades."]
+  };
+  const copy = defaults[businessType] || defaults.ecommerce;
+
+  document.body.dataset.storeNavigation = getNavigationMode(templateKey);
+  setText("hero-kicker",copy[0]);
+  setText("hero-title",store?.hero_title || copy[1]);
+  setText("hero-text",store?.hero_text || copy[2]);
+}
+
 function escapeHTML(value){
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -279,6 +303,7 @@ function escapeHTML(value){
 }
 
 function clearStorefrontClasses(){
+  delete document.body.dataset.storeNavigation;
   document.body.className =
     document.body.className
       .split(" ")

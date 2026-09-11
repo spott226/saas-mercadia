@@ -257,8 +257,15 @@ async function ensureCustomerAccountSchema(){
           ADD COLUMN IF NOT EXISTS owner_name VARCHAR(120),
           ADD COLUMN IF NOT EXISTS phone VARCHAR(30),
           ADD COLUMN IF NOT EXISTS address TEXT,
-          ADD COLUMN IF NOT EXISTS business_hours TEXT
+          ADD COLUMN IF NOT EXISTS business_hours TEXT,
+          ADD COLUMN IF NOT EXISTS custom_domain VARCHAR(253),
+          ADD COLUMN IF NOT EXISTS custom_domain_status VARCHAR(20) NOT NULL DEFAULT 'none'
         `
+      );
+
+      await pool.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS stores_custom_domain_unique
+         ON stores (LOWER(custom_domain)) WHERE custom_domain IS NOT NULL`
       );
 
       await pool.query(

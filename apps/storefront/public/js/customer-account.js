@@ -74,6 +74,9 @@ function resolveAssetUrl(asset, fallback){
 
 function getSlugFromDomain(){
 
+  const configuredSlug = window.MERCADIA_CONFIG?.STORE_SLUG;
+  if(configuredSlug) return configuredSlug;
+
   const params =
     new URLSearchParams(
       window.location.search
