@@ -368,7 +368,9 @@ test('Storefront product and category links preserve the active store slug',() =
   assert.match(renderer,/function getProductsUrl/);
   assert.match(renderer,/params\.set\("slug", slug\)/);
   assert.match(renderer,/getProductsUrl\(store\?\.slug/);
-  assert.match(homepage,/products\.js\?v=20260911-5/);
-  assert.match(productsPage,/products\.js\?v=20260911-5/);
-  assert.match(productPage,/product-detail\.js\?v=20260911-5/);
+  assert.match(homepage,/products\.js\?v=20260911-7/);
+  assert.match(productsPage,/products\.js\?v=20260911-7/);
+  assert.match(productPage,/product-detail\.js\?v=20260911-7/);
 });
+
+

@@ -1,4 +1,5 @@
 import { getStore } from "./api.js";
+import { applyStorefrontIdentity } from "./storefront-renderer.js?v=20260911-7";
 import {
   getCustomerSession,
   setCustomerSession,
@@ -39,6 +40,24 @@ const state = {
   orders: [],
   activeTab: "login"
 };
+
+
+function normalizeStoreExperience(store){
+  const siteSettings = Array.isArray(store?.homepage_sections)
+    ? store.homepage_sections.find(section => section?.type === "site_settings")
+    : null;
+
+  if(!siteSettings) return store;
+
+  return {
+    ...store,
+    ...(siteSettings.display_name ? { name: siteSettings.display_name } : {}),
+    ...(siteSettings.theme ? { theme: siteSettings.theme } : {}),
+    ...(siteSettings.styles ? { site_styles: siteSettings.styles } : {}),
+    ...(siteSettings.hero_title ? { hero_title: siteSettings.hero_title } : {}),
+    ...(siteSettings.hero_text ? { hero_text: siteSettings.hero_text } : {})
+  };
+}
 
 function resolveAssetUrl(asset, fallback){
 
@@ -939,10 +958,11 @@ async function init(){
 
   keepLocalSlugInLinks(slug);
 
-  const store =
+  let store =
     await getStore(slug);
 
   if(!store){
+    document.body.classList.remove("storefront-loading");
     setMessage(
       "No se pudo cargar la tienda.",
       "error"
@@ -950,6 +970,7 @@ async function init(){
     return;
   }
 
+  store = normalizeStoreExperience(store);
   state.store = store;
   state.session =
     getCustomerSession(store.id);
@@ -1014,6 +1035,8 @@ async function init(){
   }
 
   applyStoreTheme(store);
+  applyStorefrontIdentity({ store });
+  document.body.classList.remove("storefront-loading");
 
   if(redirect?.recovery){
     return;

@@ -1,5 +1,5 @@
 import { getStore } from "./api.js";
-import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-5";
+import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-7";
 
 let editorDraftStore = null;
 let storeInitialized = false;
@@ -132,6 +132,8 @@ link.href =
 
 async function initStore(){
 
+document.body.classList.add("storefront-loading");
+
 try{
 
 const slug = getSlugFromDomain();
@@ -144,6 +146,7 @@ const store = await getStore(slug);
 
 if(!store){
 
+document.body.classList.remove("storefront-loading");
 document.body.innerHTML = `
 <div style="text-align:center;margin-top:100px;font-family:sans-serif;">
 <h1>Tienda no encontrada</h1>
@@ -313,6 +316,7 @@ initPromotionPopup(slug);
 initChatbot();
 
 storeInitialized = true;
+document.body.classList.remove("storefront-loading");
 
 if(editorDraftStore){
   await applyEditorPreview(editorDraftStore);
@@ -330,6 +334,7 @@ if(
 
 }catch(error){
 
+document.body.classList.remove("storefront-loading");
 console.error("STORE INIT ERROR:", error);
 
 document.body.innerHTML = `

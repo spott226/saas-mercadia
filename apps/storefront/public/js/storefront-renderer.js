@@ -329,14 +329,33 @@ function escapeHTML(value){
     .replaceAll("'", "&#039;");
 }
 
+
+export function applyStorefrontIdentity({ store }){
+  clearStorefrontClasses();
+
+  const businessType = store?.business_type || "ecommerce";
+  const templateKey = store?.template_key || "ecommerce_default";
+  const safeTemplateKey = String(templateKey).replaceAll("_","-");
+
+  document.body.classList.add(
+    `storefront-${businessType}`,
+    `template-${safeTemplateKey}`
+  );
+  document.body.dataset.storeNavigation = getNavigationMode(templateKey);
+  applySitePalette(store);
+}
+
 function clearStorefrontClasses(){
   delete document.body.dataset.storeNavigation;
   document.body.className =
     document.body.className
       .split(" ")
       .filter(className =>
-        !className.startsWith("storefront-") &&
-        !className.startsWith("template-")
+        className === "storefront-loading" ||
+        (
+          !className.startsWith("storefront-") &&
+          !className.startsWith("template-")
+        )
       )
       .join(" ");
 }
@@ -704,3 +723,4 @@ export async function renderStorefrontExperience({ store, slug }){
   await template.render();
 
 }
+
