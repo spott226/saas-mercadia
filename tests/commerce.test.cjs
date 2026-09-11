@@ -216,3 +216,40 @@ test('Products focuses on creation and published offers are managed in inventory
   assert.match(inventory,/id="filter-offer-type"/);
   assert.match(read('apps/admin/js/inventory.js'),/editInventoryProduct/);
 });
+
+test('Password recovery keeps its token isolated and never exposes raw JWT errors',async () => {
+  const calls=[];
+  const controller=loadController('apps/backend/src/controllers/platform.controller.js',{
+    bcrypt:{hash:async()=> 'new-hash'},
+    jsonwebtoken:{},
+    crypto:{randomBytes:()=>Buffer.from('1234')},
+    '../db/db':{query:async(sql,args)=>{calls.push({sql,args});return {rows:[]};}},
+    '../services/supabaseAuth':{
+      getUser:async()=>({id:'auth-1',email:'OWNER@EXAMPLE.COM'}),
+      updatePassword:async()=>{}
+    },
+    '../config/auth':{}
+  });
+  let res=response();
+  await controller.updatePassword({headers:{authorization:'Bearer recovery.jwt.token'},body:{password:'NuevaClave123'}},res,error=>{throw error;});
+  assert.equal(res.data.success,true);
+  assert.match(calls[0].sql,/role = 'superadmin'/);
+  assert.deepEqual(Array.from(calls[0].args),['new-hash','owner@example.com']);
+
+  const invalid=loadController('apps/backend/src/controllers/platform.controller.js',{
+    bcrypt:{},jsonwebtoken:{},crypto:{randomBytes:()=>Buffer.from('1234')},
+    '../db/db':{query:async()=>({rows:[]})},
+    '../services/supabaseAuth':{getUser:async()=>{const error=new Error('invalid JWT: expired');error.status=401;throw error;}},
+    '../config/auth':{}
+  });
+  res=response();
+  await invalid.updatePassword({headers:{authorization:'Bearer expired.jwt.token'},body:{password:'NuevaClave123'}},res,error=>{throw error;});
+  assert.equal(res.code,401);
+  assert.doesNotMatch(res.data.error,/jwt/i);
+  assert.match(res.data.error,/enlace/);
+
+  const platform=read('apps/storefront/public/js/platform.js');
+  assert.match(platform,/RECOVERY_TOKEN_KEY/);
+  assert.match(platform,/if\(isRecoveryFlow\)[\s\S]*setAuthenticatedHeader\(false\)/);
+  assert.doesNotMatch(platform,/Authorization: `Bearer \$\{localStorage\.getItem\(TOKEN_KEY\)\}`[^\n]*update-password/);
+});

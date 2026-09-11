@@ -34,6 +34,7 @@ const THEME_KEYS = [
 const state = {
   store: null,
   session: null,
+  recoveryToken: null,
   customer: null,
   orders: [],
   activeTab: "login"
@@ -290,10 +291,10 @@ async function ensureFreshSession(){
   return true;
 }
 
-function authHeaders(){
+function authHeaders(accessToken = state.session?.token){
   return {
     Authorization:
-      `Bearer ${state.session.token}`,
+      `Bearer ${accessToken}`,
     "X-Store-Id":
       String(state.store.id)
   };
@@ -311,6 +312,12 @@ function accountRedirectUrl(){
   return url.toString();
 }
 
+function accountRecoveryUrl(){
+  const url = new URL(accountRedirectUrl());
+  url.searchParams.set("reset", "1");
+  return url.toString();
+}
+
 function consumeSupabaseRedirect(){
   const hash = new URLSearchParams(
     window.location.hash.replace(/^#/, "")
@@ -318,6 +325,14 @@ function consumeSupabaseRedirect(){
   const token = hash.get("access_token");
 
   if(!token){
+    if(hash.get("error")){
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname + window.location.search
+      );
+      return { error:true };
+    }
     return null;
   }
 
@@ -342,6 +357,7 @@ function consumeSupabaseRedirect(){
 
   return {
     session,
+    recoveryToken: token,
     recovery:
       hash.get("type") === "recovery"
   };
@@ -788,7 +804,7 @@ async function handleForgotPassword(event){
       method: "POST",
       body: JSON.stringify({
         email,
-        redirect_to: accountRedirectUrl()
+        redirect_to: accountRecoveryUrl()
       })
     }
   );
@@ -809,11 +825,16 @@ async function handleResetPassword(event){
     .querySelector('[name="password"]')
     .value;
 
+  if(!state.recoveryToken){
+    setMessage("El enlace para cambiar la contrasena vencio. Solicita uno nuevo.", "error");
+    return;
+  }
+
   const data = await customerRequest(
     "/customer-auth/update-password",
     {
       method: "POST",
-      headers: authHeaders(),
+      headers: authHeaders(state.recoveryToken),
       body: JSON.stringify({ password })
     }
   );
@@ -823,9 +844,12 @@ async function handleResetPassword(event){
     return;
   }
 
-  setMessage("Contrasena actualizada. Tu sesion ya esta activa.", "success");
+  state.recoveryToken = null;
+  clearCustomerSession();
+  state.session = null;
+  setMessage("Contrasena actualizada. Inicia sesion con tu nueva contrasena.", "success");
   event.currentTarget.reset();
-  await loadCustomerData();
+  showLoginPanel();
 }
 
 function bindEvents(){
@@ -929,21 +953,33 @@ async function init(){
 
   const redirect = consumeSupabaseRedirect();
   if(redirect){
-    state.session = redirect.session;
-    setCustomerSession(state.session);
-
-    if(redirect.recovery){
+    if(redirect.error){
+      showLoginPanel();
+      setMessage(
+        "El enlace para cambiar la contrasena vencio o ya fue utilizado. Solicita uno nuevo.",
+        "error"
+      );
+    }else if(redirect.recovery){
+      state.recoveryToken = redirect.recoveryToken;
       showSpecialPanel("account-reset-panel");
       setMessage(
         "Escribe una nueva contrasena para terminar la recuperacion.",
         "neutral"
       );
     }else{
+      state.session = redirect.session;
+      setCustomerSession(state.session);
       setMessage(
         "Correo confirmado correctamente.",
         "success"
       );
     }
+  }else if(new URLSearchParams(window.location.search).get("reset") === "1"){
+    showLoginPanel();
+    setMessage(
+      "El enlace para cambiar la contrasena vencio o esta incompleto. Solicita uno nuevo.",
+      "error"
+    );
   }
 
   document.title =

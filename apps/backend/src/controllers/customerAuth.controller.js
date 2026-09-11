@@ -17,6 +17,19 @@ function isEmail(value){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function passwordRecoveryError(error){
+  const detail = String(error?.message || "").toLowerCase();
+  if(
+    detail.includes("jwt") ||
+    detail.includes("token") ||
+    detail.includes("expired") ||
+    detail.includes("session")
+  ){
+    return "El enlace para cambiar la contraseña venció o ya fue utilizado. Solicita uno nuevo.";
+  }
+  return "No se pudo cambiar la contraseña. Solicita un enlace nuevo e inténtalo otra vez.";
+}
+
 function redirectUrl(value){
   const raw = clean(value, 2000);
   if(!raw) return undefined;
@@ -400,7 +413,10 @@ exports.updatePassword = async (req, res, next) => {
     res.json({ success: true, message: "contrasena actualizada" });
   }catch(error){
     if(error?.status){
-      return res.status(401).json({ success: false, error: publicAuthError(error) });
+      return res.status(error.status >= 500 ? 502 : 401).json({
+        success: false,
+        error: passwordRecoveryError(error)
+      });
     }
     next(error);
   }

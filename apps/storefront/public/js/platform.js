@@ -1,6 +1,7 @@
 const API = window.MERCADIA_CONFIG?.API_URL || "/api";
 const TOKEN_KEY = "mercadia_owner_token";
 const REFRESH_KEY = "mercadia_owner_refresh";
+const RECOVERY_TOKEN_KEY = "mercadia_owner_recovery_token";
 
 const authDialog = document.getElementById("auth-dialog");
 const resetDialog = document.getElementById("reset-dialog");
@@ -72,6 +73,7 @@ function clearSession(){
   localStorage.removeItem("mercadia_admin_store_id");
   sessionStorage.removeItem("mercadia_platform_token");
   localStorage.removeItem("mercadia_platform_token");
+  sessionStorage.removeItem(RECOVERY_TOKEN_KEY);
   setAuthenticatedHeader(false);
 }
 
@@ -248,11 +250,25 @@ document.getElementById("forgot-button").addEventListener("click", async () => {
 document.getElementById("logout-button").addEventListener("click", () => { clearSession(); location.href = "/"; });
 
 const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
-if(hash.get("access_token")){
-  localStorage.setItem(TOKEN_KEY, hash.get("access_token"));
-  if(hash.get("refresh_token")) localStorage.setItem(REFRESH_KEY, hash.get("refresh_token"));
+const recoveryToken = hash.get("type") === "recovery"
+  ? hash.get("access_token")
+  : null;
+const isRecoveryFlow = Boolean(recoveryToken);
+const resetRequested = new URLSearchParams(location.search).get("reset") === "1";
+
+if(recoveryToken){
+  sessionStorage.setItem(RECOVERY_TOKEN_KEY,recoveryToken);
   history.replaceState({}, "", location.pathname + location.search);
-  if(hash.get("type") === "recovery") resetDialog.showModal();
+  resetDialog.showModal();
+}else if(hash.get("error")){
+  history.replaceState({}, "", location.pathname + location.search);
+  showTab("login");
+  authDialog.showModal();
+  setMessage("El enlace para cambiar la contraseña venció o ya fue utilizado. Solicita uno nuevo.");
+}else if(resetRequested){
+  showTab("login");
+  authDialog.showModal();
+  setMessage("El enlace para cambiar la contraseña venció o está incompleto. Solicita uno nuevo.");
 }
 
 if(new URLSearchParams(location.search).get("verified") === "1"){
@@ -273,14 +289,25 @@ document.getElementById("reset-form").addEventListener("submit", async event => 
   event.preventDefault();
   const resetMessage = document.getElementById("reset-message");
   try{
-    await request("/platform/update-password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY)}` }, body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))) });
+    const token = sessionStorage.getItem(RECOVERY_TOKEN_KEY);
+    if(!token) throw new Error("El enlace para cambiar la contraseña venció. Solicita uno nuevo.");
+    await request("/platform/update-password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))) });
+    clearSession();
     resetMessage.textContent = "Contraseña actualizada. Ya puedes iniciar sesión.";
     resetMessage.classList.add("ok");
-    setTimeout(() => resetDialog.close(), 1200);
+    event.currentTarget.reset();
+    setTimeout(() => {
+      resetDialog.close();
+      showTab("login");
+      authDialog.showModal();
+      setMessage("Contraseña actualizada. Inicia sesión con tu nueva contraseña.",true);
+    }, 1200);
   }catch(error){ resetMessage.textContent = error.message; }
 });
 
-if(platformToken){
+if(isRecoveryFlow){
+  setAuthenticatedHeader(false);
+}else if(platformToken){
   location.replace("/platform.html");
 }else{
   setAuthenticatedHeader(Boolean(localStorage.getItem(TOKEN_KEY)));

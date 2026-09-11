@@ -15,6 +15,19 @@ function email(value){
   return clean(value, 320).toLowerCase();
 }
 
+function passwordRecoveryError(error){
+  const detail = String(error?.message || "").toLowerCase();
+  if(
+    detail.includes("jwt") ||
+    detail.includes("token") ||
+    detail.includes("expired") ||
+    detail.includes("session")
+  ){
+    return "El enlace para cambiar la contraseña venció o ya fue utilizado. Solicita uno nuevo.";
+  }
+  return "No se pudo cambiar la contraseña. Solicita un enlace nuevo e inténtalo otra vez.";
+}
+
 function slugify(value){
   return clean(value, 80)
     .normalize("NFD")
@@ -82,8 +95,8 @@ async function accountByAuthUser(authUser){
 async function authUserFromRequest(req){
   const header = String(req.headers.authorization || "");
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  if(!token){
-    const error = new Error("token required");
+  if(!token || token === "null" || token === "undefined"){
+    const error = new Error("recovery token required");
     error.status = 401;
     throw error;
   }
@@ -334,8 +347,12 @@ exports.refresh = async (req,res,next) => {
 
 exports.forgotPassword = async (req, res, next) => {
   try{
+    const userEmail = email(req.body.email);
+    if(!/^\S+@\S+\.\S+$/.test(userEmail)){
+      return res.status(400).json({ success:false, error:"Escribe un correo válido." });
+    }
     await supabaseAuth.recover(
-      email(req.body.email),
+      userEmail,
       `${req.protocol}://${req.get("host")}/?reset=1`
     );
     res.json({ success: true, message: "Si la cuenta existe, recibirás el correo para cambiar tu contraseña." });
@@ -355,10 +372,22 @@ exports.updatePassword = async (req, res, next) => {
       return res.status(400).json({ success: false, error: "La contraseña debe tener al menos 8 caracteres." });
     }
     await supabaseAuth.updatePassword(auth.token, password);
+    const authEmail = email(auth.user?.email);
+    if(authEmail){
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.query(
+        `UPDATE users SET password = $1
+         WHERE LOWER(email) = $2 AND role = 'superadmin'`,
+        [hashedPassword, authEmail]
+      );
+    }
     res.json({ success: true, message: "Contraseña actualizada." });
   }catch(error){
     if(error?.status){
-      return res.status(error.status).json({ success: false, error: error.message });
+      return res.status(error.status >= 500 ? 502 : error.status).json({
+        success: false,
+        error: passwordRecoveryError(error)
+      });
     }
     next(error);
   }
