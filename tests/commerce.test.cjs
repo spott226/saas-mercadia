@@ -255,8 +255,58 @@ test('Password recovery keeps its token isolated and never exposes raw JWT error
 
   const platform=read('apps/storefront/public/js/platform.js');
   assert.match(platform,/RECOVERY_TOKEN_KEY/);
+  assert.match(platform,/function getRecoveryToken/);
+  assert.match(platform,/split\("\."\)\.length === 3/);
   assert.match(platform,/if\(isRecoveryFlow\)[\s\S]*setAuthenticatedHeader\(false\)/);
+  assert.match(platform,/El enlace para cambiar la contraseña llegó incompleto/);
   assert.doesNotMatch(platform,/Authorization: `Bearer \$\{localStorage\.getItem\(TOKEN_KEY\)\}`[^\n]*update-password/);
+});
+
+test('Platform registration and password reset keep form references across async requests',() => {
+  const platform=read('apps/storefront/public/js/platform.js');
+  assert.match(platform,/const registerForm = document\.getElementById\("register-form"\)/);
+  assert.match(platform,/registerForm\?\.addEventListener\("submit", async event => \{\s+event\.preventDefault\(\);\s+const form = event\.currentTarget;/);
+  assert.match(platform,/const body = Object\.fromEntries\(new FormData\(form\)\)/);
+  assert.match(platform,/form\.reset\(\)/);
+  assert.doesNotMatch(platform,/event\.currentTarget\.reset\(\)/);
+  assert.doesNotMatch(platform,/new FormData\(event\.currentTarget\)/);
+});
+
+test('Superadmin panel lists stores and can activate, suspend, or reject accounts',async () => {
+  const calls=[];
+  const client={
+    release(){},
+    query:async(sql,args=[])=>{
+      calls.push({sql,args});
+      if(sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return {rows:[]};
+      if(sql.includes('FROM merchant_accounts WHERE id = $1 FOR UPDATE')){
+        return {rows:[{id:7,business_name:'Zero Fear',desired_slug:'zero-fear',store_id:null}]};
+      }
+      if(sql.includes('FROM stores WHERE slug = $1')) return {rows:[]};
+      if(sql.includes('INSERT INTO stores')) return {rows:[{id:22,slug:'zero-fear'}]};
+      if(sql.includes('UPDATE merchant_accounts')) return {rows:[{id:7,status:args[0],store_id:args[1]}]};
+      return {rows:[]};
+    }
+  };
+  const controller=loadController('apps/backend/src/controllers/platform.controller.js',{
+    bcrypt:{},jsonwebtoken:{},crypto:{randomBytes:()=>Buffer.from('1234')},
+    '../db/db':{connect:async()=>client,query:async(sql,args)=>{calls.push({sql,args});return {rows:[]};}},
+    '../services/supabaseAuth':{},'../config/auth':{}
+  });
+  const res=response();
+  await controller.setAccountStatus({params:{id:'7'},body:{status:'active'},user:{user_id:1}},res,error=>{throw error;});
+  assert.equal(res.data.success,true);
+  assert.equal(res.data.store_id,22);
+  assert.equal(res.data.store_url,'/tienda/zero-fear');
+  assert.ok(calls.some(call=>String(call.sql).includes('INSERT INTO stores')));
+
+  const adminJs=read('apps/storefront/public/js/platform-admin.js');
+  const adminHtml=read('apps/storefront/public/platform.html');
+  assert.match(adminHtml,/id="master-stats"/);
+  assert.match(adminHtml,/id="merchant-status-filter"/);
+  assert.match(adminJs,/data-value="active"/);
+  assert.match(adminJs,/data-value="suspended"/);
+  assert.match(adminJs,/data-value="rejected"/);
 });
 
 test('Every store template has its own immersive presentation and navigation mode',() => {

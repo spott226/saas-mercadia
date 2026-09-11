@@ -70,6 +70,16 @@ function merchantView(account){
     plan_amount: Number(account.plan_amount),
     payment_reference: account.payment_reference,
     store_id: account.store_id,
+    store_name: account.store_name || account.business_name,
+    store_slug: account.store_slug || null,
+    custom_domain: account.custom_domain || null,
+    custom_domain_status: account.custom_domain_status || "none",
+    business_type: account.business_type || null,
+    product_limit: account.product_limit === undefined
+      ? null
+      : Number(account.product_limit),
+    created_at: account.created_at || null,
+    updated_at: account.updated_at || null,
     email_verified: account.email_verified,
     store_url: account.store_slug
       ? `/tienda/${account.store_slug}`
@@ -495,7 +505,9 @@ exports.adminLogin = async (req, res, next) => {
 exports.listAccounts = async (req, res, next) => {
   try{
     const result = await pool.query(
-      `SELECT ma.*, s.slug AS store_slug,
+      `SELECT ma.*, s.name AS store_name, s.slug AS store_slug,
+              s.custom_domain, s.custom_domain_status,
+              s.business_type, s.product_limit,
               mp.id AS payment_id, mp.status AS payment_status,
               mp.proof_url, mp.notes AS payment_notes, mp.reported_at
        FROM merchant_accounts ma
@@ -596,20 +608,65 @@ exports.reviewAccount = async (req, res, next) => {
 };
 
 exports.setAccountStatus = async (req, res, next) => {
+  const client = await pool.connect();
   try{
     const status = clean(req.body.status, 30);
-    if(!["active", "suspended"].includes(status)){
+    if(!["active", "suspended", "rejected"].includes(status)){
       return res.status(400).json({ success: false, error: "Estado inválido." });
     }
-    const result = await pool.query(
-      "UPDATE merchant_accounts SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id,status",
-      [status, Number(req.params.id)]
+    const merchantId = Number(req.params.id);
+    if(!Number.isSafeInteger(merchantId) || merchantId < 1){
+      return res.status(400).json({ success: false, error: "Cuenta inválida." });
+    }
+
+    await client.query("BEGIN");
+    const accountResult = await client.query(
+      "SELECT * FROM merchant_accounts WHERE id = $1 FOR UPDATE",
+      [merchantId]
     );
-    if(!result.rows.length){
+    const account = accountResult.rows[0];
+    if(!account){
+      await client.query("ROLLBACK");
       return res.status(404).json({ success: false, error: "Cuenta no encontrada." });
     }
-    res.json({ success: true, account: result.rows[0] });
+
+    let storeId = account.store_id;
+    let storeSlug = null;
+    if(status === "active"){
+      if(!storeId){
+        storeSlug = await uniqueSlug(client, account.desired_slug || account.business_name);
+        const storeResult = await client.query(
+          "INSERT INTO stores (name, slug) VALUES ($1,$2) RETURNING id,slug",
+          [account.business_name, storeSlug]
+        );
+        storeId = storeResult.rows[0].id;
+      }else{
+        const storeResult = await client.query(
+          "SELECT slug FROM stores WHERE id = $1",
+          [storeId]
+        );
+        storeSlug = storeResult.rows[0]?.slug || null;
+      }
+    }
+
+    const result = await client.query(
+      `UPDATE merchant_accounts
+       SET status = $1, store_id = COALESCE($2, store_id), updated_at = NOW()
+       WHERE id = $3
+       RETURNING *`,
+      [status, storeId, merchantId]
+    );
+    await client.query("COMMIT");
+    res.json({
+      success: true,
+      account: result.rows[0],
+      store_id: storeId || null,
+      store_url: storeSlug ? `/tienda/${storeSlug}` : null
+    });
   }catch(error){
+    await client.query("ROLLBACK");
     next(error);
+  }finally{
+    client.release();
   }
 };

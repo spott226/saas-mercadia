@@ -6,6 +6,11 @@ const RECOVERY_TOKEN_KEY = "mercadia_owner_recovery_token";
 const authDialog = document.getElementById("auth-dialog");
 const resetDialog = document.getElementById("reset-dialog");
 const message = document.getElementById("auth-message");
+const registerForm = document.getElementById("register-form");
+const loginForm = document.getElementById("login-form");
+const forgotButton = document.getElementById("forgot-button");
+const logoutButton = document.getElementById("logout-button");
+const resetForm = document.getElementById("reset-form");
 const guestNav = document.getElementById("guest-nav");
 const sessionNav = document.getElementById("session-nav");
 const platformToken =
@@ -153,14 +158,15 @@ function renderAccount(data){
 
 async function reportPayment(event){
   event.preventDefault();
-  const button = event.currentTarget.querySelector("button");
+  const form = event.currentTarget;
+  const button = form.querySelector("button");
   button.disabled = true;
   button.textContent = "Reportando...";
   try{
     await request("/platform/payment", {
       method: "POST",
       headers: { Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY)}` },
-      body: new FormData(event.currentTarget)
+      body: new FormData(form)
     });
     await loadAccount();
   }catch(error){
@@ -205,41 +211,43 @@ async function loadAccount(){
   }
 }
 
-document.getElementById("register-form").addEventListener("submit", async event => {
+registerForm?.addEventListener("submit", async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   setMessage("Creando cuenta...");
   try{
-    const body = Object.fromEntries(new FormData(event.currentTarget));
+    const body = Object.fromEntries(new FormData(form));
     const data = await request("/platform/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     saveSession(data);
     if(data.email_confirmation_required){
       setMessage("Cuenta creada. Revisa tu correo y confirma el enlace antes de iniciar sesión.", true);
-      event.currentTarget.reset();
+      form.reset();
     }else{
-      authDialog.close();
+      authDialog?.close?.();
       renderAccount(data);
     }
   }catch(error){ setMessage(error.message); }
 });
 
-document.getElementById("login-form").addEventListener("submit", async event => {
+loginForm?.addEventListener("submit", async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   setMessage("Iniciando sesión...");
   try{
-    const body = Object.fromEntries(new FormData(event.currentTarget));
+    const body = Object.fromEntries(new FormData(form));
     const data = await request("/platform/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     saveSession(data);
     if(data.role === "superadmin"){
       location.href = data.redirect || "/platform.html";
       return;
     }
-    authDialog.close();
+    authDialog?.close?.();
     renderAccount(data);
   }catch(error){ setMessage(error.message); }
 });
 
-document.getElementById("forgot-button").addEventListener("click", async () => {
-  const value = document.querySelector('#login-form [name="email"]').value;
+forgotButton?.addEventListener("click", async () => {
+  const value = loginForm?.querySelector('[name="email"]')?.value || "";
   if(!value){ setMessage("Escribe primero tu correo."); return; }
   try{
     const data = await request("/platform/forgot-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: value }) });
@@ -247,12 +255,16 @@ document.getElementById("forgot-button").addEventListener("click", async () => {
   }catch(error){ setMessage(error.message); }
 });
 
-document.getElementById("logout-button").addEventListener("click", () => { clearSession(); location.href = "/"; });
+logoutButton?.addEventListener("click", () => { clearSession(); location.href = "/"; });
 
 const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
-const recoveryToken = hash.get("type") === "recovery"
-  ? hash.get("access_token")
-  : null;
+function getRecoveryToken(hashParams){
+  if(hashParams.get("type") !== "recovery") return null;
+  const token = String(hashParams.get("access_token") || "").trim();
+  return token.split(".").length === 3 ? token : null;
+}
+
+const recoveryToken = getRecoveryToken(hash);
 const isRecoveryFlow = Boolean(recoveryToken);
 const resetRequested = new URLSearchParams(location.search).get("reset") === "1";
 
@@ -265,6 +277,11 @@ if(recoveryToken){
   showTab("login");
   authDialog.showModal();
   setMessage("El enlace para cambiar la contraseña venció o ya fue utilizado. Solicita uno nuevo.");
+}else if(hash.get("type") === "recovery"){
+  history.replaceState({}, "", location.pathname + location.search);
+  showTab("login");
+  authDialog.showModal();
+  setMessage("El enlace para cambiar la contraseña llegó incompleto. Solicita uno nuevo.");
 }else if(resetRequested){
   showTab("login");
   authDialog.showModal();
@@ -285,17 +302,18 @@ if(new URLSearchParams(location.search).get("login") === "1"){
   authDialog.showModal();
 }
 
-document.getElementById("reset-form").addEventListener("submit", async event => {
+resetForm?.addEventListener("submit", async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   const resetMessage = document.getElementById("reset-message");
   try{
     const token = sessionStorage.getItem(RECOVERY_TOKEN_KEY);
     if(!token) throw new Error("El enlace para cambiar la contraseña venció. Solicita uno nuevo.");
-    await request("/platform/update-password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))) });
+    await request("/platform/update-password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
     clearSession();
     resetMessage.textContent = "Contraseña actualizada. Ya puedes iniciar sesión.";
     resetMessage.classList.add("ok");
-    event.currentTarget.reset();
+    form.reset();
     setTimeout(() => {
       resetDialog.close();
       showTab("login");

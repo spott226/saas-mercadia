@@ -917,28 +917,44 @@ async function loadStore(){
 async function saveExperience(event){
 
   event.preventDefault();
+  const saveButton = document.getElementById("save-experience-btn");
 
-  await adminRequest(
-    "/admin/store",
-    {
-      method:"PATCH",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        business_type:businessType.value,
-        template_key:templateKey.value,
-        homepage_sections:buildHomepageSections(),
-        custom_domain:customDomain.value.trim()
-      })
+  if(saveButton?.disabled) return;
+
+  const originalText = saveButton?.textContent || "Guardar experiencia";
+  if(saveButton){
+    saveButton.disabled = true;
+    saveButton.textContent = "Guardando...";
+  }
+
+  try{
+    await adminRequest(
+      "/admin/store",
+      {
+        method:"PATCH",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          business_type:businessType.value,
+          template_key:templateKey.value,
+          homepage_sections:buildHomepageSections(),
+          custom_domain:customDomain.value.trim()
+        })
+      }
+    );
+
+    showMessage(
+      "Experiencia actualizada"
+    );
+
+    await loadStore();
+  }finally{
+    if(saveButton){
+      saveButton.disabled = false;
+      saveButton.textContent = originalText;
     }
-  );
-
-  showMessage(
-    "Experiencia actualizada"
-  );
-
-  await loadStore();
+  }
 
 }
 

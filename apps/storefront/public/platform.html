@@ -1,14 +1,26 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Mercadia · Panel maestro</title><link rel="stylesheet" href="/css/platform.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Mercadia · Panel maestro</title><link rel="icon" href="/icons/mercadia-app.png" type="image/png"><link rel="apple-touch-icon" href="/icons/mercadia-app.png"><link rel="stylesheet" href="/css/platform.css?v=20260911-2"></head>
 <body>
   <header class="topbar"><a class="brand" href="/"><img src="/icons/mercadia-app.png" alt=""><span>Mercadia Maestro</span></a><button class="secondary hidden" id="platform-logout">Cerrar sesión</button></header>
   <main>
-    <section class="account-shell hidden" id="platform-dashboard">
-      <div class="account-head"><div><span class="eyebrow">ADMINISTRACIÓN</span><h1>Usuarios y pagos</h1></div><button class="secondary" id="refresh-accounts">Actualizar</button></div>
+    <section class="account-shell platform-master hidden" id="platform-dashboard">
+      <div class="account-head"><div><span class="eyebrow">ADMINISTRACIÓN</span><h1>Tiendas y planes</h1><p>Monitorea altas, pagos y acceso de cada tienda desde un solo panel.</p></div><button class="secondary" id="refresh-accounts">Actualizar</button></div>
+      <div class="master-stats" id="master-stats"></div>
+      <div class="master-toolbar">
+        <input id="merchant-search" placeholder="Buscar tienda, dueño o correo">
+        <select id="merchant-status-filter">
+          <option value="">Todos los estados</option>
+          <option value="active">Activas</option>
+          <option value="payment_reported">Pago reportado</option>
+          <option value="payment_pending">Pago pendiente</option>
+          <option value="suspended">Suspendidas</option>
+          <option value="rejected">Baja / rechazadas</option>
+        </select>
+      </div>
       <div class="admin-list" id="merchant-list"></div>
     </section>
   </main>
-  <script src="/config.js"></script><script type="module" src="/js/platform-admin.js"></script>
+  <script src="/config.js"></script><script type="module" src="/js/platform-admin.js?v=20260911-2"></script>
 </body>
 </html>
