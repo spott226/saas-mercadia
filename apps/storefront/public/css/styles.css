@@ -84,7 +84,7 @@ NAVBAR
 header{
 background:var(--card);
 border-bottom:1px solid var(--border);
-color:var(--text);
+color:var(--header-text,var(--text));
 }
 
 header > div:first-child{
@@ -94,7 +94,7 @@ padding:14px clamp(18px,5vw,72px);
 }
 
 header a{
-color:var(--text);
+color:inherit;
 transition:opacity .2s;
 }
 
@@ -102,8 +102,12 @@ header a:hover{
 opacity:.7;
 }
 
+header button{
+color:inherit;
+}
+
 .brand-link{
-color:var(--text);
+color:inherit;
 text-decoration:none;
 }
 
@@ -130,9 +134,11 @@ transform:translateX(-50%);
 #mobile-menu{
 background:var(--card);
 border-color:var(--border);
+color:var(--header-text,var(--text));
 }
 
 #mobile-menu a{
+color:inherit;
 font-size:13px;
 font-weight:700;
 text-transform:uppercase;
@@ -657,7 +663,8 @@ rgba(0,0,0,.12)
 position:relative;
 z-index:1;
 max-width:620px;
-color:var(--section-text,white);
+color:#fff;
+text-shadow:0 2px 22px rgba(0,0,0,.48);
 }
 
 .storefront-section-gallery{
@@ -1719,6 +1726,60 @@ THEMES
 --border:#e5e5e5;
 }
 
+/* MINIMAL */
+.theme-minimal{
+--background:#faf9f6;
+--card:#faf9f6;
+--card-elevated:#ffffff;
+--text:#171717;
+--text-muted:#6b6b66;
+--text-inverse:#ffffff;
+--primary:#171717;
+--border:#d8d5ce;
+--radius:0;
+}
+
+.theme-minimal header{
+background:color-mix(in srgb,var(--background) 94%,transparent);
+box-shadow:none;
+}
+
+.theme-minimal .product-card{
+border-width:1px 0 0;
+box-shadow:none;
+}
+
+/* STREET */
+.theme-street{
+--background:#f4f0e6;
+--card:#fffdf7;
+--card-elevated:#ffffff;
+--text:#111111;
+--text-muted:#5c564c;
+--text-inverse:#ffffff;
+--primary:#ef3f23;
+--border:#111111;
+--radius:4px;
+}
+
+.theme-street header{
+border-bottom:3px solid var(--border);
+}
+
+.theme-street .product-card,
+.theme-street .storefront-split-copy{
+border:2px solid var(--border);
+box-shadow:7px 7px 0 var(--border);
+}
+
+.theme-street .product-btn,
+.theme-street .promotion-button{
+border:2px solid var(--border);
+box-shadow:3px 3px 0 var(--border);
+font-weight:900;
+text-transform:uppercase;
+}
+
 /* DARK */
 .theme-dark{
 --background:#2b2b2b;
@@ -1836,12 +1897,29 @@ body.theme-black,
 body.theme-dark,
 body.theme-earth,
 body.theme-modern,
+body.theme-minimal,
+body.theme-street,
 body.theme-velour,
-body.lujo,
-body.tenis,
+body.theme-lujo,
+body.theme-tenis,
 body.theme-luxury{
 background:var(--background);
 color:var(--text);
+}
+
+/* Mantiene legible la navegación aunque el editor mezcle una plantilla clara
+   con un tema oscuro o conserve un color de texto de otra plantilla. */
+body.theme-black,
+body.theme-dark,
+body.theme-earth,
+body.theme-velour,
+body.theme-luxury,
+body.theme-tenis,
+body.theme-lujo,
+body.template-restaurant-2,
+body.template-professional-2,
+body.template-gym-active-1{
+--header-text:#f8fafc;
 }
 
 /* MODAL PRODUCTO */
@@ -2861,6 +2939,10 @@ body.template-gym-active-1 .storefront-image-banner::after{
 background:linear-gradient(90deg,rgba(3,8,14,.92),rgba(3,8,14,.42),color-mix(in srgb,var(--primary) 16%,transparent));
 }
 
+body.template-gym-active-1 .storefront-image-banner > div:not(.storefront-section-gallery){
+color:#f5fbff;
+}
+
 body.template-gym-active-1 .storefront-category-grid{
 display:flex;
 gap:10px;
@@ -2937,9 +3019,22 @@ right:-8vw;
 bottom:170px;
 }
 body.template-gym-active-1 .storefront-image-banner{
-min-height:430px;
+min-height:0;
+padding:40px 28px;
+width:calc(100% - 32px);
+margin:24px 16px;
 border-radius:24px;
 transform:none;
+}
+body.template-gym-active-1 .storefront-image-banner h2{
+font-size:clamp(34px,11vw,52px);
+line-height:.94;
+overflow-wrap:normal;
+}
+body.template-gym-active-1 .storefront-image-banner span{
+display:block;
+font-size:16px;
+line-height:1.45;
 }
 .storefront-products-section{
 padding:34px 16px!important;
