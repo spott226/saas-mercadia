@@ -16,6 +16,9 @@ let orders = [];
 let products = [];
 let inventory = [];
 let currentReport = {};
+let dashboardLoading = false;
+let dashboardInitialized = false;
+const DASHBOARD_REFRESH_MS = 15000;
 
 const toNumber = value => Number(value || 0);
 const isPaidOrder = order => SALES_STATUSES.includes(String(order?.status || "").toUpperCase());
@@ -141,13 +144,18 @@ function getInventoryMetrics(){
 }
 
 async function fetchJson(url){
-  const response = await fetch(url,{headers:{Authorization:`Bearer ${token}`}});
+  const response = await fetch(url,{
+    cache:"no-store",
+    headers:{Authorization:`Bearer ${token}`}
+  });
   const data = await response.json();
   if(!response.ok) throw new Error(data.error || "No se pudo cargar la información");
   return data;
 }
 
 async function loadDashboardStats(){
+  if(dashboardLoading) return;
+  dashboardLoading = true;
   try{
     const [productsResponse,ordersData,inventoryData] = await Promise.all([
       getProducts(store),
@@ -161,6 +169,8 @@ async function loadDashboardStats(){
   }catch(error){
     console.error("Dashboard error:",error);
     setText("period-summary","No se pudieron cargar todas las estadísticas. Intenta nuevamente.");
+  }finally{
+    dashboardLoading = false;
   }
 }
 
@@ -247,7 +257,33 @@ window.exportMonthReport = () => {
   URL.revokeObjectURL(url);
 };
 
-document.addEventListener("DOMContentLoaded",async () => {
+async function initializeDashboard(){
+  if(dashboardInitialized) return;
+  dashboardInitialized = true;
   setupPeriodControls();
   await loadDashboardStats();
+
+  window.setInterval(() => {
+    if(document.visibilityState === "visible") loadDashboardStats();
+  },DASHBOARD_REFRESH_MS);
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded",initializeDashboard,{once:true});
+}else{
+  initializeDashboard();
+}
+
+document.addEventListener("visibilitychange",() => {
+  if(document.visibilityState === "visible" && dashboardInitialized){
+    loadDashboardStats();
+  }
+});
+
+window.addEventListener("focus",() => {
+  if(dashboardInitialized) loadDashboardStats();
+});
+
+window.addEventListener("pageshow",event => {
+  if(event.persisted && dashboardInitialized) loadDashboardStats();
 });
