@@ -436,5 +436,5 @@ test('Merchant PWA uses backend push instead of foreground order polling',() => 
   assert.match(pwa,/service-worker\.js\?v=20260911-15/);
   assert.match(pwa,/navigator\.serviceWorker\.ready/);
   assert.match(pwa,/PWA MERCHANT TEST WARNING/);
-  assert.match(serviceWorker,/mercadia-shell-v18/);
+  assert.match(serviceWorker,/mercadia-shell-v19/);
 });

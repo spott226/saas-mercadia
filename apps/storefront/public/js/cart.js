@@ -70,6 +70,19 @@ function prefillCheckoutForm(){
   setInputValue("c-ref", profile.reference);
 }
 
+
+function setModalScrollLock(active){
+  document.documentElement?.classList?.toggle("mercadia-modal-open", active);
+  document.body?.classList?.toggle("mercadia-modal-open", active);
+}
+
+function hasOpenOrderModal(){
+  return ["cart-modal", "checkout-modal"].some(id => {
+    const modal = document.getElementById(id);
+    return modal && !modal.classList.contains("hidden");
+  });
+}
+
 function appendText(parent, tag, text, className){
   const element = document.createElement(tag);
 
@@ -230,6 +243,7 @@ export function openCart(){
 
   if(modal){
     modal.classList.remove("hidden");
+    setModalScrollLock(true);
   }
 }
 
@@ -242,6 +256,10 @@ export function closeCart(){
 
   if(modal){
     modal.classList.add("hidden");
+  }
+
+  if(!hasOpenOrderModal()){
+    setModalScrollLock(false);
   }
 }
 
@@ -279,6 +297,7 @@ export function checkout(){
 
   prefillCheckoutForm();
   modal.classList.remove("hidden");
+  setModalScrollLock(true);
 }
 
 /* =======================
@@ -290,6 +309,10 @@ export function closeCheckout(){
 
   if(modal){
     modal.classList.add("hidden");
+  }
+
+  if(!hasOpenOrderModal()){
+    setModalScrollLock(false);
   }
 }
 

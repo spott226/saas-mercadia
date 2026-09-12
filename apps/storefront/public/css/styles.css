@@ -2980,8 +2980,13 @@ body.template-gym-active-1 .account-form .btn-primary,body.template-gym-active-1
 .checkout-input::placeholder{color:color-mix(in srgb,var(--text-muted) 84%,transparent)}
 .checkout-panel .modal-actions{padding:14px 20px 20px}
 @media(max-width:640px){.checkout-panel{width:100%;max-height:88dvh;border-radius:22px 22px 0 0}.checkout-grid{grid-template-columns:1fr!important;padding:14px;gap:10px}.checkout-input{min-height:48px}.checkout-panel .modal-actions{padding:12px 14px 16px}}
+html.mercadia-modal-open,
+body.mercadia-modal-open{
+overflow:hidden!important;
+overscroll-behavior:none;
+}
 
-#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden}
+#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden!important}
 #cart-modal .cart-panel{width:min(560px,calc(100vw - 28px))!important;height:auto!important;max-height:min(86dvh,760px)!important;border-radius:26px!important;border:1px solid color-mix(in srgb,var(--border) 82%,transparent)!important;box-shadow:0 30px 90px rgba(0,0,0,.26)!important;overflow:hidden!important}
 #cart-modal .modal-header,#checkout-modal .modal-header{padding:20px 22px 14px!important}
 #cart-modal .modal-body{padding:4px 22px!important;min-height:120px!important;max-height:42dvh!important;overflow:auto!important}
@@ -2990,6 +2995,5 @@ body.template-gym-active-1 .account-form .btn-primary,body.template-gym-active-1
 #cart-modal .modal-actions,#checkout-modal .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
 #checkout-modal .checkout-panel{width:min(620px,calc(100vw - 28px))!important;max-height:min(88dvh,760px)!important;border-radius:26px!important;box-shadow:0 30px 90px rgba(0,0,0,.26)!important}
 #checkout-modal .checkout-grid{max-height:48dvh;overflow:auto}
-.commerce-popup-overlay{position:fixed!important;inset:0!important;z-index:100000!important;align-items:center!important;justify-content:center!important;padding:18px!important}
+.commerce-popup-overlay{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;z-index:100000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden!important}
 @media(max-width:640px){#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{align-items:center!important;padding:14px!important}#cart-modal .cart-panel,#checkout-modal .checkout-panel{width:100%!important;max-height:86dvh!important;border-radius:24px!important}#cart-modal .modal-body{max-height:38dvh!important}#cart-modal .modal-actions,#checkout-modal .modal-actions{grid-template-columns:1fr!important}#checkout-modal .checkout-grid{max-height:46dvh}}
-

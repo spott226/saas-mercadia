@@ -1,5 +1,5 @@
 import { getProducts } from "./api.js";
-import { addToCart } from "./cart.js?v=20260911-13";
+import { addToCart } from "./cart.js?v=20260911-14";
 
 const DEFAULT_IMAGE = "/assets/images/default.jpg";
 
@@ -344,3 +344,4 @@ async function initProductDetail(){
 }
 
 document.addEventListener("DOMContentLoaded", initProductDetail);
+

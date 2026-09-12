@@ -2,10 +2,14 @@ import {getActivePromotions} from './api.js';
 import {createPromotionCard} from './promotion-card.js';
 function closedKey(slug,p){ return `mercadia_promotion_closed_${slug}_${p.id}_${p.updated_at || 'current'}`; }
 function wasClosed(slug,p){ try { return sessionStorage.getItem(closedKey(slug,p)) === '1'; } catch { return false; } }
+function setPopupScrollLock(active){
+  document.documentElement?.classList?.toggle('mercadia-modal-open', active);
+  document.body?.classList?.toggle('mercadia-modal-open', active);
+}
 export async function initPromotionPopup(slug){
   try {
     if(!document.querySelector('link[data-promotions]')){
-      const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = new URL('../css/promotions.css',import.meta.url).href; style.dataset.promotions = 'true'; document.head.append(style);
+      const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = new URL('../css/promotions.css?v=20260911-12',import.meta.url).href; style.dataset.promotions = 'true'; document.head.append(style);
     }
     const promotions = await getActivePromotions(slug);
     document.querySelectorAll('[data-commerce-promotions]').forEach(element => element.remove());
@@ -29,7 +33,7 @@ export async function initPromotionPopup(slug){
       const overlay = document.createElement('div'); overlay.className = 'commerce-popup-overlay'; overlay.dataset.commercePromotions = 'popup';
       const card = createPromotionCard(p); card.setAttribute('role','dialog'); card.setAttribute('aria-modal','true'); card.setAttribute('aria-label',p.title || 'Promoción');
       const close = document.createElement('button'); close.type = 'button'; close.className = 'commerce-popup-close'; close.textContent = '×'; close.setAttribute('aria-label','Cerrar promoción');
-      close.addEventListener('click',() => { try { sessionStorage.setItem(closedKey(slug,p),'1'); } catch {} overlay.remove(); previousFocus?.focus(); next(); });
+      close.addEventListener('click',() => { try { sessionStorage.setItem(closedKey(slug,p),'1'); } catch {} overlay.remove(); setPopupScrollLock(false); previousFocus?.focus(); next(); });
       overlay.addEventListener('keydown',event => {
         if(event.key === 'Escape') close.click();
         if(event.key === 'Tab'){
@@ -38,7 +42,7 @@ export async function initPromotionPopup(slug){
           else if(!event.shiftKey && document.activeElement === last){event.preventDefault();first.focus();}
         }
       });
-      card.prepend(close); overlay.append(card); document.body.append(overlay); close.focus();
+      card.prepend(close); overlay.append(card); document.body.append(overlay); setPopupScrollLock(true); close.focus();
     }
     next();
   } catch(error){ console.error('PROMOTION ERROR:',error); }
