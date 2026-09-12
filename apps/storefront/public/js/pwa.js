@@ -132,12 +132,15 @@ async function enableMerchantNotifications(){
     throw new Error(keyData.error || "Notificaciones no disponibles");
   }
 
-  const current = await registration.pushManager.getSubscription();
+  const pushRegistration = await navigator.serviceWorker.ready;
+  registration = pushRegistration;
+
+  const current = await pushRegistration.pushManager.getSubscription();
   if(current){
     await current.unsubscribe().catch(() => false);
   }
 
-  const subscription = await registration.pushManager.subscribe({
+  const subscription = await pushRegistration.pushManager.subscribe({
     userVisibleOnly:true,
     applicationServerKey:base64ToBytes(keyData.public_key)
   });
@@ -166,7 +169,7 @@ async function enableMerchantNotifications(){
   });
   const testData = await testResponse.json().catch(() => null);
   if(!testResponse.ok || testData?.success === false){
-    throw new Error(testData?.error || "La alerta quedó guardada, pero no se pudo mandar la prueba desde el servidor.");
+    console.warn("PWA MERCHANT TEST WARNING:",testData?.error || "No se pudo mandar la prueba desde el servidor.");
   }
 
   localStorage.setItem("mercadia_merchant_push_ready","1");
@@ -230,7 +233,7 @@ window.refreshMerchantNotifications = () => showMerchantNotifications().catch(er
 async function init(){
   if(!("serviceWorker" in navigator)) return;
 
-  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-14");
+  registration = await navigator.serviceWorker.register("/service-worker.js?v=20260911-15");
   registration.update?.();
 
   window.addEventListener("beforeinstallprompt", event => {
@@ -269,3 +272,4 @@ async function init(){
 }
 
 init().catch(error => console.error("PWA ERROR:", error));
+

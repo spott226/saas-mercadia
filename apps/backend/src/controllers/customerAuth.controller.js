@@ -46,12 +46,26 @@ function redirectUrl(value){
 
 function publicAuthError(error){
   const message = String(error?.message || "").toLowerCase();
+  const code = String(error?.code || "").toLowerCase();
+  const constraint = String(error?.constraint || "").toLowerCase();
 
   if(message.includes("invalid login") || message.includes("invalid credentials")){
     return "correo o contrasena incorrectos";
   }
   if(message.includes("email not confirmed")){
     return "confirma tu correo antes de iniciar sesion";
+  }
+  if(message.includes("already registered") || message.includes("user already") || message.includes("already exists")){
+    return "ese correo ya tiene cuenta; inicia sesión o usa recuperar contraseña";
+  }
+  if(code === "23505"){
+    if(constraint.includes("phone")){
+      return "ese teléfono ya está registrado en esta tienda";
+    }
+    return "ese correo ya tiene cuenta en esta tienda; inicia sesión o recupera tu contraseña";
+  }
+  if(code === "23503" || code === "22p02"){
+    return "los datos de la cuenta no son válidos; revisa la tienda y vuelve a intentar";
   }
   if(error?.status === 429){
     return "demasiados intentos; espera unos minutos";
@@ -287,8 +301,11 @@ exports.register = async (req, res, next) => {
       }
     });
   }catch(error){
-    if(error?.status){
-      return res.status(error.status >= 500 ? 502 : error.status).json({
+    if(error?.status || error?.code){
+      const status = error.status
+        ? (error.status >= 500 ? 502 : error.status)
+        : (error.code === "23505" ? 409 : 400);
+      return res.status(status).json({
         success: false,
         error: publicAuthError(error)
       });

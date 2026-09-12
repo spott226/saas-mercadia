@@ -165,7 +165,16 @@ async function requireCustomer(req, res, next){
   }
 }
 
+async function optionalCustomer(req, res, next){
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    return next();
+  }
+  return requireCustomer(req, res, next);
+}
+
 module.exports = authenticate;
 module.exports.requireAdmin = requireAdmin;
 module.exports.requireCustomer = requireCustomer;
+module.exports.optionalCustomer = optionalCustomer;
 module.exports.requireSuperadmin = requireSuperadmin;

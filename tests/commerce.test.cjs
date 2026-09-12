@@ -74,13 +74,30 @@ test('Order endpoint rejects missing/invalid business WhatsApp before writing or
     assert.ok(released);
   }
 });
-test('Order endpoint rejects users that are not customers of the store',async () => {
+test('Order endpoint allows guests but rejects a mismatched customer session',async () => {
   const client={query:async()=>{throw new Error('no debe consultar antes de validar sesion');},release(){}};
   const controller=loadController('apps/backend/src/controllers/orders.controller.js',{'../db/db':{connect:async()=>client},'../services/pushNotifications':{},'../services/commerceValidation':validation});
   const res=response();
   await controller.createOrder({user:{role:'customer',store_id:8,customer_account_id:3},body:{store_id:7,customer_name:'Ana',customer_phone:'5512345678',customer_address:'Calle 1',items:[{variant_id:1,quantity:1}]}},res,error=>{throw error;});
   assert.equal(res.code,403);
-  assert.match(res.data.error,/cliente de esta tienda/);
+  assert.match(res.data.error,/no pertenece a esta tienda/);
+});
+test('Customer register returns a clear duplicate message instead of a generic server error',async () => {
+  const client={query:async(sql,args)=>{
+    if(sql.includes('SELECT id, name, slug FROM stores')) return {rows:[{id:7,name:'Demo',slug:'demo'}]};
+    throw Object.assign(new Error('duplicate key value violates unique constraint'),{code:'23505',constraint:'customer_accounts_store_email_idx'});
+  },release(){}};
+  const controller=loadController('apps/backend/src/controllers/customerAuth.controller.js',{
+    '../db/db':{connect:async()=>client},
+    '../services/supabaseAuth':{
+      signIn:async()=>{throw Object.assign(new Error('Invalid login credentials'),{status:400});},
+      signUp:async()=>({user:{id:'11111111-1111-1111-1111-111111111111',identities:[{}]},access_token:'token'})
+    }
+  });
+  const res=response();
+  await controller.register({body:{store_id:7,name:'Ana',phone:'4491787307',email:'ana@test.com',password:'123456'}},res,error=>{throw error;});
+  assert.equal(res.code,409);
+  assert.match(res.data.error,/correo ya tiene cuenta/);
 });
 test('Business endpoint ignores a forged store id and validates input on the server',async () => {
   const calls=[];
@@ -113,13 +130,14 @@ test('Customer account returns to the store after checkout login',() => {
   assert.match(account,/returnToCheckoutIfNeeded\(\)/);
   assert.match(read('apps/storefront/public/mi-cuenta.html'),/customer-account\.js\?v=20260911-13/);
 });
-test('Checkout requires a customer session before creating an order',async () => {
+test('Checkout allows guest purchases without a customer session',async () => {
   const {send,calls}=checkoutHarness('525512345678',{session:null});
   await send();
-  assert.equal(calls.orders,0);
-  assert.equal(calls.confirmations,0);
-  assert.match(calls.alerts[0],/Inicia sesión/);
-  assert.match(calls.href,/\/mi-cuenta\.html\?slug=demo/);
+  assert.equal(calls.orders,1);
+  assert.equal(calls.session,null);
+  assert.equal(calls.confirmations,1);
+  assert.equal(calls.href,'');
+  assert.deepEqual(calls.alerts,[]);
 });
 test('Checkout blocks missing WhatsApp without creating an order',async () => {
   for(const number of [undefined,'abc','123']){
@@ -411,10 +429,12 @@ test('Merchant PWA uses backend push instead of foreground order polling',() => 
   const pwa=read('apps/storefront/public/js/pwa.js');
   const serviceWorker=read('apps/storefront/public/service-worker.js');
   for(const file of ['index.html','products.html','product.html','categorias.html','mi-cuenta.html','landing.html']){
-    assert.match(read(`apps/storefront/public/${file}`),/pwa\.js\?v=20260911-14/);
+    assert.match(read(`apps/storefront/public/${file}`),/pwa\.js\?v=20260911-15/);
   }
   assert.doesNotMatch(pwa,/fetchMerchantOrders|startMerchantOrderWatcher|setInterval\(/);
   assert.match(pwa,/\/admin\/push\/test/);
-  assert.match(pwa,/service-worker\.js\?v=20260911-14/);
-  assert.match(serviceWorker,/mercadia-shell-v17/);
+  assert.match(pwa,/service-worker\.js\?v=20260911-15/);
+  assert.match(pwa,/navigator\.serviceWorker\.ready/);
+  assert.match(pwa,/PWA MERCHANT TEST WARNING/);
+  assert.match(serviceWorker,/mercadia-shell-v18/);
 });

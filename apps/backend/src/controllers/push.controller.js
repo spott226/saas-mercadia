@@ -71,7 +71,9 @@ exports.testMerchant = async (req,res,next) => {
     if(!result.sent){
       return res.status(502).json({
         success:false,
-        error:"No se pudo entregar la notificación de prueba a este dispositivo."
+        error:result.lastError
+          ? `No se pudo entregar la notificación de prueba: ${result.lastError}`
+          : "No se pudo entregar la notificación de prueba a este dispositivo."
       });
     }
     res.json({ success:true, ...result });

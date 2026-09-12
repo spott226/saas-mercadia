@@ -136,9 +136,9 @@ exports.createOrder = async (
 
     }
 
-    if(req.user?.role !== "customer" || Number(req.user.store_id) !== store_id){
+    if(req.user && (req.user.role !== "customer" || Number(req.user.store_id) !== store_id)){
       return res.status(403).json({
-        error:"Inicia sesión como cliente de esta tienda para comprar."
+        error:"La sesión de cliente no pertenece a esta tienda."
       });
     }
 

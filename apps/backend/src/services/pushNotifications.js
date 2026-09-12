@@ -84,7 +84,7 @@ async function saveMerchantSubscription(storeId, merchantId, subscription, admin
 }
 
 async function deliver(rows,payload,tableName){
-  const stats = { sent:0, removed:0, failed:0 };
+  const stats = { sent:0, removed:0, failed:0, lastError:"" };
 
   await Promise.allSettled(
     rows.map(async row => {
@@ -104,7 +104,8 @@ async function deliver(rows,payload,tableName){
           return;
         }
         stats.failed += 1;
-        console.error("PUSH ERROR:",error.message);
+        stats.lastError = error.body || error.message || "push delivery failed";
+        console.error("PUSH ERROR:",error.statusCode || "",stats.lastError);
       }
     })
   );

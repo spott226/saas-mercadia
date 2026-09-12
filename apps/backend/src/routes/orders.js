@@ -24,7 +24,7 @@ CREAR PEDIDO
 
 router.post(
   "/",
-  auth.requireCustomer,
+  auth.optionalCustomer,
   createOrder
 );
 
