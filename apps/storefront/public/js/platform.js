@@ -34,12 +34,34 @@ function showTab(tab){
   setMessage("");
 }
 
+function openCenteredDialog(dialog){
+  if(!dialog || dialog.open) return;
+  document.documentElement.classList.add("modal-open");
+  document.body.classList.add("modal-open");
+  dialog.showModal();
+}
+
+function closeDialog(dialog){
+  if(dialog?.open) dialog.close();
+}
+
 document.querySelectorAll("[data-open]").forEach(button => button.addEventListener("click", () => {
   showTab(button.dataset.open);
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
 }));
 document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => showTab(button.dataset.tab)));
-document.querySelectorAll(".dialog-close").forEach(button => button.addEventListener("click", () => button.closest("dialog").close()));
+document.querySelectorAll(".dialog-close").forEach(button => button.addEventListener("click", () => closeDialog(button.closest("dialog"))));
+document.querySelectorAll("dialog").forEach(dialog => {
+  dialog.addEventListener("close", () => {
+    if(!document.querySelector("dialog[open]")){
+      document.documentElement.classList.remove("modal-open");
+      document.body.classList.remove("modal-open");
+    }
+  });
+  dialog.addEventListener("click", event => {
+    if(event.target === dialog) closeDialog(dialog);
+  });
+});
 
 async function request(path, options = {}){
   const response = await fetch(`${API}${path}`, options);
@@ -271,26 +293,26 @@ const resetRequested = new URLSearchParams(location.search).get("reset") === "1"
 if(recoveryToken){
   sessionStorage.setItem(RECOVERY_TOKEN_KEY,recoveryToken);
   history.replaceState({}, "", location.pathname + location.search);
-  resetDialog.showModal();
+  openCenteredDialog(resetDialog);
 }else if(hash.get("error")){
   history.replaceState({}, "", location.pathname + location.search);
   showTab("login");
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
   setMessage("El enlace para cambiar la contraseña venció o ya fue utilizado. Solicita uno nuevo.");
 }else if(hash.get("type") === "recovery"){
   history.replaceState({}, "", location.pathname + location.search);
   showTab("login");
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
   setMessage("El enlace para cambiar la contraseña llegó incompleto. Solicita uno nuevo.");
 }else if(resetRequested){
   showTab("login");
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
   setMessage("El enlace para cambiar la contraseña venció o está incompleto. Solicita uno nuevo.");
 }
 
 if(new URLSearchParams(location.search).get("verified") === "1"){
   showTab("login");
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
   setMessage(
     "Correo verificado correctamente. Inicia sesión para continuar con el pago.",
     true
@@ -299,7 +321,7 @@ if(new URLSearchParams(location.search).get("verified") === "1"){
 
 if(new URLSearchParams(location.search).get("login") === "1"){
   showTab("login");
-  authDialog.showModal();
+  openCenteredDialog(authDialog);
 }
 
 resetForm?.addEventListener("submit", async event => {
@@ -317,7 +339,7 @@ resetForm?.addEventListener("submit", async event => {
     setTimeout(() => {
       resetDialog.close();
       showTab("login");
-      authDialog.showModal();
+      openCenteredDialog(authDialog);
       setMessage("Contraseña actualizada. Inicia sesión con tu nueva contraseña.",true);
     }, 1200);
   }catch(error){ resetMessage.textContent = error.message; }
