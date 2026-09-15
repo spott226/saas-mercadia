@@ -250,6 +250,17 @@ exports.createProduct = async (req, res) => {
     const product_id =
       product.id;
 
+    const additionalImages =
+      (req.files?.additional_images || []).slice(0,3);
+
+    for (const file of additionalImages) {
+      await Product.createProductImage({
+        product_id,
+        color: "gallery",
+        image_url: file.path || file.secure_url
+      });
+    }
+
 
     /* =========================
     IMÁGENES POR COLOR
@@ -550,6 +561,9 @@ exports.updateProduct = async (
     IMÁGENES POR COLOR
     ========================= */
 
+    const additionalImages =
+      (req.files?.additional_images || []).slice(0,3);
+
     const colorImages =
       req.files?.color_images || [];
 
@@ -572,11 +586,50 @@ exports.updateProduct = async (
 
     }
 
-    if (colorImages.length > 0) {
+    const replaceProductImages =
+      req.body.replace_product_images === "true" ||
+      req.body.replace_product_images === true;
+
+    if (replaceProductImages || additionalImages.length > 0 || colorImages.length > 0) {
+
+      let keepIds = [];
+      try {
+        keepIds = JSON.parse(req.body.keep_product_image_ids || "[]")
+          .map(Number)
+          .filter(Number.isInteger);
+      } catch (e) {
+        keepIds = [];
+      }
+
+      const existingImages = await Product.getImagesByProduct(id);
+      const retainedImages = existingImages.filter(image =>
+        keepIds.includes(Number(image.id))
+      );
+
+      const retainedGalleryCount = retainedImages.filter(image => image.color === "gallery").length;
+      if(retainedGalleryCount + additionalImages.length > 3){
+        return res.status(400).json({ error:"maximum 3 additional images" });
+      }
 
       await Product.deleteImagesByProduct(
         id
       );
+
+      for (const image of retainedImages) {
+        await Product.createProductImage({
+          product_id:id,
+          color:image.color,
+          image_url:image.image_url
+        });
+      }
+
+      for (const file of additionalImages) {
+        await Product.createProductImage({
+          product_id:id,
+          color:"gallery",
+          image_url:file.path || file.secure_url
+        });
+      }
 
       for (
         let i = 0;

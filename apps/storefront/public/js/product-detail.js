@@ -129,10 +129,12 @@ function renderProduct(product){
   const thumbs = document.createElement("div");
   thumbs.className = "product-detail-thumbs";
 
-  const images =
-    product.images?.length
-      ? product.images
-      : [{ image_url: mainImage.src }];
+  const images = [
+    { image_url:getProductImage(product,null), color:"main" },
+    ...(product.images || [])
+  ].filter((image,index,list) =>
+    image.image_url && list.findIndex(entry => entry.image_url === image.image_url) === index
+  );
 
   images.forEach((image, index) => {
     const button = document.createElement("button");

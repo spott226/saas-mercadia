@@ -44,12 +44,73 @@ VARIANTES ERP
 
 let variants = [];
 let defaultItemType = "product";
+let additionalImageFiles = [];
+let existingProductImages = [];
+let productImagesChanged = false;
 
 const itemTypeInput = document.getElementById("item-type");
 const trackInventoryInput = document.getElementById("track-inventory");
 const variantsSection = document.getElementById("variants-section");
 const simpleInventory = document.getElementById("simple-inventory");
 const simpleStockFields = document.getElementById("simple-stock-fields");
+const additionalImagesInput = document.getElementById("additional-images");
+const additionalImagesPreview = document.getElementById("additional-images-preview");
+
+function galleryImages(){
+  return existingProductImages.filter(image => image.color === "gallery");
+}
+
+function renderAdditionalImages(){
+  if(!additionalImagesPreview) return;
+  additionalImagesPreview.replaceChildren();
+
+  galleryImages().forEach(image => {
+    const item = document.createElement("div");
+    item.className = "additional-image-item";
+    const preview = document.createElement("img");
+    preview.src = image.image_url;
+    preview.alt = "Foto adicional";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Quitar";
+    remove.addEventListener("click",() => {
+      existingProductImages = existingProductImages.filter(entry => entry !== image);
+      productImagesChanged = true;
+      renderAdditionalImages();
+    });
+    item.append(preview,remove);
+    additionalImagesPreview.appendChild(item);
+  });
+
+  additionalImageFiles.forEach((file,index) => {
+    const item = document.createElement("div");
+    item.className = "additional-image-item";
+    const preview = document.createElement("img");
+    preview.src = URL.createObjectURL(file);
+    preview.alt = file.name;
+    preview.onload = () => URL.revokeObjectURL(preview.src);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Quitar";
+    remove.addEventListener("click",() => {
+      additionalImageFiles.splice(index,1);
+      productImagesChanged = true;
+      renderAdditionalImages();
+    });
+    item.append(preview,remove);
+    additionalImagesPreview.appendChild(item);
+  });
+}
+
+additionalImagesInput?.addEventListener("change",() => {
+  const available = Math.max(0,3 - galleryImages().length);
+  additionalImageFiles = [...additionalImagesInput.files].slice(0,available);
+  if(additionalImagesInput.files.length > available){
+    alert("Puedes agregar máximo 3 fotos adicionales.");
+  }
+  if(additionalImageFiles.length > 0) productImagesChanged = true;
+  renderAdditionalImages();
+});
 
 function hasVariantMode(){
   return document.querySelector('[name="selling-mode"]:checked')?.value === "variants";
@@ -522,7 +583,8 @@ async function loadProducts(){
             )},
             ${JSON.stringify(p.item_type || "product")},
             ${p.has_variants === true},
-            ${p.track_inventory !== false}
+            ${p.track_inventory !== false},
+            ${JSON.stringify(p.images || [])}
           )'
         >
         Editar
@@ -947,6 +1009,20 @@ async function createProduct(){
 
   }
 
+  additionalImageFiles.forEach(file => {
+    formData.append("additional_images",file);
+  });
+
+  if(editingProduct){
+    if(productImagesChanged){
+      formData.append("replace_product_images","true");
+    }
+    formData.append(
+      "keep_product_image_ids",
+      JSON.stringify(existingProductImages.map(image => image.id).filter(Boolean))
+    );
+  }
+
 
   /* =========================
   CREATE / UPDATE
@@ -995,8 +1071,12 @@ async function createProduct(){
   editingProduct = null;
 
   variants = [];
+  additionalImageFiles = [];
+  existingProductImages = [];
+  productImagesChanged = false;
 
   renderVariants();
+  renderAdditionalImages();
 
   document
     .getElementById(
@@ -1034,7 +1114,8 @@ function editProduct(
   productVariants,
   itemType = "product",
   hasVariants = false,
-  trackInventory = true
+  trackInventory = true,
+  productImages = []
 ){
 
   editingProduct = id;
@@ -1066,6 +1147,10 @@ function editProduct(
   );
   document.querySelector(`[name="selling-mode"][value="${inferredVariants ? "variants" : "simple"}"]`).checked = true;
   trackInventoryInput.checked = trackInventory !== false;
+  existingProductImages = Array.isArray(productImages) ? productImages : [];
+  additionalImageFiles = [];
+  productImagesChanged = false;
+  renderAdditionalImages();
 
   const grouped = {};
 
@@ -1220,7 +1305,8 @@ function restoreInventoryEdit(){
       Array.isArray(product.variants) ? product.variants : [],
       product.item_type || "product",
       Boolean(product.has_variants),
-      product.track_inventory !== false
+      product.track_inventory !== false,
+      Array.isArray(product.images) ? product.images : []
     );
   }catch(error){
     console.warn("No se pudo abrir el producto seleccionado",error);

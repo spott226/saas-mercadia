@@ -14,6 +14,7 @@ router.post(
   auth.requireAdmin,
   upload.fields([
     { name: "image", maxCount: 1 },
+    { name: "additional_images", maxCount: 3 },
     { name: "color_images", maxCount: 20 }
   ]),
   productController.createProduct
@@ -25,6 +26,7 @@ router.put(
   auth.requireAdmin,
   upload.fields([
     { name: "image", maxCount: 1 },
+    { name: "additional_images", maxCount: 3 },
     { name: "color_images", maxCount: 20 }
   ]),
   productController.updateProduct

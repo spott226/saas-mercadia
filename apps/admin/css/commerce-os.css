@@ -431,6 +431,7 @@ button:disabled{opacity:.55!important;cursor:not-allowed!important;transform:non
 .optional-label{color:var(--os-muted);font-size:10px;font-weight:600}
 .is-hidden{display:none!important}
 .variants-section{margin-top:18px!important}
+.additional-images-preview{display:grid;grid-template-columns:repeat(3,minmax(0,120px));gap:10px;margin-top:10px}.additional-image-item{position:relative;aspect-ratio:1;border:1px solid var(--os-line);border-radius:12px;overflow:hidden;background:#f4f6fb}.additional-image-item img{width:100%;height:100%;object-fit:cover}.additional-image-item button{position:absolute;right:6px;bottom:6px;border:0;border-radius:8px;padding:6px 8px;background:rgba(17,24,39,.86);color:#fff;font-size:11px;font-weight:700}
 .products-create-only .page-heading,
 .products-create-only .form-card{max-width:980px;margin-left:auto!important;margin-right:auto!important}
 .products-create-only .form-actions{margin-top:20px!important;padding-top:18px!important;border-top:1px solid var(--os-line)!important}

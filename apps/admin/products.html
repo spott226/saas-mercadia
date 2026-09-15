@@ -638,7 +638,17 @@ Imagen principal
 <input
 type="file"
 id="image"
+accept="image/*"
 >
+</div>
+
+<div class="field-group field-wide">
+<label for="additional-images">
+Fotos adicionales <span class="optional-label">Hasta 3</span>
+</label>
+<input type="file" id="additional-images" accept="image/*" multiple>
+<small>Se mostrarán como galería aunque la publicación no tenga variantes.</small>
+<div id="additional-images-preview" class="additional-images-preview"></div>
 </div>
 
 <div class="field-group field-wide">
@@ -976,7 +986,7 @@ overlay.classList.toggle("active");
 <script src="config.js"></script>
 <script src="js/auth.js?v=20260911-8"></script>
 
-<script type="module" src="js/products.js?v=20260915-1"></script>
+<script type="module" src="js/products.js?v=20260915-2"></script>
 
 <script type="module" src="/js/pwa.js?v=20260911-15"></script>
 
