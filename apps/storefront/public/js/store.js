@@ -1,5 +1,5 @@
 import { getStore } from "./api.js";
-import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260911-7";
+import { renderStorefrontExperience } from "./storefront-renderer.js?v=20260914-active2";
 
 let editorDraftStore = null;
 let storeInitialized = false;

@@ -3210,3 +3210,185 @@ overscroll-behavior:none;
 #checkout-modal .checkout-grid{max-height:48dvh;overflow:auto}
 .commerce-popup-overlay{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;z-index:100000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden!important}
 @media(max-width:640px){#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{align-items:center!important;padding:14px!important}#cart-modal .cart-panel,#checkout-modal .checkout-panel{width:100%!important;max-height:86dvh!important;border-radius:24px!important}#cart-modal .modal-body{max-height:38dvh!important}#cart-modal .modal-actions,#checkout-modal .modal-actions{grid-template-columns:1fr!important}#checkout-modal .checkout-grid{max-height:46dvh}}
+/* Active Terrain v2: composición de catálogo premium y correcciones móviles. */
+body.template-active-terrain-1{
+overflow-x:hidden;
+background:#f3f0e8;
+}
+
+body.template-active-terrain-1 header{
+position:sticky;
+top:0;
+z-index:5000;
+}
+
+body.template-active-terrain-1 .storefront-media-placeholder{
+position:absolute;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+background:
+linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,0)),
+repeating-linear-gradient(135deg,#a6a59f 0,#a6a59f 1px,#bbb9b2 1px,#bbb9b2 22px);
+}
+
+body.template-active-terrain-1 .storefront-media-placeholder::before{
+content:"";
+position:absolute;
+inset:18px;
+border:1px solid rgba(255,255,255,.58);
+}
+
+body.template-active-terrain-1 .storefront-media-placeholder span{
+position:relative;
+z-index:1;
+padding:10px 14px;
+background:rgba(25,27,22,.82);
+color:#fff;
+font-size:10px;
+font-weight:800;
+letter-spacing:.14em;
+text-transform:uppercase;
+}
+
+body.template-active-terrain-1 .storefront-split-image.storefront-media-placeholder{
+position:relative;
+inset:auto;
+}
+
+body.template-active-terrain-1 .storefront-image-banner>div:not(.storefront-section-gallery):not(.storefront-media-placeholder){
+width:min(760px,100%);
+min-width:0;
+}
+
+body.template-active-terrain-1 .storefront-image-banner h2,
+body.template-active-terrain-1 .storefront-split-copy h2,
+body.template-active-terrain-1 .storefront-editorial-banner h2{
+max-width:100%;
+overflow-wrap:break-word;
+word-break:normal;
+}
+
+body.template-active-terrain-1 .storefront-image-banner span{
+display:block;
+max-width:620px;
+}
+
+body.template-active-terrain-1 .storefront-image-banner a{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-height:46px;
+margin-top:24px;
+padding:0 22px;
+background:#fff;
+color:#191b16;
+font-size:10px;
+font-weight:900;
+letter-spacing:.12em;
+text-transform:uppercase;
+text-shadow:none;
+}
+
+body.template-active-terrain-1 #cart-modal.modal-backdrop{
+position:fixed!important;
+inset:0!important;
+z-index:100000!important;
+display:flex!important;
+justify-content:flex-end!important;
+align-items:stretch!important;
+padding:0!important;
+background:rgba(10,12,9,.58)!important;
+backdrop-filter:blur(5px)!important;
+pointer-events:auto!important;
+}
+
+body.template-active-terrain-1 #cart-modal.modal-backdrop.hidden{
+display:none!important;
+}
+
+body.template-active-terrain-1 #cart-modal .cart-panel{
+width:min(460px,100vw)!important;
+height:100dvh!important;
+max-height:100dvh!important;
+border:0!important;
+border-left:1px solid rgba(25,27,22,.2)!important;
+border-radius:0!important;
+background:#f8f6f0!important;
+color:#191b16!important;
+box-shadow:-24px 0 70px rgba(0,0,0,.28)!important;
+pointer-events:auto!important;
+}
+
+body.template-active-terrain-1 #cart-modal .modal-body{
+flex:1 1 auto!important;
+max-height:none!important;
+overflow-y:auto!important;
+}
+
+body.template-active-terrain-1 #cart-modal .modal-footer{
+margin-top:auto;
+background:#f8f6f0;
+border-top:1px solid rgba(25,27,22,.18);
+}
+
+body.template-active-terrain-1 #cart-modal .modal-actions{
+grid-template-columns:1fr 1.25fr!important;
+}
+
+body.template-active-terrain-1 #cart-modal .btn-primary,
+body.template-active-terrain-1 #cart-modal .btn-secondary{
+min-height:50px;
+border-radius:0;
+}
+
+@media(max-width:767px){
+body.template-active-terrain-1 header>div:first-child{min-height:70px}
+body.template-active-terrain-1 #mobile-menu{
+position:absolute;
+top:100%;
+left:0;
+right:0;
+z-index:5100;
+padding:8px 20px 18px!important;
+background:#f3f0e8!important;
+color:#191b16!important;
+border-top:1px solid rgba(25,27,22,.18)!important;
+border-bottom:1px solid rgba(25,27,22,.28)!important;
+box-shadow:0 18px 36px rgba(25,27,22,.14);
+}
+body.template-active-terrain-1 #mobile-menu.hidden{display:none!important}
+body.template-active-terrain-1 #mobile-menu a{
+display:flex!important;
+align-items:center;
+min-height:58px;
+padding:0 6px!important;
+color:#191b16!important;
+border-bottom:1px solid rgba(25,27,22,.22)!important;
+font-size:12px!important;
+font-weight:850!important;
+letter-spacing:.12em!important;
+opacity:1!important;
+}
+body.template-active-terrain-1 #mobile-menu a:last-child{border-bottom:0!important}
+body.template-active-terrain-1 .hero-copy{text-align:left}
+body.template-active-terrain-1 .hero-title{font-size:clamp(42px,13vw,64px);line-height:.9;letter-spacing:-.055em}
+body.template-active-terrain-1 .hero-text{line-height:1.5}
+body.template-active-terrain-1 .storefront-split-showcase{overflow:hidden}
+body.template-active-terrain-1 .storefront-image-banner{
+min-height:560px;
+padding:34px 22px;
+align-items:flex-end;
+}
+body.template-active-terrain-1 .storefront-image-banner h2{
+font-size:clamp(40px,12.5vw,58px);
+line-height:.92;
+letter-spacing:-.055em;
+}
+body.template-active-terrain-1 .storefront-image-banner span{font-size:14px;line-height:1.5}
+body.template-active-terrain-1 .storefront-media-placeholder::before{inset:12px}
+body.template-active-terrain-1 #cart-modal .cart-panel{width:100vw!important}
+body.template-active-terrain-1 #cart-modal .modal-actions{grid-template-columns:1fr!important}
+}

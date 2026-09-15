@@ -631,7 +631,7 @@ function renderImageBanner({ sectionConfig, store }){
   const section = createSection("storefront-image-banner");
   applySectionPresentation(section,sectionConfig);
   section.innerHTML = `
-    ${renderSectionMedia(images,"storefront-section-gallery")}
+    ${renderSectionMedia(images,"storefront-section-gallery") || `<div class="storefront-media-placeholder" aria-hidden="true"><span>Espacio para fotografía</span></div>`}
     <div>
       <p>${escapeHTML(sectionConfig.kicker || sectionConfig.eyebrow || "")}</p>
       <h2>${escapeHTML(sectionConfig.title || store?.name || "")}</h2>
@@ -654,7 +654,7 @@ function renderSplitShowcase({ sectionConfig, store }){
       <h2>${escapeHTML(sectionConfig.title || store?.name || "")}</h2>
       <span>${escapeHTML(sectionConfig.text || sectionConfig.description || "")}</span>
     </div>
-    ${renderSectionMedia(images,"storefront-split-image storefront-section-gallery")}
+    ${renderSectionMedia(images,"storefront-split-image storefront-section-gallery") || `<div class="storefront-split-image storefront-media-placeholder" aria-hidden="true"><span>Espacio para fotografía</span></div>`}
   `;
 
   return section;
