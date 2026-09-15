@@ -1,4 +1,4 @@
-const CACHE_NAME = "mercadia-shell-v25";
+const CACHE_NAME = "mercadia-shell-v26";
 const APP_SHELL = [
   "/",
   "/landing.html",
@@ -16,7 +16,9 @@ const APP_SHELL = [
   "/css/styles.css",
   "/css/platform.css",
   "/config.js",
-  "/icons/mercadia-app.png"
+  "/icons/mercadia-app.png",
+  "/assets/images/product-placeholder.svg",
+  "/assets/images/hero-placeholder.svg"
 ];
 
 self.addEventListener("install", event => {

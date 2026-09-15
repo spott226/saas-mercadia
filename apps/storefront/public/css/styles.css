@@ -3193,14 +3193,9 @@ body.template-gym-active-1 .account-form .btn-primary,body.template-gym-active-1
 .checkout-input::placeholder{color:color-mix(in srgb,var(--text-muted) 84%,transparent)}
 .checkout-panel .modal-actions{padding:14px 20px 20px}
 @media(max-width:640px){.checkout-panel{width:100%;max-height:88dvh;border-radius:22px 22px 0 0}.checkout-grid{grid-template-columns:1fr!important;padding:14px;gap:10px}.checkout-input{min-height:48px}.checkout-panel .modal-actions{padding:12px 14px 16px}}
-html.mercadia-modal-open,
-body.mercadia-modal-open{
-overflow:hidden!important;
-overscroll-behavior:none;
-}
-
 #cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden!important}
-#cart-modal .cart-panel{width:min(560px,calc(100vw - 28px))!important;height:auto!important;max-height:min(86dvh,760px)!important;border-radius:26px!important;border:1px solid color-mix(in srgb,var(--border) 82%,transparent)!important;box-shadow:0 30px 90px rgba(0,0,0,.26)!important;overflow:hidden!important}
+#cart-modal.modal-backdrop{justify-content:flex-end!important;padding:12px!important;background:transparent!important;backdrop-filter:none!important;pointer-events:none!important}
+#cart-modal .cart-panel{pointer-events:auto!important;width:min(430px,calc(100vw - 24px))!important;height:calc(100dvh - 24px)!important;max-height:none!important;border-radius:22px!important;border:1px solid color-mix(in srgb,var(--border) 82%,transparent)!important;box-shadow:0 24px 70px rgba(0,0,0,.28)!important;overflow:hidden!important}
 #cart-modal .modal-header,#checkout-modal .modal-header{padding:20px 22px 14px!important}
 #cart-modal .modal-body{padding:4px 22px!important;min-height:120px!important;max-height:42dvh!important;overflow:auto!important}
 #cart-modal .modal-footer{padding:16px 22px 20px!important}
@@ -3208,8 +3203,10 @@ overscroll-behavior:none;
 #cart-modal .modal-actions,#checkout-modal .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
 #checkout-modal .checkout-panel{width:min(620px,calc(100vw - 28px))!important;max-height:min(88dvh,760px)!important;border-radius:26px!important;box-shadow:0 30px 90px rgba(0,0,0,.26)!important}
 #checkout-modal .checkout-grid{max-height:48dvh;overflow:auto}
-.commerce-popup-overlay{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;z-index:100000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:hidden!important}
-@media(max-width:640px){#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{align-items:center!important;padding:14px!important}#cart-modal .cart-panel,#checkout-modal .checkout-panel{width:100%!important;max-height:86dvh!important;border-radius:24px!important}#cart-modal .modal-body{max-height:38dvh!important}#cart-modal .modal-actions,#checkout-modal .modal-actions{grid-template-columns:1fr!important}#checkout-modal .checkout-grid{max-height:46dvh}}
+.commerce-popup-overlay{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;z-index:100000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;overflow:visible!important;pointer-events:none!important}
+.commerce-popup-overlay>.commerce-promotion{pointer-events:auto!important;overscroll-behavior:auto}
+@media(max-width:640px){#checkout-modal.modal-backdrop{align-items:center!important;padding:14px!important}#cart-modal.modal-backdrop{align-items:stretch!important;padding:8px!important}#cart-modal .cart-panel{width:min(400px,calc(100vw - 16px))!important;height:calc(100dvh - 16px)!important;border-radius:20px!important}#checkout-modal .checkout-panel{width:100%!important;max-height:86dvh!important;border-radius:24px!important}#cart-modal .modal-body{max-height:none!important}#cart-modal .modal-actions,#checkout-modal .modal-actions{grid-template-columns:1fr!important}#checkout-modal .checkout-grid{max-height:46dvh}}
+
 /* Active Terrain v2: composición de catálogo premium y correcciones móviles. */
 body.template-active-terrain-1{
 overflow-x:hidden;
@@ -3392,6 +3389,14 @@ body.template-active-terrain-1 .storefront-media-placeholder::before{inset:12px}
 body.template-active-terrain-1 #cart-modal .cart-panel{width:100vw!important}
 body.template-active-terrain-1 #cart-modal .modal-actions{grid-template-columns:1fr!important}
 }
+
+/* Stable viewport modals: never inherit document or template positioning. */
+html.storefront-modal-open,body.storefront-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
+#cart-modal.modal-backdrop,#checkout-modal.modal-backdrop{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;z-index:100000!important}
+#cart-modal.modal-backdrop.hidden,#checkout-modal.modal-backdrop.hidden{display:none!important}
+#checkout-modal.modal-backdrop{display:flex;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+#checkout-modal .checkout-panel{position:relative!important;margin:0!important;max-height:calc(100dvh - 28px)!important}
+
 body.template-active-terrain-1 header>div:first-child>div:last-child{
 gap:10px!important;
 align-items:center;

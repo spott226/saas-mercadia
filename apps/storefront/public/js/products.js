@@ -1,5 +1,5 @@
 import { getProducts } from "./api.js";
-import { addToCart } from "./cart.js?v=20260911-14";
+import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-4";
 
 
 // ================================
@@ -167,6 +167,8 @@ export async function loadProducts(slug){
     const products =
       await getProducts(slug);
 
+    syncCartWithProducts(products);
+
     console.log(
       "PRODUCTS:",
       products
@@ -272,7 +274,7 @@ export async function loadProducts(slug){
       let imageUrl =
         product.image ||
         product.images?.[0]?.image_url ||
-        "/assets/images/default.jpg";
+        "/assets/images/product-placeholder.svg";
 
       const price =
         Number(
@@ -292,7 +294,8 @@ export async function loadProducts(slug){
             alt="${product.name}"
             loading="lazy"
             onerror="
-              this.src='/assets/images/default.jpg'
+              this.onerror=null;
+              this.src='/assets/images/product-placeholder.svg'
             "
           >
 

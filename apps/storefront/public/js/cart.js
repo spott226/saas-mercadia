@@ -6,24 +6,55 @@ import {
   saveCustomerProfile
 } from "./customer-session.js";
 
-const CART_KEY = "mercadia_cart";
-const DEFAULT_IMAGE = "/assets/images/default.jpg";
+const LEGACY_CART_KEY = "mercadia_cart";
+const DEFAULT_IMAGE = "/assets/images/product-placeholder.svg";
+
+function getCartKey(){
+  const params = new URLSearchParams(window.location.search);
+  const pathStore = window.location.pathname.match(/^\/tienda\/([^/]+)/i)?.[1];
+  const scope = window.store?.id || window.store_id || pathStore ||
+    params.get("slug") || params.get("store") || window.location.hostname;
+  return `${LEGACY_CART_KEY}:${String(scope).toLowerCase()}`;
+}
 
 function getCart(){
   try{
-    const cart = localStorage.getItem(CART_KEY);
+    const cartKey = getCartKey();
+    let cart = localStorage.getItem(cartKey);
+
+    if(cart === null){
+      cart = localStorage.getItem(LEGACY_CART_KEY);
+      if(cart !== null){
+        localStorage.setItem(cartKey,cart);
+        localStorage.removeItem(LEGACY_CART_KEY);
+      }
+    }
+
     const parsed = cart ? JSON.parse(cart) : [];
 
     return Array.isArray(parsed) ? parsed : [];
   }catch(error){
     console.error("Error leyendo carrito:", error);
-    localStorage.removeItem(CART_KEY);
+    localStorage.removeItem(getCartKey());
     return [];
   }
 }
 
 function saveCart(cart){
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  localStorage.setItem(getCartKey(), JSON.stringify(cart));
+}
+
+export function syncCartWithProducts(products){
+  if(!Array.isArray(products) || products.length === 0) return;
+
+  const publishedIds = new Set(products.map(product => String(product.id)));
+  const cart = getCart();
+  const currentCart = cart.filter(item => publishedIds.has(String(item.id)));
+
+  if(currentCart.length !== cart.length){
+    saveCart(currentCart);
+    updateCartCount();
+  }
 }
 
 function formatMoney(value){
@@ -71,18 +102,6 @@ function prefillCheckoutForm(){
 }
 
 
-function setModalScrollLock(active){
-  document.documentElement?.classList?.toggle("mercadia-modal-open", active);
-  document.body?.classList?.toggle("mercadia-modal-open", active);
-}
-
-function hasOpenOrderModal(){
-  return ["cart-modal", "checkout-modal"].some(id => {
-    const modal = document.getElementById(id);
-    return modal && !modal.classList.contains("hidden");
-  });
-}
-
 function appendText(parent, tag, text, className){
   const element = document.createElement(tag);
 
@@ -94,6 +113,15 @@ function appendText(parent, tag, text, className){
   parent.appendChild(element);
 
   return element;
+}
+
+function syncModalLock(){
+  const modalOpen = ["cart-modal","checkout-modal"].some(id => {
+    const modal = document.getElementById(id);
+    return modal && !modal.classList.contains("hidden");
+  });
+  document.documentElement.classList.toggle("storefront-modal-open", modalOpen);
+  document.body.classList.toggle("storefront-modal-open", modalOpen);
 }
 
 /* =======================
@@ -242,8 +270,16 @@ export function openCart(){
   const modal = document.getElementById("cart-modal");
 
   if(modal){
+    document.body.appendChild(modal);
+    modal.removeAttribute("style");
     modal.classList.remove("hidden");
-    setModalScrollLock(true);
+    syncModalLock();
+    const modalBody = typeof modal.querySelector === "function"
+      ? modal.querySelector(".modal-body")
+      : null;
+    if(typeof modalBody?.scrollTo === "function"){
+      modalBody.scrollTo({ top: 0 });
+    }
   }
 }
 
@@ -257,10 +293,7 @@ export function closeCart(){
   if(modal){
     modal.classList.add("hidden");
   }
-
-  if(!hasOpenOrderModal()){
-    setModalScrollLock(false);
-  }
+  syncModalLock();
 }
 
 /* =======================
@@ -296,8 +329,11 @@ export function checkout(){
   }
 
   prefillCheckoutForm();
+  document.body.appendChild(modal);
+  modal.removeAttribute("style");
+  document.getElementById("cart-modal")?.classList.add("hidden");
   modal.classList.remove("hidden");
-  setModalScrollLock(true);
+  syncModalLock();
 }
 
 /* =======================
@@ -310,10 +346,7 @@ export function closeCheckout(){
   if(modal){
     modal.classList.add("hidden");
   }
-
-  if(!hasOpenOrderModal()){
-    setModalScrollLock(false);
-  }
+  syncModalLock();
 }
 
 function buildWhatsappMessage({ cart, orderId, total, customer }){
@@ -453,7 +486,7 @@ export async function sendCheckout(){
     });
 
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    localStorage.removeItem(CART_KEY);
+    localStorage.removeItem(getCartKey());
     updateCartCount();
     closeCheckout();
     closeCart();

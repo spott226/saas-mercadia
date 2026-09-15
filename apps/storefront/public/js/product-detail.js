@@ -1,7 +1,7 @@
 import { getProducts } from "./api.js";
-import { addToCart } from "./cart.js?v=20260911-14";
+import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-4";
 
-const DEFAULT_IMAGE = "/assets/images/default.jpg";
+const DEFAULT_IMAGE = "/assets/images/product-placeholder.svg";
 
 function getParam(name){
   return new URLSearchParams(window.location.search).get(name);
@@ -360,6 +360,7 @@ async function initProductDetail(){
   }
 
   const products = await getProducts(slug);
+  syncCartWithProducts(products);
   const product =
     products.find(
       item => String(item.id) === String(productId)
