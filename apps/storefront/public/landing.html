@@ -12,7 +12,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/icons/mercadia-app.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/mercadia-app.png">
-  <link rel="stylesheet" href="/css/platform.css?v=20260915-1">
+  <link rel="stylesheet" href="/css/platform.css?v=20260915-2">
 </head>
 <body data-pwa-context="platform">
   <header class="topbar">
@@ -61,10 +61,33 @@
       </div>
     </section>
 
-    <section class="steps" id="steps-view">
-      <article><span>1</span><h3>Crea tu cuenta</h3><p>Confirma tu correo y registra el nombre de tu negocio.</p></article>
-      <article><span>2</span><h3>Realiza la transferencia</h3><p>Usa tu referencia única para que podamos identificar el pago.</p></article>
-      <article><span>3</span><h3>Publica tu tienda</h3><p>Cuando aprobemos el pago tendrás acceso completo al panel.</p></article>
+    <section class="proof-strip" aria-label="Ventajas de Mercadia">
+      <div><strong>01</strong><span>Tu propia tienda</span></div>
+      <div><strong>24/7</strong><span>Siempre vendiendo</span></div>
+      <div><strong>0%</strong><span>Sin comisión por venta</span></div>
+      <div><strong>1</strong><span>Panel para controlarlo todo</span></div>
+    </section>
+
+    <section class="benefits-section">
+      <div class="section-heading"><span class="eyebrow"><i></i> TODO EN UN SOLO LUGAR</span><h2>Deja de vender entre mensajes desordenados.</h2><p>Haz que tu negocio se vea profesional y permite que tus clientes encuentren lo que quieren sin esperar una respuesta.</p></div>
+      <div class="benefit-grid">
+        <article class="benefit-main"><span class="feature-icon">↗</span><div><small>VENDE MEJOR</small><h3>Un catálogo que trabaja por ti</h3><p>Productos, precios, variantes y promociones organizados en un enlace fácil de compartir.</p></div><div class="catalog-mock"><i></i><i></i><i></i></div></article>
+        <article><span class="feature-icon">◎</span><small>CONTROL REAL</small><h3>Administra desde donde estés</h3><p>Pedidos, inventario y clientes desde tu celular.</p></article>
+        <article class="dark-benefit"><span class="feature-icon">⚡</span><small>LISTA PARA CRECER</small><h3>Tu marca, tus colores, tu tienda</h3><p>Una experiencia profesional que genera confianza.</p></article>
+      </div>
+    </section>
+
+    <section class="steps-wrap" id="steps-view">
+      <div class="steps-intro"><span>EMPIEZA HOY</span><h2>De idea a tienda en tres pasos.</h2><p>Nosotros ponemos la tecnología. Tú pones las ganas de vender.</p><button class="primary" data-open="register">Quiero mi tienda</button></div>
+      <div class="steps">
+        <article><span>01</span><div><h3>Crea tu cuenta</h3><p>Registra tu negocio en minutos.</p></div></article>
+        <article><span>02</span><div><h3>Activa por $99</h3><p>Realiza tu transferencia con referencia única.</p></div></article>
+        <article><span>03</span><div><h3>Empieza a vender</h3><p>Personaliza, publica y comparte tu enlace.</p></div></article>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="cta-glow"></div><span>EL SIGUIENTE PEDIDO PUEDE SER TUYO</span><h2>Tu negocio ya está listo.<br>Ahora dale una tienda a su altura.</h2><p>Activa Mercadia por solo <strong>$99 MXN</strong> y comienza a vender con una imagen más profesional.</p><button class="cta-button" data-open="register">Crear mi tienda ahora <b>→</b></button>
     </section>
 
     <section class="account-shell hidden" id="account-view">
@@ -76,7 +99,15 @@
     </section>
   </main>
 
-  <footer>Mercadia · Tiendas independientes en una sola plataforma</footer>
+  <footer class="site-footer">
+    <div class="footer-main">
+      <a class="footer-brand" href="/"><img src="/icons/mercadia-app.png" alt=""><div><strong>Mercadia</strong><span>Tu negocio, listo para vender.</span></div></a>
+      <p>La forma sencilla de crear, administrar y hacer crecer tu tienda online.</p>
+      <div class="footer-contact"><span>ENCUÉNTRANOS</span><a href="https://www.instagram.com/mercadia_ags/" target="_blank" rel="noopener noreferrer"><b>◎</b> @mercadia_ags</a><p><b>⌖</b> Aguascalientes, México</p></div>
+      <button class="footer-action" data-open="register">Empezar por $99</button>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Mercadia. Todos los derechos reservados.</span><span>Creado en Aguascalientes para negocios de todo México.</span></div>
+  </footer>
 
   <dialog id="auth-dialog">
     <button class="dialog-close" aria-label="Cerrar">×</button>
