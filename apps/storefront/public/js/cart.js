@@ -522,25 +522,47 @@ INIT
 
 function bindCartControls(){
   const controls = [
-    ['[onclick="openCart()"]', openCart],
-    ['[onclick="closeCart()"]', closeCart],
-    ['[onclick="checkout()"]', checkout],
-    ['[onclick="closeCheckout()"]', closeCheckout],
-    ['[onclick="sendCheckout()"]', sendCheckout]
+    ['[onclick="openCart()"]', "openCart"],
+    ['[onclick="closeCart()"]', "closeCart"],
+    ['[onclick="checkout()"]', "checkout"],
+    ['[onclick="closeCheckout()"]', "closeCheckout"],
+    ['[onclick="sendCheckout()"]', "sendCheckout"]
   ];
 
-  controls.forEach(([selector,handler]) => {
+  controls.forEach(([selector,action]) => {
     document.querySelectorAll(selector).forEach(button => {
-      if(button.dataset.cartControlBound === "1") return;
-      button.dataset.cartControlBound = "1";
+      button.dataset.cartAction = action;
       button.removeAttribute("onclick");
-      button.addEventListener("click", event => {
-        event.preventDefault();
-        handler();
-      });
     });
   });
 }
+
+const cartActions = { openCart, closeCart, checkout, closeCheckout, sendCheckout };
+
+document.addEventListener("click", event => {
+  const button = event.target.closest?.("button");
+  if(!button) return;
+
+  let action = button.dataset.cartAction;
+  if(!action){
+    const inlineAction = button.getAttribute("onclick")?.replace(/\s+/g, "");
+    action = ({
+      "openCart()":"openCart",
+      "closeCart()":"closeCart",
+      "checkout()":"checkout",
+      "closeCheckout()":"closeCheckout",
+      "sendCheckout()":"sendCheckout"
+    })[inlineAction];
+  }
+
+  const handler = cartActions[action];
+  if(!handler) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  button.dataset.cartAction = action;
+  button.removeAttribute("onclick");
+  handler();
+}, true);
 
 function initializeCart(){
   updateCartCount();

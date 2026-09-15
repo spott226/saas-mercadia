@@ -1,5 +1,5 @@
 import { getProducts } from "./api.js";
-import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-6";
+import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-7";
 
 const DEFAULT_IMAGE = "/assets/images/product-placeholder.svg";
 
