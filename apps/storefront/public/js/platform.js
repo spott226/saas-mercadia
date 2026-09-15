@@ -124,20 +124,23 @@ function statusText(status){
 function renderAccount(data){
   const merchant = data.merchant;
   document.getElementById("marketing-view").classList.add("hidden");
-  document.getElementById("steps-view").classList.add("hidden");
-  document.getElementById("account-view").classList.remove("hidden");
+  document.querySelectorAll("[data-marketing-only]").forEach(section => section.classList.add("hidden"));
+  const accountView = document.getElementById("account-view");
+  accountView.classList.remove("hidden");
+  accountView.classList.toggle("active-merchant", merchant.status === "active");
   document.getElementById("account-title").textContent = merchant.business_name;
   setAuthenticatedHeader(true);
 
   if(merchant.status === "active"){
     document.getElementById("account-content").innerHTML = `
-      <div class="status-card">
-        <span class="status-pill active">${statusText(merchant.status)}</span>
-        <h2>Tu tienda está lista</h2>
-        <p>Ya puedes configurar la página, cargar productos y empezar a recibir pedidos.</p>
-        <div class="action-grid">
-          <a class="primary" href="/admin/dashboard.html">Abrir panel de administración</a>
-          <a class="secondary" href="${escapeHtml(merchant.store_url)}">Ver mi tienda</a>
+      <div class="active-account-card">
+        <div class="active-account-icon"><img src="/icons/mercadia-app.png" alt=""></div>
+        <span class="active-account-kicker">TU ESPACIO MERCADIA</span>
+        <h2>¿A dónde quieres ir?</h2>
+        <p>Tu tienda está activa y lista para seguir vendiendo.</p>
+        <div class="active-account-actions">
+          <a class="account-action admin-action" href="/admin/dashboard.html"><span>Administrar mi negocio<small>Productos, pedidos, diseño y clientes</small></span><b>→</b></a>
+          <a class="account-action store-action" href="${escapeHtml(merchant.store_url)}"><span>Ver mi tienda<small>Abre la experiencia que ven tus clientes</small></span><b>↗</b></a>
         </div>
       </div>`;
     return;
@@ -350,6 +353,8 @@ if(isRecoveryFlow){
 }else if(platformToken){
   location.replace("/platform.html");
 }else{
-  setAuthenticatedHeader(Boolean(localStorage.getItem(TOKEN_KEY)));
-  loadAccount();
+  const hasOwnerSession = Boolean(localStorage.getItem(TOKEN_KEY));
+  setAuthenticatedHeader(hasOwnerSession);
+  if(hasOwnerSession) document.body.classList.add("checking-session");
+  loadAccount().finally(() => document.body.classList.remove("checking-session"));
 }
