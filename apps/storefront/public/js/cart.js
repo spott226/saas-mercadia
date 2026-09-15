@@ -115,13 +115,26 @@ function appendText(parent, tag, text, className){
   return element;
 }
 
+let lockedScrollY = 0;
+
 function syncModalLock(){
   const modalOpen = ["cart-modal","checkout-modal"].some(id => {
     const modal = document.getElementById(id);
     return modal && !modal.classList.contains("hidden");
   });
-  document.documentElement.classList.toggle("storefront-modal-open", modalOpen);
-  document.body.classList.toggle("storefront-modal-open", modalOpen);
+  const alreadyLocked = document.body.classList.contains("storefront-modal-open");
+
+  if(modalOpen && !alreadyLocked){
+    lockedScrollY = window.scrollY;
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.documentElement.classList.add("storefront-modal-open");
+    document.body.classList.add("storefront-modal-open");
+  }else if(!modalOpen && alreadyLocked){
+    document.documentElement.classList.remove("storefront-modal-open");
+    document.body.classList.remove("storefront-modal-open");
+    document.body.style.removeProperty("top");
+    window.scrollTo({ top:lockedScrollY, left:0, behavior:"instant" });
+  }
 }
 
 /* =======================

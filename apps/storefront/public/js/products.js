@@ -1,5 +1,5 @@
 import { getProducts } from "./api.js";
-import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-4";
+import { addToCart, syncCartWithProducts } from "./cart.js?v=20260915-5";
 
 
 // ================================
