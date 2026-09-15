@@ -3392,3 +3392,89 @@ body.template-active-terrain-1 .storefront-media-placeholder::before{inset:12px}
 body.template-active-terrain-1 #cart-modal .cart-panel{width:100vw!important}
 body.template-active-terrain-1 #cart-modal .modal-actions{grid-template-columns:1fr!important}
 }
+body.template-active-terrain-1 header>div:first-child>div:last-child{
+gap:10px!important;
+align-items:center;
+}
+
+body.template-active-terrain-1 .storefront-icon-button{
+display:inline-flex!important;
+align-items:center!important;
+justify-content:center!important;
+flex:0 0 auto;
+padding:0!important;
+line-height:0!important;
+}
+
+body.template-active-terrain-1 .storefront-icon-button .storefront-icon{
+display:block;
+width:18px!important;
+height:18px!important;
+margin:auto;
+transform:none;
+}
+
+body.template-active-terrain-1 #storefront-hero-cta{
+display:inline-flex!important;
+align-items:center!important;
+justify-content:center!important;
+width:auto!important;
+min-width:222px;
+min-height:54px!important;
+padding:0 26px!important;
+line-height:1!important;
+vertical-align:middle;
+}
+
+body.template-active-terrain-1 .hero-image,
+body.template-active-terrain-1 #hero-image{
+animation:activeTerrainImageIn 1.15s cubic-bezier(.2,.7,.2,1) both;
+}
+
+body.template-active-terrain-1 .storefront-section-gallery img{
+transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s ease;
+}
+
+body.template-active-terrain-1 .storefront-image-banner:hover .storefront-section-gallery img,
+body.template-active-terrain-1 .storefront-split-showcase:hover .storefront-section-gallery img{
+transform:scale(1.035);
+filter:saturate(1.06) contrast(1.03);
+}
+
+body.template-active-terrain-1 .storefront-reveal{
+opacity:0;
+transform:translateY(28px);
+transition:
+opacity .72s cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms),
+transform .78s cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms);
+}
+
+body.template-active-terrain-1 .storefront-reveal.is-visible{
+opacity:1;
+transform:translateY(0);
+}
+
+@keyframes activeTerrainImageIn{
+from{opacity:0;transform:scale(1.045)}
+to{opacity:1;transform:scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+body.template-active-terrain-1 .hero-image,
+body.template-active-terrain-1 #hero-image{animation:none}
+body.template-active-terrain-1 .storefront-reveal{opacity:1;transform:none;transition:none}
+body.template-active-terrain-1 .storefront-section-gallery img{transition:none}
+}
+
+@media(max-width:767px){
+body.template-active-terrain-1 .hero-copy{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+body.template-active-terrain-1 #storefront-hero-cta{
+min-width:220px;
+min-height:52px!important;
+margin-inline:auto;
+}
+}

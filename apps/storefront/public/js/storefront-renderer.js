@@ -182,6 +182,8 @@ class EcommerceTemplate{
       products: this.products,
       sections: this.getSections()
     });
+
+    initializeStorefrontMotion();
   }
 }
 
@@ -373,6 +375,39 @@ function clearDynamicSections(){
     .querySelectorAll(".storefront-dynamic-section")
     .forEach(section => section.remove());
   clearProductSectionPresentation();
+}
+
+function initializeStorefrontMotion(){
+  if(!document.body.classList.contains("template-active-terrain-1")) return;
+
+  const targets = [
+    ...document.querySelectorAll(
+      ".hero-copy, .storefront-dynamic-section, .storefront-products-section, .product-card"
+    )
+  ];
+
+  targets.forEach((element,index) => {
+    element.classList.add("storefront-reveal");
+    element.style.setProperty("--reveal-delay",`${Math.min(index % 4,3) * 70}ms`);
+  });
+
+  if(
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    !("IntersectionObserver" in window)
+  ){
+    targets.forEach(element => element.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  },{ threshold:0.12, rootMargin:"0px 0px -7% 0px" });
+
+  targets.forEach(element => observer.observe(element));
 }
 
 function getInsertionPoint(){
