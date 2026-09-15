@@ -61,9 +61,9 @@ Tienda
 
 <div class="flex items-center gap-4">
 
-<button onclick="openCart()" class="relative w-12 h-12 rounded flex items-center justify-center">
+<button onclick="openCart()" class="storefront-icon-button relative w-12 h-12 rounded flex items-center justify-center" aria-label="Abrir carrito">
 
-<span class="text-lg">🛒</span>
+<svg class="storefront-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.15 10.2a2 2 0 0 0 1.96 1.58h7.78a2 2 0 0 0 1.96-1.6L20.4 7H6.1M9 20h.01M17 20h.01"/></svg>
 
 <span 
 id="cart-count"
@@ -74,8 +74,8 @@ class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded
 
 </button>
 
-<button id="menu-btn" class="md:hidden text-2xl">
-☰
+<button id="menu-btn" class="storefront-icon-button md:hidden" aria-label="Abrir menú" aria-expanded="false">
+<svg class="storefront-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
 </button>
 
 </div>
@@ -280,6 +280,7 @@ const menu = document.getElementById("mobile-menu")
 
 btn.addEventListener("click", () => {
   menu.classList.toggle("hidden")
+  btn.setAttribute("aria-expanded", String(!menu.classList.contains("hidden")))
 })
 
 </script>

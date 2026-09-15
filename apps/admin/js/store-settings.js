@@ -24,6 +24,19 @@ if(!token){
 const templatesByType = {
   ecommerce:[
     {
+      value:"active_terrain_1",
+      label:"Active Terrain",
+      description:"Estilo outdoor editorial: portada fuerte, categorias visuales, beneficios, productos y promociones en una experiencia totalmente responsiva.",
+      sections:[
+        { type:"promo_strip", title:"Envío disponible", text:"Compra fácil y confirma tu entrega directamente con la tienda." },
+        { type:"split_showcase", eyebrow:"Diseñado para moverse", title:"Equipo que acompaña cada aventura", text:"Productos resistentes, funcionales y listos para el ritmo de todos los días.", layout:"image-right" },
+        { type:"category_tiles", title:"Elige tu categoría" },
+        { type:"editorial_banner", eyebrow:"Compra con confianza", title:"Bien hecho. Listo para durar.", text:"Presenta aquí garantías, materiales, beneficios o aquello que distingue a tu negocio." },
+        { type:"product_grid", title:"Favoritos de la comunidad" },
+        { type:"image_banner", eyebrow:"Colección destacada", title:"Más producto. Más posibilidades.", text:"Crea campañas, novedades y promociones con una imagen que destaque.", cta:"Explorar productos" }
+      ]
+    },
+    {
       value:"ecommerce_default",
       label:"Glass 3D",
       description:"Catalogo limpio con hero, categorias y productos destacados.",
@@ -832,11 +845,13 @@ function getTemplateNavigationLabel(templateValue){
   if(["restaurant_2","professional_2","boutique_grid_1"].includes(templateValue)) return "Navegación lateral";
   if(["appointments_3","mobile_first_1","streetwear_drop_1"].includes(templateValue)) return "Navegación inferior";
   if(["restaurant_3","appointments_2","professional_3","ecommerce_default"].includes(templateValue)) return "Navegación flotante";
+  if(templateValue === "active_terrain_1") return "Navegación superior compacta";
   return "Navegación superior";
 }
 
 function getTemplateDefaultColors(templateValue){
   const key = String(templateValue || "");
+  if(key === "active_terrain_1") return {background:"#f2efe7",text:"#191b16",accent:"#d5532f"};
   const defaults = {
     ecommerce_default:{ background:"#eef2ff", text:"#101828", accent:"#5b5cf0" },
     fashion_editorial_1:{ background:"#f4efe9", text:"#1b1816", accent:"#1b1816" },

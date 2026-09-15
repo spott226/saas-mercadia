@@ -14,6 +14,14 @@ const BACKEND_ORIGIN =
   );
 
 const DEFAULT_PRESETS = {
+  active_terrain_1: [
+    { type: "promo_strip", title: "Envío disponible", text: "Compra fácil y confirma tu entrega directamente con la tienda." },
+    { type: "split_showcase", kicker: "Diseñado para moverse", title: "Equipo que acompaña cada aventura", text: "Productos resistentes, funcionales y listos para el ritmo de todos los días.", layout: "image-right" },
+    { type: "category_tiles", title: "Elige tu categoría" },
+    { type: "editorial_banner", kicker: "Compra con confianza", title: "Bien hecho. Listo para durar.", text: "Presenta aquí garantías, materiales, beneficios o aquello que distingue a tu negocio." },
+    { type: "product_grid", title: "Favoritos de la comunidad" },
+    { type: "image_banner", kicker: "Colección destacada", title: "Más producto. Más posibilidades.", text: "Crea campañas, novedades y promociones con una imagen que destaque.", cta: "Explorar productos" }
+  ],
   ecommerce_default: [
     { type: "product_grid" }
   ],
