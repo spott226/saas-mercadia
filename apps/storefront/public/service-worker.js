@@ -1,4 +1,4 @@
-const CACHE_NAME = "mercadia-shell-v29";
+const CACHE_NAME = "mercadia-shell-v30";
 const APP_SHELL = [
   "/",
   "/landing.html",

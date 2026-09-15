@@ -533,7 +533,20 @@ function bindCartControls(){
     document.querySelectorAll(selector).forEach(button => {
       button.dataset.cartAction = action;
       button.removeAttribute("onclick");
+      button.onclick = event => {
+        event.preventDefault();
+        cartActions[action]();
+      };
     });
+  });
+
+  document.querySelectorAll("button[data-cart-action]").forEach(button => {
+    const action = button.dataset.cartAction;
+    if(!cartActions[action]) return;
+    button.onclick = event => {
+      event.preventDefault();
+      cartActions[action]();
+    };
   });
 }
 
@@ -567,6 +580,8 @@ document.addEventListener("click", event => {
 function initializeCart(){
   updateCartCount();
   bindCartControls();
+  const observer = new MutationObserver(() => bindCartControls());
+  observer.observe(document.body, { childList:true, subtree:true });
 }
 
 if(document.readyState === "loading"){
