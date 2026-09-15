@@ -67,6 +67,27 @@ function getVariantSize(variant, index = 0){
   );
 }
 
+function isDirectRequest(product){
+  return ["appointment","quote"].includes(product?.item_type);
+}
+
+function openWhatsAppRequest(product){
+  const phone = String(
+    window.store?.whatsapp || window.STORE?.whatsapp || window.store_whatsapp || ""
+  ).replace(/\D/g,"");
+
+  if(!phone){
+    alert("Este negocio todavía no ha configurado su WhatsApp.");
+    return;
+  }
+
+  const message = product.item_type === "appointment"
+    ? `Hola, quiero solicitar la cita o reservación: ${product.name}. ¿Me comparten los horarios disponibles?`
+    : `Hola, quiero cotizar: ${product.name}. ¿Qué información necesitan para preparar la cotización?`;
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,"_blank","noopener,noreferrer");
+}
+
 
 // ================================
 // IMAGE ZOOM
@@ -284,7 +305,7 @@ export async function loadProducts(slug){
           </div>
 
           <div class="product-price">
-            ${product.item_type === "quote" ? "Por cotizar" : `$${price}`}
+            ${product.item_type === "quote" ? "Precio por cotizar" : product.item_type === "appointment" ? "Horario por confirmar" : `$${price}`}
           </div>
 
           <button class="product-btn add-cart">
@@ -329,6 +350,11 @@ export async function loadProducts(slug){
         event => {
 
           event.stopPropagation();
+
+          if(isDirectRequest(product)){
+            openWhatsAppRequest(product);
+            return;
+          }
 
           console.log(
             "PRODUCT CLICK:",

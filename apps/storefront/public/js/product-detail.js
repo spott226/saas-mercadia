@@ -73,6 +73,27 @@ function getVariantSize(variant, index = 0){
   );
 }
 
+function isDirectRequest(product){
+  return ["appointment","quote"].includes(product?.item_type);
+}
+
+function openWhatsAppRequest(product){
+  const phone = String(
+    window.store?.whatsapp || window.STORE?.whatsapp || window.store_whatsapp || ""
+  ).replace(/\D/g,"");
+
+  if(!phone){
+    alert("Este negocio todavía no ha configurado su WhatsApp.");
+    return;
+  }
+
+  const message = product.item_type === "appointment"
+    ? `Hola, quiero solicitar la cita o reservación: ${product.name}. ¿Me comparten los horarios disponibles?`
+    : `Hola, quiero cotizar: ${product.name}. ¿Qué información necesitan para preparar la cotización?`;
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,"_blank","noopener,noreferrer");
+}
+
 function createText(tag, text, className){
   const element = document.createElement(tag);
 
@@ -159,18 +180,23 @@ function renderProduct(product){
     "product-detail-title"
   );
 
+  const directRequest = isDirectRequest(product);
   const isQuote = product.item_type === "quote";
   const price = createText(
     "p",
     isQuote
       ? "Precio por cotizar"
+      : product.item_type === "appointment"
+        ? "Horario por confirmar"
       : formatMoney(selectedVariant?.price || product.price),
     "product-detail-price"
   );
 
   const variantLabel = createText(
     "p",
-    product.has_variants === true && product.variants?.length
+    directRequest
+      ? "La solicitud se envía directamente al negocio"
+      : product.has_variants === true && product.variants?.length
       ? "Selecciona una opción"
       : "Disponible",
     "product-detail-variant-label"
@@ -187,7 +213,7 @@ function renderProduct(product){
   const variantGrid = document.createElement("div");
   variantGrid.className = "product-detail-variants";
 
-  if(product.has_variants === true && product.variants?.length){
+  if(!directRequest && product.has_variants === true && product.variants?.length){
     product.variants.forEach((variant, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -240,6 +266,11 @@ function renderProduct(product){
   addButton.textContent = actionLabel;
 
   addButton.addEventListener("click", () => {
+    if(directRequest){
+      openWhatsAppRequest(product);
+      return;
+    }
+
     const image = getProductImage(product, selectedVariant);
     const variantName =
       product.has_variants === true && selectedVariant
@@ -274,8 +305,10 @@ function renderProduct(product){
     product.description || (
       product.item_type === "quote"
         ? "Solicita una cotización y coordina los detalles del proyecto con el negocio."
-        : ["service","appointment"].includes(product.item_type)
-          ? "Disponible para solicitud. Agrégalo y coordina fecha y horario con el negocio."
+        : product.item_type === "appointment"
+          ? "Solicita esta cita y confirma la fecha y el horario directamente por WhatsApp."
+        : product.item_type === "service"
+          ? "Disponible para solicitud. Agrega el servicio y coordina los detalles con el negocio."
           : "Disponible para pedido. Agrégalo y coordina los detalles con la tienda."
     ),
     "product-detail-description"

@@ -43,6 +43,7 @@ VARIANTES ERP
 ========================= */
 
 let variants = [];
+let defaultItemType = "product";
 
 const itemTypeInput = document.getElementById("item-type");
 const trackInventoryInput = document.getElementById("track-inventory");
@@ -54,17 +55,31 @@ function hasVariantMode(){
   return document.querySelector('[name="selling-mode"]:checked')?.value === "variants";
 }
 
+function isDirectRequestType(itemType = itemTypeInput.value){
+  return ["appointment","quote"].includes(itemType);
+}
+
 function updateProductMode(){
   const isService = itemTypeInput.value === "service";
   const isAppointment = itemTypeInput.value === "appointment";
   const isDigital = itemTypeInput.value === "digital";
   const isDish = itemTypeInput.value === "dish";
   const isQuote = itemTypeInput.value === "quote";
+  const directRequest = isDirectRequestType();
   const skipsInventory = isService || isAppointment || isDigital || isQuote;
-  const advanced = hasVariantMode();
+  const sellingMode = document.getElementById("selling-mode");
+
+  if(directRequest){
+    document.querySelector('[name="selling-mode"][value="simple"]').checked = true;
+    variants = [];
+    renderVariants();
+  }
+
+  sellingMode?.classList.toggle("is-hidden",directRequest);
+  const advanced = !directRequest && hasVariantMode();
 
   variantsSection.classList.toggle("is-hidden",!advanced);
-  simpleInventory.classList.toggle("is-hidden",advanced);
+  simpleInventory.classList.toggle("is-hidden",advanced || directRequest);
 
   if(skipsInventory){
     trackInventoryInput.checked = false;
@@ -107,10 +122,10 @@ function updateProductMode(){
 
   const priceField = document.getElementById("price")?.closest(".field-group");
   const priceInput = document.getElementById("price");
-  priceField?.classList.toggle("is-hidden",isQuote);
+  priceField?.classList.toggle("is-hidden",directRequest);
   if(priceInput){
-    priceInput.required = !isQuote;
-    if(isQuote) priceInput.value = "";
+    priceInput.required = !directRequest;
+    if(directRequest) priceInput.value = "";
   }
 
   const optionInput = document.getElementById("variant-color");
@@ -122,7 +137,7 @@ function updateProductMode(){
     product:["Nombre del producto","Ej. Playera oversize negra","Precio público"],
     dish:["Nombre del platillo o bebida","Ej. Hamburguesa especial","Precio del menú"],
     service:["Nombre del servicio","Ej. Instalación de paneles","Precio del servicio"],
-    appointment:["Nombre de la cita o reservación","Ej. Consulta inicial","Precio de la cita"],
+    appointment:["Nombre de la cita o reservación","Ej. Consulta inicial","Se agenda por WhatsApp"],
     digital:["Nombre del producto digital","Ej. Curso de fotografía","Precio público"],
     quote:["Nombre del proyecto","Ej. Sistema de paneles solares","Se cotiza después"]
   };
@@ -785,10 +800,11 @@ async function createProduct(){
       "featured"
     ).checked;
 
+  const directRequest = isDirectRequestType();
   const isQuote = itemTypeInput.value === "quote";
-  const publicPrice = isQuote ? 0 : price;
+  const publicPrice = directRequest ? 0 : price;
 
-  if(!name || (!isQuote && !price)){
+  if(!name || (!directRequest && !price)){
 
     alert(
       isQuote
@@ -823,7 +839,7 @@ async function createProduct(){
   );
 
   const itemType = itemTypeInput.value;
-  const usesVariants = hasVariantMode();
+  const usesVariants = !directRequest && hasVariantMode();
   const trackInventory = ["product","dish"].includes(itemType) && trackInventoryInput.checked;
   formData.append("item_type",itemType);
   formData.append("has_variants",usesVariants);
@@ -995,7 +1011,7 @@ async function createProduct(){
     .innerText = "Agregar";
 
   document.querySelector('[name="selling-mode"][value="simple"]').checked = true;
-  itemTypeInput.value = "product";
+  itemTypeInput.value = defaultItemType;
   trackInventoryInput.checked = true;
   updateProductMode();
   window.history.replaceState({},"","products.html");
@@ -1169,11 +1185,13 @@ async function loadProductContext(){
       nameInput.placeholder = "Ej. Hamburguesa especial";
       categoryInput.placeholder = "Ej. Bebidas, entradas o postres";
       itemTypeInput.value = "dish";
+      defaultItemType = "dish";
     }else if(type === "appointments" || type === "professional"){
       nameLabel.textContent = "Nombre del servicio";
       nameInput.placeholder = "Ej. Consulta inicial";
       categoryInput.placeholder = "Ej. Consultas, paquetes o tratamientos";
       itemTypeInput.value = type === "appointments" ? "appointment" : "service";
+      defaultItemType = itemTypeInput.value;
     }
   }catch(error){
     console.warn("No se pudo personalizar el formulario",error);
