@@ -520,7 +520,38 @@ export async function sendCheckout(){
 INIT
 ======================= */
 
-document.addEventListener("DOMContentLoaded", updateCartCount);
+function bindCartControls(){
+  const controls = [
+    ['[onclick="openCart()"]', openCart],
+    ['[onclick="closeCart()"]', closeCart],
+    ['[onclick="checkout()"]', checkout],
+    ['[onclick="closeCheckout()"]', closeCheckout],
+    ['[onclick="sendCheckout()"]', sendCheckout]
+  ];
+
+  controls.forEach(([selector,handler]) => {
+    document.querySelectorAll(selector).forEach(button => {
+      if(button.dataset.cartControlBound === "1") return;
+      button.dataset.cartControlBound = "1";
+      button.removeAttribute("onclick");
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        handler();
+      });
+    });
+  });
+}
+
+function initializeCart(){
+  updateCartCount();
+  bindCartControls();
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initializeCart, { once:true });
+}else{
+  initializeCart();
+}
 
 window.openCart = openCart;
 window.closeCart = closeCart;
